@@ -12,7 +12,7 @@ namespace Database.Model
     {
         [Key]
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public int PlayerId { get; set; }
         public User User { get; set; }
         public string Province {  get; set; }
         public string City {  get; set; }
@@ -24,7 +24,7 @@ namespace Database.Model
 
         public ICollection<TournamentRegistration> TournamentRegistrations { get; set; }
         public ICollection<Ranking> Rankings { get; set; } = new List<Ranking>();
-
-
+        public ICollection<MatchesSendRequest> SentRequests { get; set; } = new List<MatchesSendRequest>();
+        public ICollection<MatchesSendRequest> ReceivedRequests { get; set; } = new List<MatchesSendRequest>();
     }
 }

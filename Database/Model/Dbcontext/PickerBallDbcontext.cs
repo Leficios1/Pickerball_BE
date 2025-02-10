@@ -17,8 +17,9 @@ namespace Database.Model.Dbcontext
         public DbSet<User> Users { get; set; }
         public DbSet<Player> Player { get; set; }
         public DbSet<Sponsor> Sponsors { get; set; }
-        public DbSet<Room> Room { get; set; }
-        public DbSet<RoomPlayers> RoomPlayers { get; set; }
+        public DbSet<MatchesSendRequest> MatchesSendRequest { get; set; }
+        public DbSet<RulesScore> RulesScores { get; set; }
+        public DbSet<TouramentMatches> TouramentMatches { get; set; }
         public DbSet<Friends> Friends { get; set; }
         public DbSet<TournamentProgress> TournamentProgresses { get; set; }
         public DbSet<Tournaments> Tournaments { get; set; }
@@ -35,6 +36,7 @@ namespace Database.Model.Dbcontext
         public DbSet<BlogCategory> RuleCategories { get; set; }
         public DbSet<Payments> Payments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,13 +44,13 @@ namespace Database.Model.Dbcontext
             modelBuilder.Entity<Player>()
                 .HasOne(p => p.User)
                 .WithOne(u => u.Player)
-                .HasForeignKey<Player>(p => p.UserId)
+                .HasForeignKey<Player>(p => p.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Sponsor>()
                 .HasOne(s => s.User)
                 .WithOne(u => u.Sponsor)
-                .HasForeignKey<Sponsor>(s => s.UserId)
+                .HasForeignKey<Sponsor>(s => s.SponsorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ===================== [ Friends System ] =====================
@@ -82,6 +84,17 @@ namespace Database.Model.Dbcontext
                 .WithMany()
                 .HasForeignKey(tp => tp.TournamentRegistrationId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<TouramentMatches>()
+                .HasOne(tm => tm.Tournament)
+                .WithMany()
+                .HasForeignKey(tm => tm.TournamentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TouramentMatches>()
+                .HasOne(tm => tm.Matches)
+                .WithMany(m => m.TournamentMatches)
+                .HasForeignKey(tm => tm.MatchesId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Ranking & Achievements ] =====================
             modelBuilder.Entity<Ranking>()
@@ -97,41 +110,54 @@ namespace Database.Model.Dbcontext
                 .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Match System ] =====================
-            modelBuilder.Entity<Matches>()
-                .HasOne(m => m.Tournament)
-                .WithMany(t => t.Matches)
-                .HasForeignKey(m => m.TournamentId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<Matches>()
+            //    .HasOne(m => m.Tournament)
+            //    .WithMany(t => t.Matches)
+            //    .HasForeignKey(m => m.TournamentId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Matches>()
-                 .HasOne(m => m.Player1)
-                 .WithMany()
-                 .HasForeignKey(m => m.Player1Id)
-                 .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<Matches>()
+            //     .HasOne(m => m.Player1)
+            //     .WithMany()
+            //     .HasForeignKey(m => m.Player1Id)
+            //     .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Matches>()
-                .HasOne(m => m.Player2)
-                .WithMany()
-                .HasForeignKey(m => m.Player2Id)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<Matches>()
+            //    .HasOne(m => m.Player2)
+            //    .WithMany()
+            //    .HasForeignKey(m => m.Player2Id)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Matches>()
-                .HasOne(m => m.Team1)
-                .WithMany()
-                .HasForeignKey(m => m.Team1Id)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<Matches>()
+            //    .HasOne(m => m.Team1)
+            //    .WithMany()
+            //    .HasForeignKey(m => m.Team1Id)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Matches>()
-                .HasOne(m => m.Team2)
-                .WithMany()
-                .HasForeignKey(m => m.Team2Id)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<Matches>()
+            //    .HasOne(m => m.Team2)
+            //    .WithMany()
+            //    .HasForeignKey(m => m.Team2Id)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Matches>()
                 .HasOne(m => m.Venue)
                 .WithMany(v => v.Matches)
                 .HasForeignKey(m => m.VenueId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // ===================== [ MatchesSendRequest Relationships ] =====================
+            modelBuilder.Entity<MatchesSendRequest>()
+                .HasOne(m => m.PlayerRequest)
+                .WithMany(p => p.SentRequests)
+                .HasForeignKey(m => m.PlayerRequestId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchesSendRequest>()
+                .HasOne(m => m.PlayerReceive)
+                .WithMany(p => p.ReceivedRequests)
+                .HasForeignKey(m => m.PlayerRecieveId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Match Team Members ] =====================
             //modelBuilder.Entity<MatchTeamMember>()
@@ -151,25 +177,6 @@ namespace Database.Model.Dbcontext
             //    .WithMany()
             //    .HasForeignKey(mtm => mtm.PlayerId)
             //    .OnDelete(DeleteBehavior.Cascade);
-
-            // ===================== [ Room System ] =====================
-            modelBuilder.Entity<Room>()
-                .HasOne(r => r.Creator)
-                .WithMany()
-                .HasForeignKey(r => r.CreatorId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<RoomPlayers>()
-                .HasOne(rp => rp.Room)
-                .WithMany()
-                .HasForeignKey(rp => rp.RoomId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<RoomPlayers>()
-                .HasOne(rp => rp.Player)
-                .WithMany()
-                .HasForeignKey(rp => rp.PlayerId)
-                .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Teams & Members ] =====================
             modelBuilder.Entity<TeamMembers>()

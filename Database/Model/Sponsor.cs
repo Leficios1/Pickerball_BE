@@ -12,12 +12,13 @@ namespace Database.Model
     {
         [Key]
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public int SponsorId { get; set; }
         public User User { get; set; }
         public string CompanyName { get; set; } = null!;
         public string? LogoUrl { get; set; }
         public string ContactEmail { get; set; } = null!;
         public string? Descreption { get; set; }
+        public bool isAccept {  get; set; }
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
         //Fk

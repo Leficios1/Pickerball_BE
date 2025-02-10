@@ -19,6 +19,10 @@ namespace Database.Model
         public int CaptainId { get; set; } // Đội trưởng
         public TournamentRegistration Captain { get; set; }
 
+        [ForeignKey("Matches")]
+        public int MatchingId { get; set; }
+        public Matches Matches { get; set; }
+
         public ICollection<TeamMembers> Members { get; set; }
     }
 

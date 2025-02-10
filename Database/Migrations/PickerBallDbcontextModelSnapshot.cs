@@ -105,13 +105,19 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MatchCategory")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Player1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Player2Id")
+                    b.Property<int>("MatchFormat")
                         .HasColumnType("int");
 
                     b.Property<int?>("RefereeId")
@@ -120,41 +126,62 @@ namespace Database.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Team1Id")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Team1Score")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Team2Id")
                         .HasColumnType("int");
 
                     b.Property<int?>("Team2Score")
                         .HasColumnType("int");
 
-                    b.Property<int>("TournamentId")
+                    b.Property<int>("VenueId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VenueId")
+                    b.Property<int>("WinScore")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Player1Id");
-
-                    b.HasIndex("Player2Id");
-
                     b.HasIndex("RefereeId");
-
-                    b.HasIndex("Team1Id");
-
-                    b.HasIndex("Team2Id");
-
-                    b.HasIndex("TournamentId");
 
                     b.HasIndex("VenueId");
 
                     b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("Database.Model.MatchesSendRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MatchingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerRecieveId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchingId");
+
+                    b.HasIndex("PlayerRecieveId");
+
+                    b.HasIndex("PlayerRequestId");
+
+                    b.ToTable("MatchesSendRequest");
                 });
 
             modelBuilder.Entity("Database.Model.Notification", b =>
@@ -222,7 +249,7 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Player", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
                     b.Property<string>("City")
@@ -248,7 +275,7 @@ namespace Database.Migrations
                     b.Property<int>("TotalWins")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId");
+                    b.HasKey("PlayerId");
 
                     b.ToTable("Player");
                 });
@@ -296,88 +323,7 @@ namespace Database.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Role");
-                });
-
-            modelBuilder.Entity("Database.Model.Room", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Descreption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsDraw")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("LosingTeamId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoomName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ScheduledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("WinningTeamId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
-
-                    b.ToTable("Room");
-                });
-
-            modelBuilder.Entity("Database.Model.RoomPlayers", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsOwner")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("RoomPlayers");
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Database.Model.Rule", b =>
@@ -406,9 +352,40 @@ namespace Database.Migrations
                     b.ToTable("Rules");
                 });
 
+            modelBuilder.Entity("Database.Model.RulesScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LoseGain")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxDifference")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinDifference")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WinnerGain")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RulesScores");
+                });
+
             modelBuilder.Entity("Database.Model.Sponsor", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("SponsorId")
                         .HasColumnType("int");
 
                     b.Property<string>("CompanyName")
@@ -428,7 +405,10 @@ namespace Database.Migrations
                     b.Property<string>("LogoUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId");
+                    b.Property<bool>("isAccept")
+                        .HasColumnType("bit");
+
+                    b.HasKey("SponsorId");
 
                     b.ToTable("Sponsors");
                 });
@@ -444,6 +424,9 @@ namespace Database.Migrations
                     b.Property<int>("CaptainId")
                         .HasColumnType("int");
 
+                    b.Property<int>("MatchingId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -451,6 +434,8 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CaptainId");
+
+                    b.HasIndex("MatchingId");
 
                     b.ToTable("Teams");
                 });
@@ -479,6 +464,32 @@ namespace Database.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("TeamMembers");
+                });
+
+            modelBuilder.Entity("Database.Model.TouramentMatches", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MatchesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchesId");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("TouramentMatches");
                 });
 
             modelBuilder.Entity("Database.Model.TournamentProgress", b =>
@@ -560,11 +571,17 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Descreption")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsAccept")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -585,6 +602,10 @@ namespace Database.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPrize")
                         .HasColumnType("decimal(18,2)");
@@ -715,35 +736,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Matches", b =>
                 {
-                    b.HasOne("Database.Model.Player", "Player1")
-                        .WithMany()
-                        .HasForeignKey("Player1Id")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Database.Model.Player", "Player2")
-                        .WithMany()
-                        .HasForeignKey("Player2Id")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Database.Model.User", "Referee")
                         .WithMany()
                         .HasForeignKey("RefereeId");
-
-                    b.HasOne("Database.Model.Team", "Team1")
-                        .WithMany()
-                        .HasForeignKey("Team1Id")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Database.Model.Team", "Team2")
-                        .WithMany()
-                        .HasForeignKey("Team2Id")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Database.Model.Tournaments", "Tournament")
-                        .WithMany("Matches")
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("Database.Model.Venues", "Venue")
                         .WithMany("Matches")
@@ -751,19 +746,36 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Player1");
-
-                    b.Navigation("Player2");
-
                     b.Navigation("Referee");
 
-                    b.Navigation("Team1");
-
-                    b.Navigation("Team2");
-
-                    b.Navigation("Tournament");
-
                     b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("Database.Model.MatchesSendRequest", b =>
+                {
+                    b.HasOne("Database.Model.Matches", "Matches")
+                        .WithMany("MatchRequests")
+                        .HasForeignKey("MatchingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Player", "PlayerReceive")
+                        .WithMany("ReceivedRequests")
+                        .HasForeignKey("PlayerRecieveId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Player", "PlayerRequest")
+                        .WithMany("SentRequests")
+                        .HasForeignKey("PlayerRequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Matches");
+
+                    b.Navigation("PlayerReceive");
+
+                    b.Navigation("PlayerRequest");
                 });
 
             modelBuilder.Entity("Database.Model.Notification", b =>
@@ -800,7 +812,7 @@ namespace Database.Migrations
                 {
                     b.HasOne("Database.Model.User", "User")
                         .WithOne("Player")
-                        .HasForeignKey("Database.Model.Player", "UserId")
+                        .HasForeignKey("Database.Model.Player", "PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -826,36 +838,6 @@ namespace Database.Migrations
                     b.Navigation("Tournament");
                 });
 
-            modelBuilder.Entity("Database.Model.Room", b =>
-                {
-                    b.HasOne("Database.Model.Player", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Creator");
-                });
-
-            modelBuilder.Entity("Database.Model.RoomPlayers", b =>
-                {
-                    b.HasOne("Database.Model.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Database.Model.Room", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Player");
-
-                    b.Navigation("Room");
-                });
-
             modelBuilder.Entity("Database.Model.Rule", b =>
                 {
                     b.HasOne("Database.Model.BlogCategory", "RuleCategory")
@@ -871,7 +853,7 @@ namespace Database.Migrations
                 {
                     b.HasOne("Database.Model.User", "User")
                         .WithOne("Sponsor")
-                        .HasForeignKey("Database.Model.Sponsor", "UserId")
+                        .HasForeignKey("Database.Model.Sponsor", "SponsorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -886,7 +868,15 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Database.Model.Matches", "Matches")
+                        .WithMany()
+                        .HasForeignKey("MatchingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Captain");
+
+                    b.Navigation("Matches");
                 });
 
             modelBuilder.Entity("Database.Model.TeamMembers", b =>
@@ -906,6 +896,25 @@ namespace Database.Migrations
                     b.Navigation("Playermember");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Database.Model.TouramentMatches", b =>
+                {
+                    b.HasOne("Database.Model.Matches", "Matches")
+                        .WithMany("TournamentMatches")
+                        .HasForeignKey("MatchesId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Tournaments", "Tournament")
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Matches");
+
+                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("Database.Model.TournamentProgress", b =>
@@ -973,6 +982,13 @@ namespace Database.Migrations
                     b.Navigation("Rules");
                 });
 
+            modelBuilder.Entity("Database.Model.Matches", b =>
+                {
+                    b.Navigation("MatchRequests");
+
+                    b.Navigation("TournamentMatches");
+                });
+
             modelBuilder.Entity("Database.Model.Payments", b =>
                 {
                     b.Navigation("TournamentRegistration");
@@ -981,6 +997,10 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Model.Player", b =>
                 {
                     b.Navigation("Rankings");
+
+                    b.Navigation("ReceivedRequests");
+
+                    b.Navigation("SentRequests");
 
                     b.Navigation("TournamentRegistrations");
                 });
@@ -1002,8 +1022,6 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Tournaments", b =>
                 {
-                    b.Navigation("Matches");
-
                     b.Navigation("Payments");
 
                     b.Navigation("Rankings");

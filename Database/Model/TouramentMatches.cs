@@ -8,20 +8,17 @@ using System.Threading.Tasks;
 
 namespace Database.Model
 {
-    public class RoomPlayers
+    public class TouramentMatches
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [ForeignKey("Room")]
-        public int RoomId { get; set; }
-        public Room Room { get; set; }
-
-        [ForeignKey("Player")]
-        public int PlayerId { get; set; }
-        public Player Player { get; set; }
-
-        public bool IsOwner { get; set; } // True nếu là chủ phòng
+        // Foreign Key liên kết với Tournament
+        public int TournamentId { get; set; }
+        public Tournaments Tournament { get; set; }
+        public int MatchesId { get; set; }
+        public Matches Matches { get; set; }
+        public DateTime CreateAt { get; set; }
     }
 }
