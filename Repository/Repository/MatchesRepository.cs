@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Repository.Repository.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Repository.Repository.Interfeace;
-using IMatchesRepository = Repository.Repository.Interfeace.IMatchesRepository;
 
 namespace Repository.Repository
 {
