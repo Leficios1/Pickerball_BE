@@ -4,7 +4,7 @@ using Database.Model;
 
 namespace Database.DTO.Response
 {
-    public class CreateRoomResponseDTO
+    public class RoomResponseDTO
     {
         public int RoomId { get; set; }
         public string Title { get; set; }

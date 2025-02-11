@@ -8,5 +8,6 @@ namespace Services.Services.Interface
     {
         Task<StatusResponse<TeamResponseDTO>> GetTeamWithMembersAsync(int teamId);
         Task<StatusResponse<TeamResponseDTO>> CreateTeamAsync(TeamRequestDTO dto);
+        Task<StatusResponse<TeamResponseDTO>> GetTeamWithMatchingIdAsync(int matchingId);
     }
 }

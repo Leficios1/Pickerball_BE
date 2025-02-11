@@ -1,43 +1,113 @@
 using Database.DTO.Request;
 using Database.DTO.Response;
-using Microsoft.AspNetCore.Mvc;
+using Database.Model;
+using Repository.Repository.Interface;
 using Services.Services.Interface;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace YourNamespace.Controllers
+namespace Services.Services
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TeamMembersController : ControllerBase
+    public class TeamMembersService : ITeamMembersService
     {
-        private readonly ITeamMembersService _teamMembersService;
+        private readonly ITeamMembersRepository _teamMembersRepo;
 
-        public TeamMembersController(ITeamMembersService teamMembersService)
+        public TeamMembersService(ITeamMembersRepository teamMembersRepo)
         {
-            _teamMembersService = teamMembersService;
+            _teamMembersRepo = teamMembersRepo;
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateTeamMemberAsync(TeamMemberRequestDTO dto)
+        public async Task<StatusResponse<TeamMemberDTO>> CreateTeamMemberAsync(TeamMemberRequestDTO dto)
         {
-            var response = await _teamMembersService.CreateTeamMemberAsync(dto);
-            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+            var response = new StatusResponse<TeamMemberDTO>();
+            try
+            {
+                var teamMember = new TeamMembers
+                {
+                    TeamId = dto.TeamId,
+                    PlayerId = dto.PlayerId,
+                    JoinedAt = DateTime.UtcNow
+                };
+
+                await _teamMembersRepo.AddAsync(teamMember);
+                await _teamMembersRepo.SaveChangesAsync();
+
+                var teamMemberResponse = new TeamMemberDTO
+                {
+                    Id = teamMember.Id,
+                    PlayerId = teamMember.PlayerId,
+                };
+
+                response.Data = teamMemberResponse;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team member created successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
         }
 
-        [HttpGet("team/{teamId}")]
-        public async Task<IActionResult> GetTeamMembersByTeamIdAsync(int teamId)
+        public async Task<StatusResponse<IEnumerable<TeamMemberDTO>>> GetTeamMembersByTeamIdAsync(int teamId)
         {
-            var response = await _teamMembersService.GetTeamMembersByTeamIdAsync(teamId);
-            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+            var response = new StatusResponse<IEnumerable<TeamMemberDTO>>();
+            try
+            {
+                var teamMembers = await _teamMembersRepo.GetByTeamIdAsync(teamId);
+                var teamMemberDTOs = teamMembers.Select(tm => new TeamMemberDTO
+                {
+                    Id = tm.Id,
+                    PlayerId = tm.PlayerId,
+                }).ToList();
+
+                response.Data = teamMemberDTOs;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team members retrieved successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
         }
 
-        [HttpGet("player/{playerId}")]
-        public async Task<IActionResult> GetTeamMembersByPlayerIdAsync(int playerId)
+        public async Task<StatusResponse<IEnumerable<TeamMemberDTO>>> GetTeamMembersByPlayerIdAsync(int playerId)
         {
-            var response = await _teamMembersService.GetTeamMembersByPlayerIdAsync(playerId);
-            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+            var response = new StatusResponse<IEnumerable<TeamMemberDTO>>();
+            try
+            {
+                var teamMembers = await _teamMembersRepo.GetByPlayerIdAsync(playerId);
+                if (!teamMembers.Any())
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Team members not found!";
+                    return response;
+                }
+
+                var teamMemberDTOs = teamMembers.Select(tm => new TeamMemberDTO
+                {
+                    Id = tm.Id,
+                    PlayerId = tm.PlayerId
+                }).ToList();
+
+                response.Data = teamMemberDTOs;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team members retrieved successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
         }
     }
 }

@@ -22,5 +22,13 @@ namespace Repository.Repository
                 .ThenInclude(m => m.Playermember)
                 .FirstOrDefaultAsync(t => t.Id == teamId);
         }
+
+        public async Task<Team?> GetTeamWithMatchingIdAsync(int matchingId)
+        {
+            return await _context.Teams
+                .Include(t => t.Members)
+                .ThenInclude(m => m.Playermember)
+                .FirstOrDefaultAsync(t => t.MatchingId == matchingId);
+        }
     }
 }

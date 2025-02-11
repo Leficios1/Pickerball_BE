@@ -92,6 +92,43 @@ namespace Services.Services
                 response.Message = ex.Message;
                 return response;
             }
-        } 
+        }
+
+        public async Task<StatusResponse<TeamResponseDTO>> GetTeamWithMatchingIdAsync(int matchingId)
+        {
+            var response = new StatusResponse<TeamResponseDTO>();
+            try
+            {
+                var team = await _teamRepo.GetTeamWithMatchingIdAsync(matchingId);
+                if (team == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Team not found!";
+                    return response;
+                }
+
+                var teamResponse = new TeamResponseDTO
+                {
+                    Id = team.Id,
+                    Name = team.Name,
+                    Members = team.Members.Select(m => new TeamMemberDTO
+                    {
+                        Id = m.Id,
+                        PlayerId = m.PlayerId,
+                    }).ToList()
+                };
+
+                response.Data = teamResponse;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team retrieved successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
     }
 }
