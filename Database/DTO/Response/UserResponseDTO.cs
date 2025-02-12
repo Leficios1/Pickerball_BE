@@ -14,7 +14,7 @@ namespace Database.DTO.Response
         public string LastName { get; set; } = null!;
         public string? SecondName { get; set; }
         public string Email { get; set; } = null!;
-        public string PasswordHash { get; set; } = null!; // Hash password
+        //public string PasswordHash { get; set; } = null!; // Hash password
         public DateTime? DateOfBirth { get; set; }
 
         [Url]
@@ -27,5 +27,26 @@ namespace Database.DTO.Response
         public string RefreshToken { get; set; } = null!;
         public DateTime? CreateAt { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
+        public PlayerDetails? userDetails { get; set; }
+        public SponsorDetails? sponsorDetails { get; set; }
+    }
+    public class PlayerDetails
+    {
+        public string Province { get; set; }
+        public string City { get; set; }
+        //public int TotalMatch { get; set; } = 0;
+        //public int TotalWins { get; set; } = 0;
+        //public int RankingPoint { get; set; } = 0;
+        //public int ExperienceLevel { get; set; } = 1;
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+    }
+    public class SponsorDetails
+    {
+        public string CompanyName { get; set; } = null!;
+        public string? LogoUrl { get; set; }
+        public string ContactEmail { get; set; } = null!;
+        public string? Descreption { get; set; }
+        //public bool isAccept { get; set; }
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
 }

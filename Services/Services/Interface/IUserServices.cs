@@ -11,8 +11,8 @@ namespace Services.Services.Interface
 {
     public interface IUserServices
     {
-        public bool VerifyPassword(User user, string password);
-        public string HashPassword(User user, string password);
-        public StatusResponse<bool> registerUser(UserRegisterRequestDTO dto);
+        public Task<StatusResponse<List<UserResponseDTO>>> getAllUser(int? PageNumber, int?Pagesize, bool isOrderbyCreateAt);
+        public Task<StatusResponse<UserResponseDTO>> getUserById(int UserId);
+        public Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto);
     }
 }
