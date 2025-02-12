@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(PickerBallDbcontext))]
-    [Migration("20250210051813_Dbv9")]
-    partial class Dbv9
+    [Migration("20250212042544_UpdateSeeder")]
+    partial class UpdateSeeder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -111,6 +111,10 @@ namespace Database.Migrations
                     b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
@@ -134,6 +138,10 @@ namespace Database.Migrations
 
                     b.Property<int?>("Team2Score")
                         .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("VenueId")
                         .HasColumnType("int");
@@ -327,6 +335,28 @@ namespace Database.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            RoleName = "Player"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            RoleName = "Sponsor"
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            RoleName = "Refree"
+                        });
                 });
 
             modelBuilder.Entity("Database.Model.Rule", b =>
@@ -424,7 +454,7 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CaptainId")
+                    b.Property<int?>("CaptainId")
                         .HasColumnType("int");
 
                     b.Property<int>("MatchingId")
@@ -867,9 +897,7 @@ namespace Database.Migrations
                 {
                     b.HasOne("Database.Model.TournamentRegistration", "Captain")
                         .WithMany()
-                        .HasForeignKey("CaptainId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CaptainId");
 
                     b.HasOne("Database.Model.Matches", "Matches")
                         .WithMany()
