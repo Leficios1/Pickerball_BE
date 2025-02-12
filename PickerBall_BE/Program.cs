@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Services.Services;
+using Services.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +59,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
       };
   });
-
+builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "PickerBall", Version = "v1" });

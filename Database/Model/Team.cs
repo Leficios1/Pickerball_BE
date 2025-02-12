@@ -16,7 +16,7 @@ namespace Database.Model
         public string Name { get; set; }
 
         [ForeignKey("Captain")]
-        public int CaptainId { get; set; } // Đội trưởng
+        public int? CaptainId { get; set; } // Người tạo team
         public TournamentRegistration Captain { get; set; }
 
         [ForeignKey("Matches")]

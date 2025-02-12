@@ -15,5 +15,6 @@ namespace Database.DTO.Response
         public object? bonusData { get; set; }
         public int? TotalItems { get; set; }
         public int? TotalPages { get; set; }
+    
     }
 }

@@ -71,7 +71,6 @@ namespace Services.Services
                         TokenString = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo,
                         RefreshToken = refreshToken
-
                     };
                     response.Data = tokenResponse;
                     response.statusCode = HttpStatusCode.OK;
