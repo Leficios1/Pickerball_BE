@@ -1,0 +1,29 @@
+﻿using AutoMapper;
+using Database.DTO.Request;
+using Database.DTO.Response;
+using Database.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Services.Mapping
+{
+    public class MappingEntites : Profile
+    {
+        public MappingEntites()
+        {
+            CreateMap<UserUpdateRequestDTO, User>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId)).ReverseMap();
+
+            CreateMap<User, UserResponseDTO>()
+                       .ForMember(dest => dest.userDetails, opt => opt.MapFrom(src => src.Player))
+                       .ForMember(dest => dest.sponsorDetails, opt => opt.MapFrom(src => src.Sponsor));
+
+            CreateMap<PlayerDetails, Player>().ReverseMap();
+            CreateMap<SponsorDetails, Sponsor>().ReverseMap();
+            CreateMap<PlayerDetailsRequest, Player>().ReverseMap();
+        }
+    }
+}

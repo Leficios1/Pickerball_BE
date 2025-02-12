@@ -202,6 +202,8 @@ namespace Services.Services
                     AvatarUrl = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg",
                     RoleId = dto.RoleId,
                     Status = true,
+                    Gender = dto.Gender,
+                    CreateAt = DateTime.UtcNow,
                     RefreshToken = GenerateRefreshToken(),
                     RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
                 };
@@ -218,7 +220,6 @@ namespace Services.Services
                     LastName = user.LastName,
                     SecondName = user.SecondName,
                     Email = user.Email,
-                    PasswordHash = user.PasswordHash,
                     DateOfBirth = user.DateOfBirth,
                     AvatarUrl = user.AvatarUrl,
                     Gender = user.Gender,

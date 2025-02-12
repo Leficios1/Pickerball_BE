@@ -210,6 +210,11 @@ namespace Database.Model.Dbcontext
                 .WithMany(rc => rc.Rules)
                 .HasForeignKey(r => r.RuleCategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // ===================== [ Seeder ] =====================
+            base.OnModelCreating(modelBuilder);
+            PickerBallSeeder.Seed(modelBuilder);
+
         }
 
     }
