@@ -109,5 +109,33 @@ namespace Services.Services
                 return response;
             }
         }
+        public async Task<StatusResponse<bool>> DeleteTeamMemberAsync(int playerId, int teamId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var teamMember = await _teamMembersRepo.GetByPlayerIdAndTeamIdAsync(playerId, teamId);
+                if (teamMember == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Team member not found!";
+                    return response;
+                }
+
+                _teamMembersRepo.Delete(teamMember);
+                await _teamMembersRepo.SaveChangesAsync();
+
+                response.Data = true;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team member deleted successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
     }
 }

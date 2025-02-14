@@ -25,11 +25,11 @@ namespace Database.DTO.Request
         public int PlayerId { get; set; }
         public string Province { get; set; }
         public string City { get; set; }
-        //public int TotalMatch { get; set; } = 0;
-        //public int TotalWins { get; set; } = 0;
-        //public int RankingPoint { get; set; } = 0;
-        //public int ExperienceLevel { get; set; } = 1;
-        //public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+        public int TotalMatch { get; set; } = 0;
+        public int TotalWins { get; set; } = 0;
+        public int RankingPoint { get; set; } = 0;
+        public int ExperienceLevel { get; set; } = 1;
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
     public class SponsorDetailsRequest
     {
