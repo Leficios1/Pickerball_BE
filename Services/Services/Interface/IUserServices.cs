@@ -14,5 +14,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<List<UserResponseDTO>>> getAllUser(int? PageNumber, int?Pagesize, bool isOrderbyCreateAt);
         public Task<StatusResponse<UserResponseDTO>> getUserById(int UserId);
         public Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto);
+        public Task<StatusResponse<bool>> DeletedUser(int UserId);
+        public Task<StatusResponse<bool>> AcceptUser(int sponserId);
     }
 }

@@ -28,10 +28,23 @@ namespace PickerBall_BE.Controllers
             var response = await _userServices.getUserById(UserId);
             return StatusCode((int)response.statusCode, response);
         }
+        [HttpPost("AcceptUser/{sponserId}")]
+        public async Task<IActionResult> AcceptUser([FromRoute] int sponserId)
+        {
+            var response = await _userServices.AcceptUser(sponserId);
+            return StatusCode((int)response.statusCode, response);
+        }
+
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateRequestDTO dto)
         {
             var response = await _userServices.UpdateUser(dto);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpDelete("DeletedUser/{UserId}")]
+        public async Task<IActionResult> DeletedUser([FromRoute] int UserId)
+        {
+            var response = await _userServices.DeletedUser(UserId);
             return StatusCode((int)response.statusCode, response);
         }
     }

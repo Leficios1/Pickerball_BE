@@ -32,6 +32,69 @@ namespace Services.Services
             _sponsorRepository = sponsorRepository;
         }
 
+        public async Task<StatusResponse<bool>> AcceptUser(int sponserId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var sponsor = await _sponsorRepository.GetById(sponserId);
+                if (sponsor == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Sponsor not found!";
+                    return response;
+                }
+                sponsor.isAccept = true;
+                await _sponsorRepository.SaveChangesAsync();
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Accept sponsor success!";
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<bool>> DeletedUser(int UserId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var user = await _userRepository.GetUserByIdAsync(UserId);
+                if (user == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "User not found!";
+                    return response;
+                }
+                var playerInfo =await _playerRepository.GetPlayerById(UserId);
+                var sponsorInfo = await _sponsorRepository.GetById(UserId);
+                if (playerInfo == null && sponsorInfo == null)
+                {
+                    _userRepository.Delete(user);
+                    await _userRepository.SaveChangesAsync();
+                    response.Message = "Delete user success!";
+
+                }
+                else
+                {
+                    user.Status = false;
+                    await _userRepository.SaveChangesAsync();
+                    response.Message = "User account has been deactivated.";
+
+                }
+                response.statusCode = HttpStatusCode.OK;
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
+
         public async Task<StatusResponse<List<UserResponseDTO>>> getAllUser(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
         {
             var response = new StatusResponse<List<UserResponseDTO>>();

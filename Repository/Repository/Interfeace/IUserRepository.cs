@@ -14,5 +14,6 @@ namespace Repository.Repository.Interfeace
         Task<List<User>> GetAllUser();
         Task<User> GetUserByIdAsync(int userId);
         Task<User> UpdateUserAsync(User user);
+        Task<User> GetUserByRefershToken(string RefershToken);
     }
 }

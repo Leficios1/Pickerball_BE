@@ -234,9 +234,6 @@ namespace Database.Migrations
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SponsorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -246,11 +243,14 @@ namespace Database.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("SponsorId");
-
                     b.HasIndex("TournamentId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Payments");
                 });
@@ -566,9 +566,6 @@ namespace Database.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
@@ -579,8 +576,6 @@ namespace Database.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
 
                     b.HasIndex("PlayerId");
 
@@ -820,21 +815,21 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Payments", b =>
                 {
-                    b.HasOne("Database.Model.Sponsor", "Sponsor")
-                        .WithMany("Payments")
-                        .HasForeignKey("SponsorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Database.Model.Tournaments", "Tournament")
                         .WithMany("Payments")
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Sponsor");
+                    b.HasOne("Database.Model.User", "User")
+                        .WithMany("Payments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Tournament");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Database.Model.Player", b =>
@@ -891,7 +886,7 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Team", b =>
                 {
-                    b.HasOne("Database.Model.TournamentRegistration", "Captain")
+                    b.HasOne("Database.Model.Player", "Captain")
                         .WithMany()
                         .HasForeignKey("CaptainId");
 
@@ -957,12 +952,6 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.TournamentRegistration", b =>
                 {
-                    b.HasOne("Database.Model.Payments", "Payment")
-                        .WithMany("TournamentRegistration")
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Database.Model.Player", "Player")
                         .WithMany("TournamentRegistrations")
                         .HasForeignKey("PlayerId")
@@ -974,8 +963,6 @@ namespace Database.Migrations
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Payment");
 
                     b.Navigation("Player");
 
@@ -1016,11 +1003,6 @@ namespace Database.Migrations
                     b.Navigation("TournamentMatches");
                 });
 
-            modelBuilder.Entity("Database.Model.Payments", b =>
-                {
-                    b.Navigation("TournamentRegistration");
-                });
-
             modelBuilder.Entity("Database.Model.Player", b =>
                 {
                     b.Navigation("Rankings");
@@ -1035,11 +1017,6 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Model.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("Database.Model.Sponsor", b =>
-                {
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("Database.Model.Team", b =>
@@ -1061,6 +1038,8 @@ namespace Database.Migrations
                     b.Navigation("Achievements");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("Payments");
 
                     b.Navigation("Player")
                         .IsRequired();
