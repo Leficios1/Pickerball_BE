@@ -39,10 +39,10 @@ namespace Database.Model
         public Sponsor Sponsor { get; set; }
 
         //public ICollection<TournamentRegistration> TournamentRegistrations { get; set; }
-        //public ICollection<Payments> Payments { get; set; }
         //public ICollection<Matches> MatchesAsPlayer1 { get; set; }
         //public ICollection<Matches> MatchesAsPlayer2 { get; set; }
         //public ICollection<Ranking> Rankings { get; set; }
+        public ICollection<Payments> Payments { get; set; }
         public ICollection<Achievement> Achievements { get; set; }
         public ICollection<Notification> Notifications { get; set; }
         //public ICollection<TeamMembers> TeamMembers { get; set; } // Sửa lại đúng tên

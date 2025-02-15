@@ -193,9 +193,9 @@ namespace Database.Model.Dbcontext
 
             // ===================== [ Payment System ] =====================
             modelBuilder.Entity<Payments>()
-                   .HasOne(p => p.Sponsor)
+                   .HasOne(p => p.User)
                    .WithMany(s => s.Payments)
-                   .HasForeignKey(p => p.SponsorId)
+                   .HasForeignKey(p => p.UserId)
                    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Payments>()

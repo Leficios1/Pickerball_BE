@@ -31,5 +31,11 @@ namespace PickerBall_BE.Controllers
             var response = await _authServices.RegisterAsync(registerDto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult>RefershToken(RefershTokenRequestDTO dto)
+        {
+            var response = await _authServices.getRefershToken(dto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
     }
 }

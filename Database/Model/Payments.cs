@@ -15,8 +15,8 @@ namespace Database.Model
         public int Id { get; set; }
 
         [ForeignKey("Sponsor")]
-        public int SponsorId { get; set; }
-        public Sponsor Sponsor { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         [ForeignKey("Tournaments")]
         public int TournamentId { get; set; }
@@ -26,8 +26,6 @@ namespace Database.Model
         public PaymentStatus Status { get; set; } // Pending, Completed, Failed
         public TypePayment Type {  get; set; }
         public DateTime PaymentDate { get; set; }
-
-        public ICollection<TournamentRegistration> TournamentRegistration { get; set; }
     }
 
     public enum PaymentStatus

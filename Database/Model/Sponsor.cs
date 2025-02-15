@@ -22,7 +22,7 @@ namespace Database.Model
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
         //Fk
-        public ICollection<Payments> Payments { get; set; } // Thanh toán tài trợ
+        
 
     }
 }

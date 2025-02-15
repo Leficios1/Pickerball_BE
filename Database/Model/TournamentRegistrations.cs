@@ -17,9 +17,6 @@ namespace Database.Model
         public int PlayerId { get; set; }
         public Player Player { get; set; }
 
-        [ForeignKey("Payment")]
-        public int PaymentId {  get; set; }
-        public Payments Payment { get; set; }
 
         public DateTime RegisteredAt { get; set; }
         public bool IsApproved { get; set; } = false;

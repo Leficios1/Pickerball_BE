@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using AutoMapper;
+using Azure.Core;
 using Database.DTO.Request;
 using Database.DTO.Response;
 using Database.Model;
@@ -26,13 +27,15 @@ namespace Services.Services
     {
         private readonly IUserRepository _userRepo;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _map;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AuthServices(IUserRepository userRepo, IConfiguration configuration, IPasswordHasher<User> passwordHasher)
+        public AuthServices(IUserRepository userRepo, IConfiguration configuration, IPasswordHasher<User> passwordHasher, IMapper mapper)
         {
             _userRepo = userRepo;
             _configuration = configuration;
             _passwordHasher = passwordHasher;
+            _map = mapper;
         }
 
         public async Task<StatusResponse<TokenReponse>> LoginAccount(AuthRequestDTO dto)
@@ -68,9 +71,9 @@ namespace Services.Services
 
                     var tokenResponse = new TokenReponse
                     {
+                        UserInfor = _map.Map<UserResponseDTO>(checkUser),
                         TokenString = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo,
-                        RefreshToken = refreshToken
                     };
                     response.Data = tokenResponse;
                     response.statusCode = HttpStatusCode.OK;
@@ -240,6 +243,43 @@ namespace Services.Services
                 response.Message = ex.Message;
                 return response;
             }
+        }
+
+        public async Task<StatusResponse<RefershTokenResponseDTO>> getRefershToken(RefershTokenRequestDTO dto)
+        {
+            var response = new StatusResponse<RefershTokenResponseDTO>();
+            try
+            {
+                var userInfo = await _userRepo.GetUserByRefershToken(dto.RefreshToken);
+                if (userInfo == null || userInfo.RefreshTokenExpiryTime < DateTime.UtcNow)
+                {
+                    response.statusCode = HttpStatusCode.Unauthorized;
+                    response.Message = "Invalid or expired refresh token";
+                    return response;
+                }
+                var newAccessToken = GetToken(userInfo);
+                var newRefreshToken = GenerateRefreshToken();
+
+                userInfo.RefreshToken = newRefreshToken;
+                userInfo.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+                _userRepo.Update(userInfo);
+                await _userRepo.SaveChangesAsync();
+
+                response.Data = new RefershTokenResponseDTO
+                {
+                    TokenString = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+                    RefreshToken = newRefreshToken
+                };
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Token refreshed successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
     }
 }

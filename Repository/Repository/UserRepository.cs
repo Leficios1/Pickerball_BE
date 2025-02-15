@@ -35,6 +35,11 @@ namespace Repository.Repository
             return await _context.Users.Where(u => u.Id == userId).SingleOrDefaultAsync();
         }
 
+        public async Task<User> GetUserByRefershToken(string RefershToken)
+        {
+            return await _context.Users.Where(u => u.RefreshToken.Equals(RefershToken)).SingleOrDefaultAsync();
+        }
+
         public async Task<User> UpdateUserAsync(User user)
         {
             var existingUser = await _context.Users.FindAsync(user.Id);
