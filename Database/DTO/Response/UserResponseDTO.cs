@@ -24,9 +24,9 @@ namespace Database.DTO.Response
         public string? Gender { get; set; }
         public bool Status { get; set; }
         public int RoleId { get; set; } // Admin, Organizer, Player, Spectator
-        public string RefreshToken { get; set; } = null!;
+        //public string RefreshToken { get; set; } = null!;
         public DateTime? CreateAt { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        //public DateTime RefreshTokenExpiryTime { get; set; }
         public PlayerDetails? userDetails { get; set; }
         public SponsorDetails? sponsorDetails { get; set; }
     }

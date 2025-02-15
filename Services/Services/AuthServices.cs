@@ -74,6 +74,7 @@ namespace Services.Services
                         UserInfor = _map.Map<UserResponseDTO>(checkUser),
                         TokenString = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo,
+                        RefreshToken = refreshToken
                     };
                     response.Data = tokenResponse;
                     response.statusCode = HttpStatusCode.OK;
@@ -227,9 +228,9 @@ namespace Services.Services
                     Gender = user.Gender,
                     Status = user.Status,
                     RoleId = user.RoleId,
-                    RefreshToken = user.RefreshToken,
+                    //RefreshToken = user.RefreshToken,
                     CreateAt = user.CreateAt,
-                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                    //RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
                 };
 
                 response.Data = userResponse;

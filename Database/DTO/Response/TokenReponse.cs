@@ -11,6 +11,7 @@ namespace Database.DTO.Response
     {
         public UserResponseDTO UserInfor { get; set; } = null!;
         public string TokenString { get; set; } = null!;
+        public string RefreshToken { get; set; } = null!;
         public DateTime Expiration { get; set; }
     }
 }
