@@ -14,11 +14,11 @@ namespace Database.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [ForeignKey("Sponsor")]
+        [ForeignKey("User")]
         public int UserId { get; set; }
         public User User { get; set; }
 
-        [ForeignKey("Tournaments")]
+        [ForeignKey("Tournament")]
         public int TournamentId { get; set; }
         public Tournaments Tournament { get; set; }
 

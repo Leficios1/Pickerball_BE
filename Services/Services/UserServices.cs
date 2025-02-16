@@ -103,7 +103,7 @@ namespace Services.Services
                 var data = await _userRepository.GetAllUser();
                 int TotalItems = data.Count;
 
-                if (isOrderbyCreateAt = true)
+                if (isOrderbyCreateAt == true)
                 {
                     data = data.OrderByDescending(x => x.CreateAt).ToList();
                 }
@@ -111,7 +111,12 @@ namespace Services.Services
                 {
                     data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
                 }
-
+                else
+                {
+                    Pagesize = 10;
+                    PageNumber = 1;
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
                 int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItems / (double)Pagesize.Value) : 1;
 
                 response.Data = _mapper.Map<List<UserResponseDTO>>(data);
@@ -146,8 +151,8 @@ namespace Services.Services
                 {
                     response.Data = new UserResponseDTO
                     {
-                        RefreshToken = data.RefreshToken,
-                        RefreshTokenExpiryTime = data.RefreshTokenExpiryTime,
+                        //RefreshToken = data.RefreshToken,
+                        //RefreshTokenExpiryTime = data.RefreshTokenExpiryTime,
                         Id = data.Id,
                         FirstName = data.FirstName,
                         LastName = data.LastName,

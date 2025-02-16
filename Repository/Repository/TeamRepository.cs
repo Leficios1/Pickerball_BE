@@ -28,7 +28,7 @@ namespace Repository.Repository
             return await _context.Teams
                 .Include(t => t.Members)
                 .ThenInclude(m => m.Playermember)
-                .FirstOrDefaultAsync(t => t.MatchingId == matchingId);
+                .SingleOrDefaultAsync(t => t.MatchingId == matchingId);
         }
     }
 }

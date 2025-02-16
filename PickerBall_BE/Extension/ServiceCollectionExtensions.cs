@@ -26,6 +26,10 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IMatchesRepository, MatchesRepository>();
             services.AddScoped<ITeamMembersRepository, TeamMembersRepository>();
             services.AddScoped<ITeamRepository, TeamRepository>();
+            services.AddScoped<ITournamentRegistrationRepository, TournamentRegistrationRepository>();
+            services.AddScoped<ITouramentRepository, TouramentRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<ITouramentMatchesRepository, TouramentMatchesRepository>();
 
             // Register Services here
             services.AddScoped<IAuthServices, AuthServices>();
@@ -36,6 +40,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<ITeamMembersService, TeamMembersService>();
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchService, MatchService>();
+            services.AddScoped<ITouramentServices, TouramentServices>();
 
             return services;
         }
