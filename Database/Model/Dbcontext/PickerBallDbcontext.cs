@@ -33,7 +33,7 @@ namespace Database.Model.Dbcontext
         public DbSet<Ranking> Rankings { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<Rule> Rules { get; set; }
-        public DbSet<BlogCategory> RuleCategories { get; set; }
+        public DbSet<BlogCategory> BlogCategories { get; set; }
         public DbSet<Payments> Payments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -206,9 +206,9 @@ namespace Database.Model.Dbcontext
 
             // ===================== [ Rules System ] =====================
             modelBuilder.Entity<Rule>()
-                .HasOne(r => r.RuleCategory)
+                .HasOne(r => r.BlogCategory)
                 .WithMany(rc => rc.Rules)
-                .HasForeignKey(r => r.RuleCategoryId)
+                .HasForeignKey(r => r.BlogCategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Seeder ] =====================
