@@ -5,6 +5,7 @@ using Repository.Repository.Interface;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database.DTO.Response;
 
 namespace Repository.Repository
 {
@@ -24,16 +25,18 @@ namespace Repository.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<TeamMembers>>  GetByPlayerIdAsync(int playerId)
+        public async Task<IEnumerable<TeamMembers>> GetByPlayerIdAsync(int playerId)
         {
             return await _context.TeamMembers
                 .Where(tm => tm.PlayerId == playerId)
                 .ToListAsync();
         }
 
-        public async Task AddAsync(TeamMembers teamMember) // Implement this method
+        public async Task<TeamMembers> GetByPlayerIdAndTeamIdAsync(int playerId, int teamId)
         {
-            await _context.TeamMembers.AddAsync(teamMember);
+            return await _context.TeamMembers
+                .Where(tm => tm.PlayerId == playerId && tm.TeamId == teamId)
+                .FirstOrDefaultAsync();
         }
     }
 }
