@@ -19,7 +19,7 @@ namespace Database.Model
 
         [ForeignKey("Playermember")]
         public int PlayerId { get; set; }
-        public TournamentRegistration Playermember { get; set; }
+        public Player Playermember { get; set; }
 
         public DateTime JoinedAt { get; set; }
 

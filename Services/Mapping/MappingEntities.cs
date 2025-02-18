@@ -27,6 +27,8 @@ namespace Services.Mapping
             CreateMap<PlayerDetails, Player>().ReverseMap();
             CreateMap<SponsorDetails, Sponsor>().ReverseMap();
             CreateMap<PlayerDetailsRequest, Player>().ReverseMap();
+            CreateMap<TournamentRequestDTO, Tournaments>().ReverseMap();
+            CreateMap<Tournaments, TournamentResponseDTO>().ReverseMap();
         }
     }
 }
