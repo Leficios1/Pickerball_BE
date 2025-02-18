@@ -19,7 +19,7 @@ namespace PickerBall_BE.Controllers
             var response = await _ruleService.PaginglRules(currentPage, pageSize);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
-        [HttpGet]
+        [HttpGet("get-by-id")]
         public async Task<IActionResult> GetRuleById(int RuleId)
         {
             var response = await _ruleService.GetRuleById(RuleId);

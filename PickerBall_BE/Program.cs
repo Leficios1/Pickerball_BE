@@ -6,6 +6,10 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Services.Services;
 using Services.Services.Interface;
+using Database.Helper;
+using Microsoft.Extensions.Configuration;
+using Repository.Repository.Interfeace;
+using Repository.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,10 +89,15 @@ builder.Services.AddSwaggerGen(opt =>
                             }
                     },
                         Array.Empty<string>()
-                    }
-                    });
+        }
+    });
 });
 
+
+builder.Services.Configure<VnpayConfig>(builder.Configuration.GetSection("VNPAY"));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IVnpayRepository, VnpayRepository>();
+builder.Services.AddScoped<IVnpayService, VnpayService>();
 var app = builder.Build();
 app.UseCors("AllowAll");
 app.UseDeveloperExceptionPage();

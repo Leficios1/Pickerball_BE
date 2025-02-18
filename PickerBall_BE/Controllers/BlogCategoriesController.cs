@@ -19,7 +19,7 @@ namespace PickerBall_BE.Controllers
             var response = await _blogCategory.PaginglBlogCategories(currentPage, pageSize);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
-        [HttpGet]
+        [HttpGet("get-by-id")]
         public async Task<IActionResult> GetBlogCategoryById(int blogCategoryId)
         {
             var response = await _blogCategory.GetBlogCategoryById(blogCategoryId);
