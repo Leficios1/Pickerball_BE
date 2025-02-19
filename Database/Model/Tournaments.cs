@@ -44,7 +44,7 @@ namespace Database.Model
 
     public enum TournamentType
     {
-        Singles,
-        Doubles
+        Singles = 0,
+        Doubles = 1
     }
 }

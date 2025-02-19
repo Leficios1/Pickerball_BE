@@ -18,6 +18,11 @@ namespace Repository.Repository
             _context = context;
         }
 
+        public async Task<List<TouramentMatches>> getByMatchId(int MatchId)
+        {
+            return await _context.TouramentMatches.Where(x => x.MatchesId == MatchId).ToListAsync();
+        }
+
         public async Task<List<TouramentMatches>> getByTouramentId(int TouramentId)
         {
             return await _context.TouramentMatches.Where(x => x.TournamentId == TouramentId).ToListAsync();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace Database.DTO.Request
 {
     public class TournamentRequestDTO
     {
+        public int? Id { get; set; }
         public string Name { get; set; }
         public string Location { get; set; }
         public int MaxPlayer { get; set; }
@@ -17,7 +19,7 @@ namespace Database.DTO.Request
         public decimal TotalPrize { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string Type { get; set; } // Singles, Doubles, Mixed
+        public TournamentType Type { get; set; } // Singles, Doubles, Mixed
         public int OrganizerId { get; set; }
     }
 }

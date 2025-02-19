@@ -15,5 +15,6 @@ namespace Database.DTO.Request
 
         public bool IsPublic { get; set; }
         public int? RefereeId { get; set; } // Nếu có trọng tài
+        public int? TouramentId { get; set; }
     }
 }

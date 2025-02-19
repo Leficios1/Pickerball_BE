@@ -10,5 +10,6 @@ namespace Repository.Repository.Interfeace
     public interface ITouramentMatchesRepository : IBaseRepository<TouramentMatches>
     {
         Task<List<TouramentMatches>> getByTouramentId(int TouramentId);
+        Task<List<TouramentMatches>> getByMatchId(int MatchId);
     }
 }

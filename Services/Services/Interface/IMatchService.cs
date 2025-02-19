@@ -12,5 +12,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<IEnumerable<MatchResponseDTO>>> GetPublicRoomsAsync();
         Task<StatusResponse<bool>> DeleteRoomAsync(int id);
         Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchRequestDTO dto);
+        Task<StatusResponse<List<MatchResponseDTO>>> GetMatchesByTouramentId(int TouramentId);
     }
 }
