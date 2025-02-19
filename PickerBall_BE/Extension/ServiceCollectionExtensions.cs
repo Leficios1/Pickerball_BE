@@ -41,6 +41,8 @@ namespace PickerBall_BE.Extension
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchService, MatchService>();
             services.AddScoped<ITouramentServices, TouramentServices>();
+            services.AddScoped<ITouramentRegistrationServices, TouramentRegistrationServices>();
+            services.AddScoped<ISponnerServices, SponnerServices>();
 
             return services;
         }

@@ -45,7 +45,35 @@ namespace Services.Services
                 response.Data = _mapper.Map<PlayerDetails>(responseData);
                 response.Message = "Create player success!";
                 response.statusCode = HttpStatusCode.OK;
-            }catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                response.Message = e.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<PlayerDetails>> UpdatePlayer(PlayerDetailsRequest player)
+        {
+            var response = new StatusResponse<PlayerDetails>();
+            try
+            {
+                var data = _playerRepository.GetById(player.PlayerId);
+                if (data == null)
+                {
+                    response.Message = "Player not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                var requestData = _mapper.Map<Player>(player);
+                await _playerRepository.UpdatePlayer(requestData);
+                await _playerRepository.SaveChangesAsync();
+                response.Data = _mapper.Map<PlayerDetails>(requestData);
+                response.Message = "Update player success!";
+                response.statusCode = HttpStatusCode.OK;
+            }
+            catch (Exception e)
             {
                 response.Message = e.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
