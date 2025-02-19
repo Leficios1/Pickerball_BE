@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Database.DTO.Request;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Services.Services;
 using Services.Services.Interface;
@@ -36,6 +37,12 @@ namespace PickerBall_BE.Controllers
         {
             var response = await _authServices.getRefershToken(dto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
+        [HttpGet("GetUserByToken/{token}")]
+        public async Task<IActionResult> GetUserByToken(string token)
+        {
+            var response = await _authServices.GetUserByToken(token);
+            return Ok(response);
         }
     }
 }

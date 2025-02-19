@@ -3,6 +3,7 @@ using Azure.Core;
 using Database.DTO.Request;
 using Database.DTO.Response;
 using Database.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -71,7 +72,6 @@ namespace Services.Services
 
                     var tokenResponse = new TokenReponse
                     {
-                        UserInfor = _map.Map<UserResponseDTO>(checkUser),
                         TokenString = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo,
                     };
@@ -148,34 +148,38 @@ namespace Services.Services
                 return null;
             }
         }
-        //public async Task<UserByTokenResponse> GetUserByToken(string token)
-        //{
-        //    var principals = DecodeToken(token);
-        //    if (principals == null) throw new BadHttpRequestException("The token is invalid");
+        public async Task<UserResponseDTO> GetUserByToken(string token)
+        {
+            var principals = DecodeToken(token);
+            if (principals == null) throw new BadHttpRequestException("The token is invalid");
 
-        //    var idClaim = principals.FindFirst(ClaimTypes.NameIdentifier);
-        //    if (idClaim == null) throw new Exception("Token is invalid. There is no indentity of name");
+            var idClaim = principals.FindFirst(ClaimTypes.NameIdentifier);
+            if (idClaim == null) throw new Exception("Token is invalid. There is no indentity of name");
 
-        //    var id = idClaim.Value;
-        //    var user = await _userRepo.Get().Select(x => new UserByTokenResponse()
-        //    {
-        //        Id = x.UserId,
-        //        Name = x.Name,
-        //        status = x.Status,
-        //        DateOfBirth = x.DateOfBirth,
-        //        AvatarUrl = x.AvatarUrl,
-        //        Gender = x.Gender,
-        //        Email = x.Email,
-        //        phone = x.Phone,
-        //        RoleId = x.RoleId,
+            var id = idClaim.Value;
+            var user = await _userRepo.Get().Select(x => new UserResponseDTO()
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                SecondName = x.SecondName,
+                Status = x.Status,
+                DateOfBirth = x.DateOfBirth,
+                AvatarUrl = x.AvatarUrl,
+                Gender = x.Gender,
+                Email = x.Email,
+                RoleId = x.RoleId,
+                RefreshToken = x.RefreshToken,
+                RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
+                CreateAt = x.CreateAt
 
-        //    }).FirstOrDefaultAsync(x => x.Id.ToString().Equals(id));
+            }).FirstOrDefaultAsync(x => x.Id.ToString().Equals(id));
 
-        //    if (user == null) throw new Exception("There is no user has by id:");
+            if (user == null) throw new Exception("There is no user has by id:");
 
-        //    return user;
+            return user;
 
-        //}
+        }
         private long ToUnixEpochDate(DateTime date)
         {
             return (long)Math.Round((date.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds);

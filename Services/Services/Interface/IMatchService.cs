@@ -7,10 +7,18 @@ namespace Services.Services.Interface
 {
     public interface IMatchService
     {
+        Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto);
         Task<StatusResponse<MatchResponseDTO>> CreateRoomAsync(MatchRequestDTO dto);
-        Task<StatusResponse<MatchResponseDTO>> GetRoomByIdAsync(int id);
-        Task<StatusResponse<IEnumerable<MatchResponseDTO>>> GetPublicRoomsAsync();
+        Task<StatusResponse<RoomResponseDTO>> GetRoomByIdAsync(int id);
         Task<StatusResponse<bool>> DeleteRoomAsync(int id);
         Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchRequestDTO dto);
+        Task<StatusResponse<List<MatchResponseDTO>>> GetMatchesByTouramentId(int TouramentId);
+        Task<StatusResponse<TeamResponseDTO>> AddPlayerToTeamAsync(AddPlayerToTeamDTO dto);
+        Task<StatusResponse<IEnumerable<MatchResponseDTO>>> GetAllMatchingsAsync();
+        
+        Task<StatusResponse<IEnumerable<RoomResponseDTO>>> GetAllPublicRoomsAsync();
+
+        Task<StatusResponse<List<RoomResponseDTO>>> GetRoomsByUserIdAsync(int userId);
+        
     }
 }

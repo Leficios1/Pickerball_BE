@@ -14,7 +14,6 @@ namespace Services.Services.Interface
         public Task<StatusResponse<UserResponseDTO>> RegisterAsync(UserRegisterRequestDTO dto);
         public Task<StatusResponse<RefershTokenResponseDTO>> getRefershToken(RefershTokenRequestDTO dto);
 
-
-        //public Task<UserByTokenResponse> GetUserByToken(string token);
+        public Task<UserResponseDTO> GetUserByToken(string token);
     }
 }

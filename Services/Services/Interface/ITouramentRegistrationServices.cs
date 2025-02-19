@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace Services.Services.Interface
 {
-    public interface IPlayerServices
+    public interface ITouramentRegistrationServices
     {
-        Task<StatusResponse<PlayerDetails>> CreatePlayer(PlayerDetailsRequest player);
-        Task<StatusResponse<PlayerDetails>> UpdatePlayer(PlayerDetailsRequest player);
+        Task<StatusResponse<bool>> CreateRegistration(TouramentRegistrationDTO dto);
     }
 }
