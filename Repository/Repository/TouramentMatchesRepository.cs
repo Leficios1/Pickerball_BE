@@ -22,8 +22,7 @@ namespace Repository.Repository
         {
             return await _context.TouramentMatches.Where(x => x.MatchesId == MatchId).ToListAsync();
         }
-
-        public async Task<List<TouramentMatches>> getByTouramentId(int TouramentId)
+        public async Task<List<TouramentMatches>> getMatchByTouramentId(int TouramentId)
         {
             return await _context.TouramentMatches.Where(x => x.TournamentId == TouramentId).ToListAsync();
         }

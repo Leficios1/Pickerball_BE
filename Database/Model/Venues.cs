@@ -17,6 +17,11 @@ namespace Database.Model
         public string Name { get; set; }
         public string Address { get; set; }
         public int Capacity { get; set; }
+        [Url]
+        public string? UrlImage { get; set; }
+        [ForeignKey("User")]
+        public int CreateBy { get; set; }
+        public User User { get; set; }
         public ICollection<Matches> Matches { get; set; }
 
     }

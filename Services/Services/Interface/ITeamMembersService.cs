@@ -10,5 +10,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<TeamMemberDTO>> CreateTeamMemberAsync(TeamMemberRequestDTO dto);
         Task<StatusResponse<IEnumerable<TeamMemberDTO>>> GetTeamMembersByTeamIdAsync(int teamId);
         Task<StatusResponse<IEnumerable<TeamMemberDTO>>> GetTeamMembersByPlayerIdAsync(int playerId);
+        Task<StatusResponse<bool>> DeleteTeamMemberAsync(int playerId, int teamId);
     }
 }
