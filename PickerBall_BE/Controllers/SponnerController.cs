@@ -15,18 +15,28 @@ namespace PickerBall_BE.Controllers
         {
             _sponnerServices = sponnerServices;
         }
+
         [HttpGet("GetById/{SponnerId}")]
         public async Task<IActionResult> GetById([FromRoute] int SponnerId)
         {
             var response = await _sponnerServices.getSponnerById(SponnerId);
             return StatusCode((int)response.statusCode, response);
         }
-        [HttpGet("AcceptSponser")]
-        public async Task<IActionResult> AcceptSponser([FromRoute] int SponnerId)
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GeAll()
         {
-            var response = await _sponnerServices.AccpetSponner(SponnerId);
+            var response = await _sponnerServices.getAllSponner();
             return StatusCode((int)response.statusCode, response);
         }
+        
+        [HttpPost("AcceptSponser")]
+        public async Task<IActionResult> AcceptSponser([FromBody] AcceptSponserRequestDTO request)
+        {
+            var response = await _sponnerServices.AccpetSponner(request.SponnerId, request.IsAccept);
+            return StatusCode((int)response.statusCode, response);
+        }
+        
         [HttpPost("CreateSponner")]
         public async Task<IActionResult> CreateSponner([FromBody] SponnerRequestDTO dto)
         {

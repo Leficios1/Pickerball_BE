@@ -9,5 +9,6 @@ namespace Repository.Repository.Interfeace
 {
     public interface ISponsorRepository : IBaseRepository<Sponsor>
     {
+        Task<List<Sponsor>> GetAllSponsorsOrderedByCreateAtAsync();
     }
 }
