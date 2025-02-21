@@ -14,6 +14,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<List<SponnerResponseDTO>>> getAllSponner();
         Task<StatusResponse<SponnerResponseDTO>> CreateSponner(SponnerRequestDTO dto);
         Task<StatusResponse<SponnerResponseDTO>> UpdateSponner(SponnerRequestDTO dto);
-        Task<StatusResponse<bool>> AccpetSponner(int SponnerId);
+        Task<StatusResponse<bool>> AccpetSponner(int SponnerId, bool isAccept);
     }
 }
