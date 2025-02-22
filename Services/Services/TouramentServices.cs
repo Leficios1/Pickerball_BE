@@ -50,6 +50,13 @@ namespace Services.Services
             var response = new StatusResponse<TournamentResponseDTO>();
             try
             {
+                var sponnerData = await _sponsorRepository.GetById(dto.OrganizerId);
+                if (sponnerData == null || sponnerData.isAccept == false)
+                {
+                    response.Message = "Sponner not found or not accept";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
                 var data = _mapper.Map<Tournaments>(dto);
                 data.Status = "Pending"; // Default status is "Pending"
                 data.IsAccept = false; // Default is not accept
@@ -175,11 +182,14 @@ namespace Services.Services
                             {
                                 Id = playerRegistrationDetails.Id,
                                 PlayerId = playerRegistrationDetails.PlayerId,
-                                PaymentId = paymentData.Id,
                                 RegisteredAt = playerRegistrationDetails.RegisteredAt,
                                 isApproved = playerRegistrationDetails.IsApproved,
                                 PlayerDetails = playerRegistration
                             };
+                            if(paymentData != null)
+                            {
+                                regis.PaymentId = paymentData.Id;
+                            }
                             registrationDetails.Add(regis);
                         }
                     }

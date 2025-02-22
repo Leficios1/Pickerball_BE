@@ -94,9 +94,9 @@ namespace Services.Services
             }
         }
 
-        public async Task<StatusResponse<TeamResponseDTO>> GetTeamWithMatchingIdAsync(int matchingId)
+        public async Task<StatusResponse<List<TeamResponseDTO>>> GetTeamWithMatchingIdAsync(int matchingId)
         {
-            var response = new StatusResponse<TeamResponseDTO>();
+            var response = new StatusResponse<List<TeamResponseDTO>>();
             try
             {
                 var team = await _teamRepo.GetTeamWithMatchingIdAsync(matchingId);
@@ -106,17 +106,21 @@ namespace Services.Services
                     response.Message = "Team not found!";
                     return response;
                 }
-
-                var teamResponse = new TeamResponseDTO
+                List<TeamResponseDTO> teamResponse = new List<TeamResponseDTO>();
+                foreach (var t in team)
                 {
-                    Id = team.Id,
-                    Name = team.Name,
-                    Members = team.Members.Select(m => new TeamMemberDTO
+                    teamResponse = new TeamResponseDTO
                     {
-                        Id = m.Id,
-                        PlayerId = m.PlayerId,
-                    }).ToList()
-                };
+                        Id = t.Id,
+                        Name = t.Name,
+                        Members = t.Members.Select(m => new TeamMemberDTO
+                        {
+                            Id = m.Id,
+                            PlayerId = m.PlayerId,
+                        }).ToList()
+                    };
+
+                }
 
                 response.Data = teamResponse;
                 response.statusCode = HttpStatusCode.OK;

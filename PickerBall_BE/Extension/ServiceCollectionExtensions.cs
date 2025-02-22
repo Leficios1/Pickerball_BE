@@ -30,6 +30,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<ITouramentRepository, TouramentRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ITouramentMatchesRepository, TouramentMatchesRepository>();
+            services.AddScoped<IMatchSentRequestRepository, MatchSentRequestRepository>();
 
             // Register Services here
             services.AddScoped<IAuthServices, AuthServices>();
@@ -43,6 +44,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<ITouramentServices, TouramentServices>();
             services.AddScoped<ITouramentRegistrationServices, TouramentRegistrationServices>();
             services.AddScoped<ISponnerServices, SponnerServices>();
+            services.AddScoped<IMatchSentRequestServices, MatchSentRequestServices>();
 
             return services;
         }

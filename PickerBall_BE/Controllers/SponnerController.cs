@@ -21,7 +21,7 @@ namespace PickerBall_BE.Controllers
             var response = await _sponnerServices.getSponnerById(SponnerId);
             return StatusCode((int)response.statusCode, response);
         }
-        [HttpGet("AcceptSponser")]
+        [HttpGet("AcceptSponse/{SponnerId}")]
         public async Task<IActionResult> AcceptSponser([FromRoute] int SponnerId)
         {
             var response = await _sponnerServices.AccpetSponner(SponnerId);

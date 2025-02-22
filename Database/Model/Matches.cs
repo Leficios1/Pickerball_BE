@@ -29,7 +29,9 @@ namespace Database.Model
 
         [ForeignKey("Referee")] public int? RefereeId { get; set; } // Nếu có trọng tài
         public User? Referee { get; set; }
-
+        [ForeignKey("RoomOwner")]
+        public int RoomOwnerId { get; set; } // Người tạo phòng
+        public User RoomOwner { get; set; }
         // Navigation properties
         public ICollection<TouramentMatches> TournamentMatches { get; set; } = new List<TouramentMatches>();
         public ICollection<MatchesSendRequest> MatchRequests { get; set; } = new List<MatchesSendRequest>();

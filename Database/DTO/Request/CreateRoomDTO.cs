@@ -17,6 +17,9 @@ namespace Database.DTO.Request
 
         // Thông tin sân
         public int? VenueId { get; set; }
+        // Tourament information
+        public int? TournamentId { get; set; }
+        public int RoomOnwer {  get; set; }
 
         // Thông tin đội
         public int? Player1Id { get; set; }

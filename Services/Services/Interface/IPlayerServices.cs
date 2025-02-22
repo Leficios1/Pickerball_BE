@@ -11,6 +11,8 @@ namespace Services.Services.Interface
     public interface IPlayerServices
     {
         Task<StatusResponse<PlayerDetails>> CreatePlayer(PlayerDetailsRequest player);
+        Task<StatusResponse<PlayerDetails>> GetPlayerById(int PlayerId);
+        Task<StatusResponse<List<PlayerDetails>>> GetAllPlayers();
         Task<StatusResponse<PlayerDetails>> UpdatePlayer(PlayerDetailsRequest player);
     }
 }

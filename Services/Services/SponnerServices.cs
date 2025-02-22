@@ -28,7 +28,7 @@ namespace Services.Services
             var response = new StatusResponse<bool>();
             try
             {
-                var data = await _sponsorRepository.GetById(SponnerId);
+                var data = (await _sponsorRepository.Find(x => x.SponsorId == SponnerId)).FirstOrDefault();
                 if (data == null)
                 {
                     response.Message = "Sponner not found";
@@ -56,6 +56,7 @@ namespace Services.Services
             try
             {
                 var data = _mapper.Map<Sponsor>(dto);
+                data.SponsorId = (int)dto.Id;
                 data.isAccept = false;
                 data.JoinedAt = DateTime.UtcNow;
                 await _sponsorRepository.AddAsync(data);
@@ -82,7 +83,7 @@ namespace Services.Services
             var response = new StatusResponse<SponnerResponseDTO>();
             try
             {
-                var data = (await _sponsorRepository.Find(s => s.SponsorId == SponnerId, orderBy: q => q.OrderByDescending(s => s.JoinedAt))).FirstOrDefault();
+                var data = (await _sponsorRepository.Find(s => s.SponsorId == SponnerId)).FirstOrDefault();
                 if (data == null)
                 {
                     response.Message = "Sponner not found";

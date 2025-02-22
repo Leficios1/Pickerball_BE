@@ -7,6 +7,6 @@ namespace Repository.Repository.Interface
     public interface ITeamRepository : IBaseRepository<Team>
     {
         Task<Team?> GetTeamWithMembersAsync(int teamId);
-        Task<Team?> GetTeamWithMatchingIdAsync(int matchingId);
+        Task<List<Team>> GetTeamWithMatchingIdAsync(int matchingId);
     }
 }

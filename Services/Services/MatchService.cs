@@ -18,18 +18,138 @@ namespace Services.Services
         private readonly IMatchesRepository _matchesRepo;
         private readonly ITouramentMatchesRepository _touramentMatchesRepository;
         private readonly IMapper _mapper;
+        private readonly ITeamService _teamService;
+        private readonly ITeamMembersService _teamMembersService;
+        private readonly ITouramentRepository _touramentRepository;
+        private readonly ITeamRepository _teamRepository;
 
-        public MatchService(IMatchesRepository matchesRepo, ITouramentMatchesRepository touramentMatchesRepository, IMapper mapper)
+
+        public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
+            ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository, ITouramentRepository touramentRepository, ITeamRepository teamRepository)
         {
             _matchesRepo = matchesRepo;
             _touramentMatchesRepository = touramentMatchesRepository;
             _mapper = mapper;
+            _teamService = teamService;
+            _teamMembersService = teamMembersService;
+            _touramentMatchesRepository = touramentMatchesRepository;
+            _touramentRepository = touramentRepository;
+            _teamRepository = teamRepository;
+        }
+
+        public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
+        {
+            var room = new MatchRequestDTO
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                MatchDate = dto.MatchDate,
+                VenueId = dto.VenueId ?? 0,
+                Status = dto.Status,
+                MatchCategory = dto.MatchCategory,
+                MatchFormat = dto.MatchFormat,
+                WinScore = dto.WinScore,
+                IsPublic = dto.IsPublic,
+                RefereeId = dto.RefereeId,
+                TouramentId = dto.TournamentId,
+                RoomOnwerId = dto.RoomOnwer
+            };
+
+            var response = await CreateRoomAsync(room);
+            if (response.statusCode == HttpStatusCode.OK)
+            {
+                var createRoomResponse = _mapper.Map<RoomResponseDTO>(response.Data);
+                createRoomResponse.Teams = new List<TeamResponseDTO>();
+
+                var team1Response = await CreateTeamForRoom(response.Data.Id, "Team 1");
+                var team2Response = await CreateTeamForRoom(response.Data.Id, "Team 2");
+
+                if (team1Response.statusCode == HttpStatusCode.OK && team2Response.statusCode == HttpStatusCode.OK)
+                {
+                    var teamMembers = CreateTeamMembers(dto, team1Response.Data.Id, team2Response.Data.Id);
+                    await AddTeamMembers(teamMembers);
+
+                    createRoomResponse.Teams.Add(await CreateTeamResponse(team1Response.Data.Id, teamMembers));
+                    createRoomResponse.Teams.Add(await CreateTeamResponse(team2Response.Data.Id, teamMembers));
+                }
+
+                return new StatusResponse<RoomResponseDTO>
+                {
+                    statusCode = HttpStatusCode.OK,
+                    Data = createRoomResponse,
+                    Message = "Room created successfully"
+                };
+            }
+
+            return new StatusResponse<RoomResponseDTO>
+            {
+                statusCode = response.statusCode,
+                Data = null,
+                Message = response.Message
+            };
+        }
+
+        private async Task<StatusResponse<TeamResponseDTO>> CreateTeamForRoom(int roomId, string teamName)
+        {
+            var teamRequest = new TeamRequestDTO { Name = teamName, MatchingId = roomId };
+            return await _teamService.CreateTeamAsync(teamRequest);
+        }
+
+        private List<TeamMemberRequestDTO> CreateTeamMembers(CreateRoomDTO dto, int team1Id, int team2Id)
+        {
+            var teamMembers = new List<TeamMemberRequestDTO>();
+
+            if (dto.MatchFormat == MatchFormat.Team)
+            {
+                if (dto.Player1Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team1Id, PlayerId = dto.Player1Id.Value });
+                if (dto.Player2Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team1Id, PlayerId = dto.Player2Id.Value });
+                if (dto.Player3Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team2Id, PlayerId = dto.Player3Id.Value });
+                if (dto.Player4Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team2Id, PlayerId = dto.Player4Id.Value });
+            }
+            else
+            {
+                if (dto.Player1Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team1Id, PlayerId = dto.Player1Id.Value });
+                if (dto.Player2Id.HasValue)
+                    teamMembers.Add(new TeamMemberRequestDTO { TeamId = team2Id, PlayerId = dto.Player2Id.Value });
+            }
+
+            return teamMembers;
+        }
+
+        private async Task AddTeamMembers(List<TeamMemberRequestDTO> teamMembers)
+        {
+            foreach (var member in teamMembers)
+            {
+                await _teamMembersService.CreateTeamMemberAsync(member);
+            }
+        }
+
+        private async Task<TeamResponseDTO> CreateTeamResponse(int teamId, List<TeamMemberRequestDTO> teamMembers)
+        {
+            var teamResponse = await _teamRepository.GetById(teamId);
+            var teamMembersResponse = await _teamMembersService.GetTeamMembersByTeamIdAsync(teamId);
+
+            return new TeamResponseDTO
+            {
+                Id = teamResponse.Id,
+                Name = teamResponse.Name,
+                CaptainId = teamResponse.CaptainId,
+                MatchingId = teamResponse.MatchingId,
+                Members = _mapper.Map<List<TeamMemberDTO>>(teamMembersResponse.Data)
+            };
         }
 
         public async Task<StatusResponse<MatchResponseDTO>> CreateRoomAsync(MatchRequestDTO dto)
         {
             var response = new StatusResponse<MatchResponseDTO>();
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
                 try
                 {
                     var match = new Matches
@@ -37,31 +157,40 @@ namespace Services.Services
                         Title = dto.Title,
                         Description = dto.Description,
                         MatchDate = dto.MatchDate,
-                        VenueId = dto.VenueId,
                         Status = dto.Status,
                         MatchCategory = dto.MatchCategory,
                         MatchFormat = dto.MatchFormat,
                         WinScore = dto.WinScore,
                         IsPublic = dto.IsPublic,
+                        RoomOwnerId = dto.RoomOnwerId,
+                        RefereeId = dto.RefereeId,
+                        VenueId = dto.VenueId != 0 ? dto.VenueId : (int?)null 
                     };
-                    if (dto.RefereeId != null)
-                    {
-                        match.RefereeId = dto.RefereeId;
-                    }
+
                     await _matchesRepo.AddAsync(match);
                     await _matchesRepo.SaveChangesAsync();
 
-                    if (dto.TouramentId != null)
+                    if (dto.TouramentId.HasValue && dto.TouramentId.Value != 0)
                     {
-                        var touramentMatch = new TouramentMatches
+                        var touramentData = await _touramentRepository.GetById(dto.TouramentId.Value);
+                        if(touramentData == null || touramentData.IsAccept == false)
+                        {
+                            response.statusCode = HttpStatusCode.BadRequest;
+                            response.Message = "Tournament not found or not accepted yet!";
+                            return response;
+                        }
+                        var tournamentMatch = new TouramentMatches
                         {
                             MatchesId = match.Id,
                             TournamentId = dto.TouramentId.Value,
-                            CreateAt = DateTime.UtcNow,
+                            CreateAt = DateTime.UtcNow
                         };
-                        await _touramentMatchesRepository.AddAsync(touramentMatch);
-                        await _touramentMatchesRepository.SaveChangesAsync();
+
+                        await _touramentMatchesRepository.AddAsync(tournamentMatch);
                     }
+
+                    await _matchesRepo.SaveChangesAsync();
+
 
                     var matchResponse = new MatchResponseDTO
                     {
@@ -81,14 +210,16 @@ namespace Services.Services
                     response.Data = matchResponse;
                     response.statusCode = HttpStatusCode.OK;
                     response.Message = "Room created successfully!";
-                    return response;
+                    transaction.Complete();
                 }
                 catch (Exception ex)
                 {
                     response.statusCode = HttpStatusCode.InternalServerError;
                     response.Message = ex.Message;
-                    return response;
                 }
+            } 
+
+            return response;
         }
 
         public async Task<StatusResponse<MatchResponseDTO>> GetRoomByIdAsync(int id)

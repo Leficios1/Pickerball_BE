@@ -23,12 +23,13 @@ namespace Repository.Repository
                 .FirstOrDefaultAsync(t => t.Id == teamId);
         }
 
-        public async Task<Team?> GetTeamWithMatchingIdAsync(int matchingId)
+        public async Task<List<Team?>> GetTeamWithMatchingIdAsync(int matchingId)
         {
             return await _context.Teams
-                .Include(t => t.Members)
-                .ThenInclude(m => m.Playermember)
-                .SingleOrDefaultAsync(t => t.MatchingId == matchingId);
+       .Where(t => t.MatchingId == matchingId)
+       .Include(t => t.Members)
+       .ThenInclude(m => m.Playermember)
+       .ToListAsync();
         }
     }
 }

@@ -54,6 +54,55 @@ namespace Services.Services
             return response;
         }
 
+        public async Task<StatusResponse<List<PlayerDetails>>> GetAllPlayers()
+        {
+            var response = new StatusResponse<List<PlayerDetails>>();
+            try
+            {
+                var data = await _playerRepository.GetAllPlayer();
+                if (data == null)
+                {
+                    response.Message = "Player not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                response.Data = _mapper.Map<List<PlayerDetails>>(data);
+                response.Message = "Get all player success!";
+                response.statusCode = HttpStatusCode.OK;
+
+            }
+            catch (Exception e)
+            {
+                response.Message = e.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<PlayerDetails>> GetPlayerById(int PlayerId)
+        {
+            var response = new StatusResponse<PlayerDetails>();
+            try
+            {
+                var data = await _playerRepository.GetById(PlayerId);
+                if (data == null)
+                {
+                    response.Message = "Player not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                response.Data = _mapper.Map<PlayerDetails>(data);
+                response = new StatusResponse<PlayerDetails>();
+                response.Message = "Get player success!";
+            }
+            catch (Exception e)
+            {
+                response.Message = e.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
         public async Task<StatusResponse<PlayerDetails>> UpdatePlayer(PlayerDetailsRequest player)
         {
             var response = new StatusResponse<PlayerDetails>();
