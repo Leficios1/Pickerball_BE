@@ -128,30 +128,33 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.NotFound;
                     return response;
                 }
-                var ListMatchByTourament = await _touramentMatchesRepository.getByTouramentId(id);
+                var ListMatchByTourament = await _touramentMatchesRepository.getMatchByTouramentId(id);
                 List<MatcheDetails>? matcheDetailsList = new List<MatcheDetails>();
                 List<RegistrationDetails>? registrationDetails = new List<RegistrationDetails>();
                 if (ListMatchByTourament != null)
                 {
                     foreach (var matchDetails in ListMatchByTourament)
                     {
-                        var playdeDetails = await _teamRepository.GetTeamWithMatchingIdAsync(matchDetails.MatchesId);
-                        if (playdeDetails != null && playdeDetails.Members.Any())
+                        var playdeDetails = await _teamRepository.GetTeamsWithMatchingIdAsync(matchDetails.MatchesId);
+                        foreach (var member in playdeDetails)
                         {
-                            var playerIdInTeam = playdeDetails.Members.Select(x => x.Playermember.PlayerId).ToList();
-                            var matchData = await _matchRepository.GetByIdAsync(matchDetails.MatchesId);
-                            var matcheDetails = new MatcheDetails
+                            if (playdeDetails != null && member.Members.Any())
                             {
-                                Id = matchDetails.Id,
-                                PlayerId1 = playerIdInTeam.ElementAtOrDefault(0),
-                                PlayerId2 = playerIdInTeam.ElementAtOrDefault(1),
-                                PlayerId3 = playerIdInTeam.ElementAtOrDefault(2),
-                                PlayerId4 = playerIdInTeam.ElementAtOrDefault(3),
-                                ScheduledTime = matchData.MatchDate,
-                                Score = $"{matchData.Team1Score} - {matchData.Team2Score}",
-                                Result = matchData.Status.ToString()
-                            };
-                            matcheDetailsList.Add(matcheDetails);
+                                var playerIdInTeam = member.Members.Select(x => x.Playermember.PlayerId).ToList();
+                                var matchData = await _matchRepository.GetById(matchDetails.MatchesId);
+                                var matcheDetails = new MatcheDetails
+                                {
+                                    Id = matchDetails.Id,
+                                    PlayerId1 = playerIdInTeam.ElementAtOrDefault(0),
+                                    PlayerId2 = playerIdInTeam.ElementAtOrDefault(1),
+                                    PlayerId3 = playerIdInTeam.ElementAtOrDefault(2),
+                                    PlayerId4 = playerIdInTeam.ElementAtOrDefault(3),
+                                    ScheduledTime = matchData.MatchDate,
+                                    Score = $"{matchData.Team1Score} - {matchData.Team2Score}",
+                                    Result = matchData.Status.ToString()
+                                };
+                                matcheDetailsList.Add(matcheDetails);
+                            }
                         }
                     }
                 }
@@ -159,6 +162,7 @@ namespace Services.Services
                 {
                     matcheDetailsList = null;
                 }
+
                 var playerRegistrationData = await _tournamentRegistrationRepository.getByTournamentId(id);
                 if (playerRegistrationData != null)
                 {

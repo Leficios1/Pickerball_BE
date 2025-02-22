@@ -52,7 +52,6 @@ namespace Services.Services
                 return response;
             }
         }
-
         public async Task<StatusResponse<IEnumerable<TeamMemberDTO>>> GetTeamMembersByTeamIdAsync(int teamId)
         {
             var response = new StatusResponse<IEnumerable<TeamMemberDTO>>();
@@ -63,6 +62,8 @@ namespace Services.Services
                 {
                     Id = tm.Id,
                     PlayerId = tm.PlayerId,
+                    TeamId = tm.TeamId,
+                    JoinedAt = tm.JoinedAt
                 }).ToList();
 
                 response.Data = teamMemberDTOs;
@@ -84,7 +85,7 @@ namespace Services.Services
             try
             {
                 var teamMembers = await _teamMembersRepo.GetByPlayerIdAsync(playerId);
-                if (!teamMembers.Any())
+                if (teamMembers == null || !teamMembers.Any())
                 {
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "Team members not found!";
@@ -94,12 +95,42 @@ namespace Services.Services
                 var teamMemberDTOs = teamMembers.Select(tm => new TeamMemberDTO
                 {
                     Id = tm.Id,
-                    PlayerId = tm.PlayerId
+                    PlayerId = tm.PlayerId,
+                    TeamId = tm.TeamId,
+                    JoinedAt = tm.JoinedAt
                 }).ToList();
 
                 response.Data = teamMemberDTOs;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Team members retrieved successfully!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
+        }
+        public async Task<StatusResponse<bool>> DeleteTeamMemberAsync(int playerId, int teamId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var teamMember = await _teamMembersRepo.GetByPlayerIdAndTeamIdAsync(playerId, teamId);
+                if (teamMember == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Team member not found!";
+                    return response;
+                }
+
+                _teamMembersRepo.Delete(teamMember);
+                await _teamMembersRepo.SaveChangesAsync();
+
+                response.Data = true;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Team member deleted successfully!";
                 return response;
             }
             catch (Exception ex)

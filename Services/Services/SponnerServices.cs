@@ -23,7 +23,7 @@ namespace Services.Services
             _mapper = mapper;
         }
 
-        public async Task<StatusResponse<bool>> AccpetSponner(int SponnerId)
+        public async Task<StatusResponse<bool>> AccpetSponner(int SponnerId, bool isAccept)
         {
             var response = new StatusResponse<bool>();
             try
@@ -35,12 +35,30 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.NotFound;
                     return response;
                 }
-                data.isAccept = true;
+                data.isAccept = isAccept;
                 _sponsorRepository.Update(data);
                 await _sponsorRepository.SaveChangesAsync();
                 response.Data = true;
                 response.statusCode = HttpStatusCode.OK;
-                response.Message = "Sponner Accepted Successfully";
+                response.Message = isAccept ? "Sponner Accepted Successfully" : "Sponner Rejected Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+        
+        public async Task<StatusResponse<List<SponnerResponseDTO>>> getAllSponner()
+        {
+            var response = new StatusResponse<List<SponnerResponseDTO>>();
+            try
+            {
+                var data = await _sponsorRepository.GetAllSponsorsOrderedByCreateAtAsync();
+                response.Data = _mapper.Map<List<SponnerResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get All Sponsors Successfully";
             }
             catch (Exception ex)
             {
@@ -70,12 +88,8 @@ namespace Services.Services
                 response.Message = ex.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
             }
-            return response;
-        }
 
-        public Task<StatusResponse<List<SponnerResponseDTO>>> getAllSponner()
-        {
-            throw new NotImplementedException();
+            return response;
         }
 
         public async Task<StatusResponse<SponnerResponseDTO>> getSponnerById(int SponnerId)

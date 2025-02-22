@@ -2,6 +2,8 @@ using Database.Model;
 using Database.Model.Dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repository.Interface;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Repository.Repository
@@ -23,13 +25,18 @@ namespace Repository.Repository
                 .FirstOrDefaultAsync(t => t.Id == teamId);
         }
 
-        public async Task<List<Team?>> GetTeamWithMatchingIdAsync(int matchingId)
+        public async Task<Team?> GetByIdAsync(int id)
+        {
+            return await _context.Teams.FindAsync(id);
+        }
+
+        public async Task<List<Team>> GetTeamsWithMatchingIdAsync(int matchingId)
         {
             return await _context.Teams
-       .Where(t => t.MatchingId == matchingId)
-       .Include(t => t.Members)
-       .ThenInclude(m => m.Playermember)
-       .ToListAsync();
+                .Include(t => t.Members)
+                .ThenInclude(m => m.Playermember)
+                .Where(t => t.MatchingId == matchingId)
+                .ToListAsync();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Database.Model
         public string Title { get; set; }
         public string Content { get; set; }
 
-        public int RuleCategoryId { get; set; }
-        public BlogCategory RuleCategory { get; set; }
+        public int BlogCategoryId { get; set; }
+        public BlogCategory? BlogCategory { get; set; }
     }
 }
