@@ -4,6 +4,7 @@ using Database.Model.Dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(PickerBallDbcontext))]
-    partial class PickerBallDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20250223081135_UpdateDBVN+6")]
+    partial class UpdateDBVN6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -358,11 +361,6 @@ namespace Database.Migrations
                         {
                             RoleId = 4,
                             RoleName = "Refree"
-                        },
-                        new
-                        {
-                            RoleId = 5,
-                            RoleName = "User"
                         });
                 });
 
@@ -471,7 +469,7 @@ namespace Database.Migrations
                     b.Property<int?>("CaptainId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MatchingId")
+                    b.Property<int?>("MatchingId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -706,7 +704,7 @@ namespace Database.Migrations
                     b.Property<DateTime>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("RoleId")
+                    b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
                     b.Property<string>("SecondName")
@@ -925,9 +923,7 @@ namespace Database.Migrations
 
                     b.HasOne("Database.Model.Matches", "Matches")
                         .WithMany()
-                        .HasForeignKey("MatchingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MatchingId");
 
                     b.Navigation("Captain");
 
@@ -1017,9 +1013,7 @@ namespace Database.Migrations
                 {
                     b.HasOne("Database.Model.Role", "Role")
                         .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
                 });

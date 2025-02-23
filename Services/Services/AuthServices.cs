@@ -168,10 +168,10 @@ namespace Services.Services
                 AvatarUrl = x.AvatarUrl,
                 Gender = x.Gender,
                 Email = x.Email,
-                RoleId = x.RoleId,
                 RefreshToken = x.RefreshToken,
                 RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
-                CreateAt = x.CreateAt
+                CreateAt = x.CreateAt,
+                RoleId = x.RoleId,
 
             }).FirstOrDefaultAsync(x => x.Id.ToString().Equals(id));
 
@@ -206,12 +206,12 @@ namespace Services.Services
                     SecondName = dto.SecondName,
                     DateOfBirth = dto.DateOfBirth,
                     AvatarUrl = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg",
-                    RoleId = dto.RoleId,
                     Status = true,
                     Gender = dto.Gender,
                     CreateAt = DateTime.UtcNow,
                     RefreshToken = GenerateRefreshToken(),
-                    RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
+                    RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7),
+                    RoleId = 5
                 };
 
                 user.PasswordHash = _passwordHasher.HashPassword(user, dto.PasswordHash);
@@ -230,7 +230,6 @@ namespace Services.Services
                     AvatarUrl = user.AvatarUrl,
                     Gender = user.Gender,
                     Status = user.Status,
-                    RoleId = user.RoleId,
                     RefreshToken = user.RefreshToken,
                     CreateAt = user.CreateAt,
                     RefreshTokenExpiryTime = user.RefreshTokenExpiryTime

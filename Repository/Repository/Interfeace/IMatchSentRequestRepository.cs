@@ -9,6 +9,7 @@ namespace Repository.Repository.Interfeace
 {
     public interface IMatchSentRequestRepository : IBaseRepository<MatchesSendRequest>
     {
-
+        Task<List<MatchesSendRequest>> GetByReceviedId(int ReceviedId);
+        Task<List<MatchesSendRequest>> GetByRequestId(int RequestId);
     }
 }

@@ -222,7 +222,7 @@ namespace Services.Services
             var response = new StatusResponse<List<TournamentResponseDTO>>();
             try
             {
-                var registrations = await _tournamentRegistrationRepository.getByPlayerId(PlayerId);
+                var registrations = await _tournamentRegistrationRepository.getAllByPlayerId(PlayerId);
                 if (registrations == null || !registrations.Any())
                 {
                     response.Message = "This player hasn't joined any tournaments";
@@ -230,10 +230,18 @@ namespace Services.Services
                     return response;
                 }
                 var tournamentIds = registrations.Select(r => r.TournamentId).Distinct().ToList();
-                var tournaments = await _touramentRepository.GetById(tournamentIds);
+                var data = new List<Tournaments>();
+                foreach(var t in tournamentIds)
+                {
+                    var tourament = await _touramentRepository.GetById(t);
+                    if(tourament != null)
+                    {
+                        data.Add(tourament);
+                    }
+                }
 
                 // Map dữ liệu sang DTO
-                var tournamentList = _mapper.Map<List<TournamentResponseDTO>>(tournaments);
+                var tournamentList = _mapper.Map<List<TournamentResponseDTO>>(data);
                 response.Data = tournamentList;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get Tournament Successfully";

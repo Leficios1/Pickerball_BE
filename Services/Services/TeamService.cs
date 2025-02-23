@@ -78,7 +78,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId
+                    MatchingId = (int)team.MatchingId
                 };
 
                 response.Data = teamResponse;
@@ -111,7 +111,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId,
+                    MatchingId =(int)team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,
@@ -235,7 +235,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId,
+                    MatchingId = (int)team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,

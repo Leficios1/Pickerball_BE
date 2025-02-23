@@ -1,4 +1,6 @@
-﻿using Database.DTO.Response;
+﻿using Database.DTO.Request;
+using Database.DTO.Response;
+using Database.Model;
 using Repository.Repository.Interfeace;
 using System;
 using System.Collections.Generic;
@@ -10,8 +12,11 @@ namespace Services.Services.Interface
 {
     public interface IMatchSentRequestServices
     {
-        Task<StatusResponse<MatchSentRequestResponseDTO>> SentRequest(MatchSentRequestResponseDTO dto);
-        Task<StatusResponse<MatchSentRequestResponseDTO>> GetRequestById(int id);
-        Task<StatusResponse<MatchSentRequestResponseDTO>> AcceptRequest(int SentRequestId, int PlayerAcceptId);
+        Task<StatusResponse<MatchSentRequestResponseDTO>> SentRequest(MatchSentRequestRequestDTO dto);
+        Task<StatusResponse<List<MatchSentRequestResponseDTO>>> GetByUserSendRequestId(int UserSendRequestId);
+        Task<StatusResponse<List<MatchSentRequestResponseDTO>>> GetResponseByUserAcceptId(int UserAcceptId);
+        Task<StatusResponse<List<MatchSentRequestResponseDTO>>> getAll();
+        Task<StatusResponse<MatchSentRequestResponseDTO>> AcceptRequest(int RequestId, int UserAcceptId, SendRequestStatus Accpet);
+        Task<StatusResponse<MatchSentRequestResponseDTO>> getById(int Id);
     }
 }

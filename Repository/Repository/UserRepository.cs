@@ -20,6 +20,11 @@ namespace Repository.Repository
             _context = context;
         }
 
+        public async Task<List<User>> GetAllRefeeUserAsync()
+        {
+            return await _context.Users.Where(x => x.RoleId == 4).ToListAsync();
+        }
+
         public async Task<List<User>> GetAllUser()
         {
             return await _context.Users.ToListAsync();

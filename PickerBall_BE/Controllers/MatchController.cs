@@ -84,5 +84,12 @@ namespace PickerBall_BE.Controllers
         {
             return await _matchService.DeleteRoomAsync(id);
         }
+        [HttpGet("GetMatchByTouramentId/{TouramentId}")]
+        public async Task<IActionResult> GetMatchByTouramentId([FromRoute] int TouramentId)
+        {
+            var response = await _matchService.GetMatchesByTouramentId(TouramentId);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+
+        }
     }
 }

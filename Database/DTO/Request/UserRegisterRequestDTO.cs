@@ -18,7 +18,6 @@ namespace Database.DTO.Request
 
         [MaxLength(10)]
         public string? Gender { get; set; }
-        public int RoleId {  get; set; }
     }
     public class PlayerDetailsRequest
     {

@@ -140,7 +140,7 @@ namespace Services.Services
                 Id = teamResponse.Id,
                 Name = teamResponse.Name,
                 CaptainId = teamResponse.CaptainId,
-                MatchingId = teamResponse.MatchingId,
+                MatchingId = (int)teamResponse.MatchingId,
                 Members = _mapper.Map<List<TeamMemberDTO>>(teamMembersResponse.Data)
             };
         }
@@ -165,7 +165,7 @@ namespace Services.Services
                         IsPublic = dto.IsPublic,
                         RoomOwner = dto.RoomOnwerId,
                         RefereeId = dto.RefereeId,
-                        VenueId = dto.VenueId != 0 ? dto.VenueId : (int?)null 
+                        VenueId = dto.VenueId != 0 ? dto.VenueId : (int?)null
                     };
 
                     await _matchesRepo.AddAsync(match);
@@ -174,7 +174,7 @@ namespace Services.Services
                     if (dto.TouramentId.HasValue && dto.TouramentId.Value != 0)
                     {
                         var touramentData = await _touramentRepository.GetById(dto.TouramentId.Value);
-                        if(touramentData == null || touramentData.IsAccept == false)
+                        if (touramentData == null || touramentData.IsAccept == false)
                         {
                             response.statusCode = HttpStatusCode.BadRequest;
                             response.Message = "Tournament not found or not accepted yet!";
@@ -218,7 +218,7 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.InternalServerError;
                     response.Message = ex.Message;
                 }
-            } 
+            }
 
             return response;
         }
@@ -463,7 +463,32 @@ namespace Services.Services
             try
             {
                 var matches = await _touramentMatchesRepository.getMatchByTouramentId(TouramentId);
-                var mapper = _mapper.Map<List<MatchResponseDTO>>(matches);
+                if (matches == null || !matches.Any())
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "No matches found for this tournament.";
+                    return response;
+                }
+                var matchIds = matches.Select(tm => tm.MatchesId).ToList();
+
+                var data = new List<Matches>();
+                foreach (var MatchId in matchIds)
+                {
+                    var match = await _matchesRepo.GetById(MatchId);
+                    if (match != null)
+                    {
+                        data.Add(match);
+
+                    }
+                }
+
+                if (matches == null || !matches.Any())
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Matches data not found.";
+                    return response;
+                }
+                var mapper = _mapper.Map<List<MatchResponseDTO>>(data);
                 response.Data = mapper;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get matches by tourament id successfully!";

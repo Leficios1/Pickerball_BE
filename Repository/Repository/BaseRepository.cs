@@ -148,5 +148,10 @@ namespace Repository.Repository
         {
             throw new NotImplementedException();
         }
+
+        public async Task<List<TEntity?>> GetAll()
+        {
+            return await _dbSet.ToListAsync();
+        }
     }
 }
