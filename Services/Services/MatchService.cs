@@ -431,7 +431,7 @@ namespace Services.Services
             }
         }
 
-        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchRequestDTO dto)
+        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchUpdateRequestDTO dto)
         {
             var response = new StatusResponse<MatchResponseDTO>();
             try
@@ -442,7 +442,20 @@ namespace Services.Services
                     return CreateErrorResponse<MatchResponseDTO>(HttpStatusCode.NotFound, "Room not found!");
                 }
 
-                _mapper.Map(dto, match);
+                // Apply the values from MatchUpdateRequestDTO
+                foreach (var property in typeof(MatchUpdateRequestDTO).GetProperties())
+                {
+                    var value = property.GetValue(dto);
+                    if (value != null)
+                    {
+                        var existingProperty = typeof(Matches).GetProperty(property.Name);
+                        if (existingProperty != null)
+                        {
+                            existingProperty.SetValue(match, value);
+                        }
+                    }
+                }
+
                 _matchesRepo.Update(match);
                 await _matchesRepo.SaveChangesAsync();
 

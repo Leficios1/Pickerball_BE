@@ -12,11 +12,23 @@ namespace Database.DTO.Request
         public int? Id { get; set; }
         public string CompanyName { get; set; } = null!;
         public string? LogoUrl { get; set; }
+        [Url] public string UrlSocial { get; set; } = null!;
+        [Url] public string? UrlSocial1 { get; set; } = null!;
+        public string ContactEmail { get; set; } = null!;
+        public string? Descreption { get; set; }
+
+    }
+    
+    public class SponnerUpdateRequestDTO
+    {
+        public int? Id { get; set; }
+        public string? CompanyName { get; set; } = null!;
+        public string? LogoUrl { get; set; }
         [Url]
-        public string UrlSocial { get; set; } = null!;
+        public string? UrlSocial { get; set; } = null!;
         [Url]
         public string? UrlSocial1 { get; set; } = null!;
-        public string ContactEmail { get; set; } = null!;
+        public string? ContactEmail { get; set; } = null!;
         public string? Descreption { get; set; }
 
     }

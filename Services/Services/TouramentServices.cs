@@ -13,6 +13,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Services.Partial;
 
 namespace Services.Services
 {
@@ -254,39 +255,52 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<TournamentResponseDTO>> UpdateTournament(TournamentRequestDTO dto)
+        public async Task<StatusResponse<TournamentResponseDTO>> UpdateTournament(TournamenUpdatetRequestDTO dto, int id)
         {
             var response = new StatusResponse<TournamentResponseDTO>();
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
                 try
                 {
-                    if (dto.Id == null)
-                    {
-                        response.Message = "Missing Id Tourament";
-                        response.statusCode = HttpStatusCode.BadRequest;
-                        return response;
-                    }
-                    var existingTournament = await _touramentRepository.GetById(dto.Id);
+                    var existingTournament = await _touramentRepository.GetById(id);
                     if (existingTournament == null)
                     {
-                        response.Message = "Tournament not found";
-                        response.statusCode = HttpStatusCode.NotFound;
-                        return response;
+                        return new StatusResponse<TournamentResponseDTO>
+                        {
+                            Message = "Tournament not found",
+                            statusCode = HttpStatusCode.NotFound
+                        };
                     }
-                    var data = _mapper.Map<Tournaments>(dto);
-                    _touramentRepository.Update(data);
+
+                    // Apply the values from TournamenUpdatetRequestDTO
+                    foreach (var property in typeof(TournamenUpdatetRequestDTO).GetProperties())
+                    {
+                        var value = property.GetValue(dto);
+                        if (value != null)
+                        {
+                            var existingProperty = typeof(Tournaments).GetProperty(property.Name);
+                            if (existingProperty != null)
+                            {
+                                existingProperty.SetValue(existingTournament, value);
+                            }
+                        }
+                    }
+
+                    _touramentRepository.Update(existingTournament);
                     await _touramentRepository.SaveChangesAsync();
-                    response.Data = _mapper.Map<TournamentResponseDTO>(data);
+
+                    response.Data = _mapper.Map<TournamentResponseDTO>(existingTournament);
                     response.statusCode = HttpStatusCode.OK;
                     response.Message = "Tournament Updated Successfully";
                     transaction.Complete();
-                    return response;
                 }
                 catch (Exception ex)
                 {
                     response.Message = ex.Message;
                     response.statusCode = HttpStatusCode.InternalServerError;
                 }
+            }
             return response;
         }
     }

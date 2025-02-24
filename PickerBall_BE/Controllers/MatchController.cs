@@ -67,8 +67,8 @@ namespace PickerBall_BE.Controllers
         }
 
         // Admin endpoints
-        [HttpPut("admin/room/{id}")]
-        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, [FromBody] MatchRequestDTO dto)
+        [HttpPatch("admin/room/{id}")]
+        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, [FromBody] MatchUpdateRequestDTO dto)
         {
             return await _matchService.UpdateRoomAsync(id, dto);
         }
@@ -84,6 +84,7 @@ namespace PickerBall_BE.Controllers
         {
             return await _matchService.DeleteRoomAsync(id);
         }
+
         [HttpGet("GetMatchByTouramentId/{TouramentId}")]
         public async Task<IActionResult> GetMatchByTouramentId([FromRoute] int TouramentId)
         {
