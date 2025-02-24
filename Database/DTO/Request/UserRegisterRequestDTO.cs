@@ -40,4 +40,17 @@ namespace Database.DTO.Request
         //public bool isAccept { get; set; }
         //public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
+    
+    public class RefereeRegisterRequestDTO
+    {
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public string? SecondName { get; set; }
+        public string Email { get; set; } = null!;
+        public string PasswordHash { get; set; } = null!; //password
+        public DateTime? DateOfBirth { get; set; }
+
+        [MaxLength(10)]
+        public string? Gender { get; set; }
+    }
 }

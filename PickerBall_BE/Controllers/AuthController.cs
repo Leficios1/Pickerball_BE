@@ -42,7 +42,13 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> GetUserByToken(string token)
         {
             var response = await _authServices.GetUserByToken(token);
-            return Ok(response);
+            return Ok(response); 
+        }
+        [HttpPost("refereesRegister")]
+        public async Task<IActionResult> refereesRegister(UserRegisterRequestDTO registerDto)
+        {
+            var response = await _authServices.RegisterAsync(registerDto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
     }
 }
