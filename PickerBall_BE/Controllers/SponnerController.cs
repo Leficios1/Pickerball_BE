@@ -43,10 +43,10 @@ namespace PickerBall_BE.Controllers
             var response = await _sponnerServices.CreateSponner(dto);
             return StatusCode((int)response.statusCode, response);
         }
-        [HttpPut("UpdateSponner")]
-        public async Task<IActionResult> UpdateSponner([FromBody] SponnerRequestDTO dto)
+        [HttpPatch("UpdateSponner/{id}")]
+        public async Task<IActionResult> UpdateSponner([FromRoute] int id, [FromBody] SponnerUpdateRequestDTO dto)
         {
-            var response = await _sponnerServices.UpdateSponner(dto);
+            var response = await _sponnerServices.UpdateSponner(dto, id);
             return StatusCode((int)response.statusCode, response);
         }
     }
