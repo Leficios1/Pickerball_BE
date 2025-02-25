@@ -36,6 +36,9 @@ namespace Services.Mapping
             CreateMap<Sponsor, SponnerResponseDTO>().ReverseMap();
             CreateMap<MatchSentRequestRequestDTO, MatchesSendRequest>().ReverseMap();
             CreateMap<MatchesSendRequest, MatchSentRequestResponseDTO>().ReverseMap();
+            CreateMap<FriendRequestDTO, Friends>().ReverseMap();
+            CreateMap<FriendResponseDTO, Friends>().ReverseMap();
+
         }
     }
 }

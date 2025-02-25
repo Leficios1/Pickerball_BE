@@ -15,6 +15,7 @@ namespace Database.DTO.Response
         public MatchCategory MatchCategory { get; set; } // Competitive, Custom, Tournament
         public MatchFormat MatchFormat { get; set; } // Single, Team(Double)
         public WinScore WinScore { get; set; } // 11, 15, 21
+        public int? RoomOwner { get; set; }
         public int? Team1Score { get; set; }
         public int? Team2Score { get; set; }
         public bool IsPublic { get; set; }

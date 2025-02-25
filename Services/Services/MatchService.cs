@@ -205,7 +205,8 @@ namespace Services.Services
                         MatchFormat = match.MatchFormat,
                         WinScore = match.WinScore,
                         IsPublic = match.IsPublic,
-                        RefereeId = match.RefereeId
+                        RefereeId = match.RefereeId,
+                        RoomOwner = match.RoomOwner
                     };
 
                     response.Data = matchResponse;
