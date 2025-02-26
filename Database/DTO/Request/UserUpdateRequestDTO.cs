@@ -10,16 +10,14 @@ namespace Database.DTO.Request
     public class UserUpdateRequestDTO
     {
         public int UserId { get; set; }
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
+        public string? FirstName { get; set; } = null!;
+        public string? LastName { get; set; } = null!;
         public string? SecondName { get; set; }
         //public string Email { get; set; } = null!;
         //public string? PasswordHash { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; } = null!;
+        public string? Gender { get; set; } = null!;
         public string? AvatarUrl { get; set; }
-        public PlayerDetails? PlayerDetails { get; set; }
-        public SponsorDetails? SponsorDetails { get; set; }
 
     }
 }

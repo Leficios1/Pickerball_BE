@@ -6,5 +6,6 @@ namespace Repository.Repository.Interfeace
     public interface IBlogCategoriesRepository : IBaseRepository<BlogCategory>
     {
         Task<PagingResult<BlogCategory>> PagingBlogCategories(int? currentPage, int? pageSize);
+        Task<BlogCategory?> GetBlogCategoryById(int blogCategoryId);
     }
 }

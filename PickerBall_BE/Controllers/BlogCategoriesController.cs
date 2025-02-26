@@ -1,4 +1,5 @@
-﻿using Database.Model;
+﻿using Database.DTO.Request;
+using Database.Model;
 using Microsoft.AspNetCore.Mvc;
 using Services.Services.Interface;
 
@@ -26,13 +27,13 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpPost("create")]
-        public async Task<IActionResult> CreateBlogCategory(BlogCategory blogCategory)
+        public async Task<IActionResult> CreateBlogCategory(BlogCategoryCreateDTO blogCategory)
         {
             var response = await _blogCategory.CreateBlogCategory(blogCategory);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpPut("edit")]
-        public async Task<IActionResult> UpdateBlogCategory(BlogCategory blogCategory)
+        public async Task<IActionResult> UpdateBlogCategory(BlogCategoryDTO blogCategory)
         {
             var response = await _blogCategory.UpdateBlogCategory(blogCategory);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });

@@ -1,4 +1,6 @@
-﻿using Database.DTO.Response;
+﻿using AutoMapper;
+using Database.DTO.Request;
+using Database.DTO.Response;
 using Database.Model;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
@@ -9,20 +11,24 @@ namespace Services.Services
     public class BlogCategoryService : IBlogCategory
     {
         private readonly IBlogCategoriesRepository _blogCategoriesRepository;
-        public BlogCategoryService(IBlogCategoriesRepository blogCategoriesRepository)
+        private readonly IMapper _mapper;
+        public BlogCategoryService(IBlogCategoriesRepository blogCategoriesRepository, IMapper mapper)
         {
             _blogCategoriesRepository = blogCategoriesRepository;
+            _mapper = mapper;
         }
 
-        public async Task<StatusResponse<BlogCategory>> CreateBlogCategory(BlogCategory BlogCategory)
+        public async Task<StatusResponse<BlogCategoryDTO>> CreateBlogCategory(BlogCategoryCreateDTO BlogCategory)
         {
-            StatusResponse<BlogCategory> response = new StatusResponse<BlogCategory>();
+            StatusResponse<BlogCategoryDTO> response = new StatusResponse<BlogCategoryDTO>();
             try
             {
-                await _blogCategoriesRepository.AddAsync(BlogCategory);
+                var category = _mapper.Map<BlogCategory>(BlogCategory);
+                await _blogCategoriesRepository.AddAsync(category);
                 await _blogCategoriesRepository.SaveChangesAsync();
 
-                response.Data = BlogCategory;
+                var categoryResponse = _mapper.Map<BlogCategoryDTO>(category);
+                response.Data = categoryResponse;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Blog Category created successfully!";
             }
@@ -39,7 +45,7 @@ namespace Services.Services
             StatusResponse<bool> response = new StatusResponse<bool>();
             try
             {
-                var blogCategory = await _blogCategoriesRepository.GetById(blogCategoryId);
+                var blogCategory = await _blogCategoriesRepository.GetBlogCategoryById(blogCategoryId);
                 if (blogCategory == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
@@ -47,6 +53,12 @@ namespace Services.Services
                 }
                 else
                 {
+                    if(blogCategory.Rules != null && blogCategory.Rules.Count > 0)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Blog Category has many contents!";
+                        return response;
+                    }
                     _blogCategoriesRepository.Delete(blogCategory);
                     await _blogCategoriesRepository.SaveChangesAsync();
 
@@ -63,14 +75,15 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<PagingResult<BlogCategory>>> PaginglBlogCategories(int? currentPage, int? pageSize)
+        public async Task<StatusResponse<PagingResult<BlogCategoryDTO>>> PaginglBlogCategories(int? currentPage, int? pageSize)
         {
-            var response = new StatusResponse<PagingResult<BlogCategory>>();
+            var response = new StatusResponse<PagingResult<BlogCategoryDTO>>();
             try
             {
                 var blogCategories = await _blogCategoriesRepository.PagingBlogCategories(currentPage, pageSize);
+                var dataResponse = _mapper.Map<PagingResult<BlogCategoryDTO>>(blogCategories);
 
-                response.Data = blogCategories;
+                response.Data = dataResponse;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Blog Categories retrieved successfully!";
                 return response;
@@ -83,9 +96,9 @@ namespace Services.Services
             }
         }
 
-        public async Task<StatusResponse<BlogCategory>> GetBlogCategoryById(int blogCategoryId)
+        public async Task<StatusResponse<BlogCategoryDTO>> GetBlogCategoryById(int blogCategoryId)
         {
-            var response = new StatusResponse<BlogCategory>();
+            var response = new StatusResponse<BlogCategoryDTO>();
             try
             {
                 var data = await _blogCategoriesRepository.GetById(blogCategoryId);
@@ -96,7 +109,7 @@ namespace Services.Services
                     return response;
                 }
 
-                response.Data = data;
+                response.Data = _mapper.Map<BlogCategoryDTO>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get Blog Categories by id success!";
 
@@ -109,12 +122,13 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<BlogCategory>> UpdateBlogCategory(BlogCategory BlogCategory)
+        public async Task<StatusResponse<BlogCategoryDTO>> UpdateBlogCategory(BlogCategoryDTO BlogCategory)
         {
-            StatusResponse<BlogCategory> response = new StatusResponse<BlogCategory>();
+            StatusResponse<BlogCategoryDTO> response = new StatusResponse<BlogCategoryDTO>();
             try
             {
-                _blogCategoriesRepository.Update(BlogCategory);
+                var category = _mapper.Map<BlogCategory>(BlogCategory);
+                _blogCategoriesRepository.Update(category);
                 await _blogCategoriesRepository.SaveChangesAsync();
 
                 response.Data = BlogCategory;

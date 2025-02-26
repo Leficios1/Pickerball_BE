@@ -10,7 +10,7 @@ namespace Services.Mapping
         public MappingEntites()
         {
             CreateMap<UserUpdateRequestDTO, User>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId)).ReverseMap();
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<User, UserResponseDTO>()
                 .ForMember(dest => dest.userDetails, opt => opt.MapFrom(src => src.Player))
@@ -33,6 +33,20 @@ namespace Services.Mapping
             CreateMap<MatchRequestDTO, Matches>().ReverseMap();
             CreateMap<SponnerRequestDTO,Sponsor>().ReverseMap();
             CreateMap<Sponsor, SponnerResponseDTO>().ReverseMap();
+            CreateMap<RefereeCreateRequestDTO, User>().ReverseMap();
+
+            //Mapping for Blog Category
+            CreateMap<BlogCategoryCreateDTO, BlogCategory>().ReverseMap();
+            CreateMap<BlogCategoryDTO, BlogCategory>().ReverseMap();
+            CreateMap<BlogCategory, BlogCategoryDTO>().ReverseMap();
+            CreateMap<PagingResult<BlogCategory>, PagingResult<BlogCategoryDTO>>();
+
+            //Mapping for Rule(Blog,Content,News)
+            CreateMap<RuleCreateDTO, Rule>().ReverseMap();
+            CreateMap<RuleUpdateDTO, Rule>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<Rule, RuleResponseDTO>().ReverseMap();
+            CreateMap<PagingResult<Rule>, PagingResult<RuleResponseDTO>>();
         }
     }
 }

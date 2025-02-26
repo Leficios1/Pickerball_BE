@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -199,40 +200,6 @@ namespace Services.Services
                     _mapper.Map(dto, existingUser);
                     response.Data = _mapper.Map<UserResponseDTO>(existingUser);
 
-                    if (dto.PlayerDetails != null)
-                    {
-                        var player = await _playerRepository.GetPlayerById(dto.UserId);
-                        if (player == null)
-                        {
-                            response.statusCode = HttpStatusCode.NotFound;
-                            response.Message = "Not Found Player Profile";
-                            return response;
-                        }
-                        else
-                        {
-                            _mapper.Map(dto.PlayerDetails, player);
-                        }
-                        //response.Data = _mapper.Map<UserResponseDTO>(player);
-                        response.Data.userDetails = _mapper.Map<PlayerDetails>(player);
-                        await _playerRepository.SaveChangesAsync();
-                    }
-                    else if (dto.SponsorDetails != null)
-                    {
-                        var sponsor = await _sponsorRepository.GetById(dto.UserId);
-                        if (sponsor == null)
-                        {
-                            response.statusCode = HttpStatusCode.NotFound;
-                            response.Message = "Not Found Sponsor Profile";
-                            return response;
-                        }
-                        else
-                        {
-                            _mapper.Map(dto.SponsorDetails, sponsor);
-                        }
-                        //response.Data = _mapper.Map<UserResponseDTO>(sponsor);
-                        response.Data.sponsorDetails = _mapper.Map<SponsorDetails>(sponsor);
-                        await _sponsorRepository.SaveChangesAsync();
-                    }
                     await _userRepository.SaveChangesAsync();
                     response.statusCode = HttpStatusCode.OK;
                     response.Message = "Update user success!";
@@ -245,6 +212,38 @@ namespace Services.Services
                     response.Message = e.Message;
                 }
             return response;
+        }
+
+        public async Task<StatusResponse<UserResponseDTO>> CreateReferee(RefereeCreateRequestDTO dto)
+        {
+            var response = new StatusResponse<UserResponseDTO>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    User user = _mapper.Map<User>(dto);
+                    user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.Password);
+                    user.RefreshToken = GenerateRefreshToken();
+                    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                    response.Data = _mapper.Map<UserResponseDTO>(user);
+
+                    await _userRepository.AddAsync(user);
+                    await _userRepository.SaveChangesAsync();
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Update user success!";
+                    transaction.Complete();
+                }
+                catch (Exception e)
+                {
+                    transaction.Dispose();
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                    response.Message = e.Message;
+                }
+            return response;
+        }
+
+        private string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
     }
 }

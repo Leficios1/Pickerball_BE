@@ -1,4 +1,4 @@
-﻿using Database.Model;
+﻿using Database.DTO.Request;
 using Microsoft.AspNetCore.Mvc;
 using Services.Services.Interface;
 
@@ -26,15 +26,15 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpPost("create")]
-        public async Task<IActionResult> CreateRule(Rule Rule)
+        public async Task<IActionResult> CreateRule([FromBody] RuleCreateDTO dto)
         {
-            var response = await _ruleService.CreateRule(Rule);
+            var response = await _ruleService.CreateRule(dto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
-        [HttpPut("edit")]
-        public async Task<IActionResult> UpdateRule(Rule Rule)
+        [HttpPatch("edit")]
+        public async Task<IActionResult> UpdateRule([FromBody] RuleUpdateDTO dto)
         {
-            var response = await _ruleService.UpdateRule(Rule);
+            var response = await _ruleService.UpdateRule(dto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpDelete("delete")]

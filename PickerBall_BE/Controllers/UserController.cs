@@ -35,7 +35,7 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, response);
         }
 
-        [HttpPut("UpdateUser")]
+        [HttpPatch("UpdateUser")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateRequestDTO dto)
         {
             var response = await _userServices.UpdateUser(dto);
@@ -45,6 +45,12 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> DeletedUser([FromRoute] int UserId)
         {
             var response = await _userServices.DeletedUser(UserId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpPost("create-referee")]
+        public async Task<IActionResult> CreateReferee([FromBody] RefereeCreateRequestDTO dto)
+        {
+            var response = await _userServices.CreateReferee(dto);
             return StatusCode((int)response.statusCode, response);
         }
     }
