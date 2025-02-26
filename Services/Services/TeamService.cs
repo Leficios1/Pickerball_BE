@@ -78,7 +78,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId
+                    MatchingId = (int)team.MatchingId
                 };
 
                 response.Data = teamResponse;
@@ -93,7 +93,6 @@ namespace Services.Services
                 return response;
             }
         }
-
         public async Task<StatusResponse<List<TeamResponseDTO>>> GetTeamsWithMatchingIdAsync(int matchingId)
         {
             var response = new StatusResponse<List<TeamResponseDTO>>();
@@ -112,7 +111,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId,
+                    MatchingId =(int)team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,
@@ -145,19 +144,18 @@ namespace Services.Services
                     response.Message = "Team not found!";
                     return response;
                 }
-
                 var teamResponse = new TeamResponseDTO
                 {
                     Id = team.Id,
                     Name = team.Name,
-                    CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,
                         PlayerId = m.PlayerId,
                     }).ToList()
                 };
+
+
 
                 response.Data = teamResponse;
                 response.statusCode = HttpStatusCode.OK;
@@ -237,7 +235,7 @@ namespace Services.Services
                     Id = team.Id,
                     Name = team.Name,
                     CaptainId = team.CaptainId,
-                    MatchingId = team.MatchingId,
+                    MatchingId = (int)team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,

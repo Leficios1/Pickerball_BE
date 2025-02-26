@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Internal;
+using Services.Services;
 using Services.Services.Interface;
 
 namespace PickerBall_BE.Controllers
@@ -15,6 +16,13 @@ namespace PickerBall_BE.Controllers
         public PlayerRegistrationController(ITouramentRegistrationServices playerRegistrationServices)
         {
             _playerRegistrationServices = playerRegistrationServices;
+        }
+
+        [HttpPut("ChangeStatus/{PlayerId}/{isAccept}")]
+        public async Task<IActionResult> ChangeStatus([FromRoute] int PlayerId,[FromRoute] bool isAccept)
+        {
+            var response = await _playerRegistrationServices.AcceptPlayer(PlayerId, isAccept);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
 
         [HttpPost("CreateRegistration")]

@@ -22,16 +22,21 @@ namespace Services.Services
         private readonly IMapper _mapper;
         private readonly ITeamService _teamService;
         private readonly ITeamMembersService _teamMembersService;
-
+        private readonly ITouramentRepository _touramentRepository;
+        private readonly ITeamRepository _teamRepository;
 
 
         public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
-            ITeamMembersService teamMembersService)
+            ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository, ITouramentRepository touramentRepository, ITeamRepository teamRepository)
         {
             _matchesRepo = matchesRepo;
             _mapper = mapper;
             _teamService = teamService;
             _teamMembersService = teamMembersService;
+            _touramentMatchesRepository = touramentMatchesRepository;
+            _touramentRepository = touramentRepository;
+            _teamRepository = teamRepository;
+
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
@@ -47,7 +52,9 @@ namespace Services.Services
                 MatchFormat = dto.MatchFormat,
                 WinScore = dto.WinScore,
                 IsPublic = dto.IsPublic,
-                RefereeId = dto.RefereeId
+                RefereeId = dto.RefereeId,
+                TouramentId = dto.TournamentId,
+                RoomOnwerId = dto.RoomOnwer
             };
 
             var response = await CreateRoomAsync(room);
@@ -126,15 +133,14 @@ namespace Services.Services
 
         private async Task<TeamResponseDTO> CreateTeamResponse(int teamId, List<TeamMemberRequestDTO> teamMembers)
         {
-            var teamResponse = await _teamService.GetTeamByIdAsync(teamId);
+            var teamResponse = await _teamRepository.GetById(teamId);
             var teamMembersResponse = await _teamMembersService.GetTeamMembersByTeamIdAsync(teamId);
-
             return new TeamResponseDTO
             {
-                Id = teamResponse.Data.Id,
-                Name = teamResponse.Data.Name,
-                CaptainId = teamResponse.Data.CaptainId,
-                MatchingId = teamResponse.Data.MatchingId,
+                Id = teamResponse.Id,
+                Name = teamResponse.Name,
+                CaptainId = teamResponse.CaptainId,
+                MatchingId = (int)teamResponse.MatchingId,
                 Members = _mapper.Map<List<TeamMemberDTO>>(teamMembersResponse.Data)
             };
         }
@@ -142,7 +148,9 @@ namespace Services.Services
         public async Task<StatusResponse<MatchResponseDTO>> CreateRoomAsync(MatchRequestDTO dto)
         {
             var response = new StatusResponse<MatchResponseDTO>();
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
                 try
                 {
                     var match = new Matches
@@ -150,31 +158,40 @@ namespace Services.Services
                         Title = dto.Title,
                         Description = dto.Description,
                         MatchDate = dto.MatchDate,
-                        VenueId = dto.VenueId,
                         Status = dto.Status,
                         MatchCategory = dto.MatchCategory,
                         MatchFormat = dto.MatchFormat,
                         WinScore = dto.WinScore,
                         IsPublic = dto.IsPublic,
+                        RoomOwner = dto.RoomOnwerId,
+                        RefereeId = dto.RefereeId,
+                        VenueId = dto.VenueId != 0 ? dto.VenueId : (int?)null
                     };
-                    if (dto.RefereeId != null)
-                    {
-                        match.RefereeId = dto.RefereeId;
-                    }
+
                     await _matchesRepo.AddAsync(match);
                     await _matchesRepo.SaveChangesAsync();
 
-                    if (dto.TouramentId != null)
+                    if (dto.TouramentId.HasValue && dto.TouramentId.Value != 0)
                     {
-                        var touramentMatch = new TouramentMatches
+                        var touramentData = await _touramentRepository.GetById(dto.TouramentId.Value);
+                        if (touramentData == null || touramentData.IsAccept == false)
+                        {
+                            response.statusCode = HttpStatusCode.BadRequest;
+                            response.Message = "Tournament not found or not accepted yet!";
+                            return response;
+                        }
+                        var tournamentMatch = new TouramentMatches
                         {
                             MatchesId = match.Id,
                             TournamentId = dto.TouramentId.Value,
-                            CreateAt = DateTime.UtcNow,
+                            CreateAt = DateTime.UtcNow
                         };
-                        await _touramentMatchesRepository.AddAsync(touramentMatch);
-                        await _touramentMatchesRepository.SaveChangesAsync();
+
+                        await _touramentMatchesRepository.AddAsync(tournamentMatch);
                     }
+
+                    await _matchesRepo.SaveChangesAsync();
+
 
                     var matchResponse = new MatchResponseDTO
                     {
@@ -188,20 +205,23 @@ namespace Services.Services
                         MatchFormat = match.MatchFormat,
                         WinScore = match.WinScore,
                         IsPublic = match.IsPublic,
-                        RefereeId = match.RefereeId
+                        RefereeId = match.RefereeId,
+                        RoomOwner = match.RoomOwner
                     };
 
                     response.Data = matchResponse;
                     response.statusCode = HttpStatusCode.OK;
                     response.Message = "Room created successfully!";
-                    return response;
+                    transaction.Complete();
                 }
                 catch (Exception ex)
                 {
                     response.statusCode = HttpStatusCode.InternalServerError;
                     response.Message = ex.Message;
-                    return response;
                 }
+            }
+
+            return response;
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> GetRoomByIdAsync(int id)
@@ -412,7 +432,7 @@ namespace Services.Services
             }
         }
 
-        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchRequestDTO dto)
+        public async Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchUpdateRequestDTO dto)
         {
             var response = new StatusResponse<MatchResponseDTO>();
             try
@@ -423,7 +443,20 @@ namespace Services.Services
                     return CreateErrorResponse<MatchResponseDTO>(HttpStatusCode.NotFound, "Room not found!");
                 }
 
-                _mapper.Map(dto, match);
+                // Apply the values from MatchUpdateRequestDTO
+                foreach (var property in typeof(MatchUpdateRequestDTO).GetProperties())
+                {
+                    var value = property.GetValue(dto);
+                    if (value != null)
+                    {
+                        var existingProperty = typeof(Matches).GetProperty(property.Name);
+                        if (existingProperty != null)
+                        {
+                            existingProperty.SetValue(match, value);
+                        }
+                    }
+                }
+
                 _matchesRepo.Update(match);
                 await _matchesRepo.SaveChangesAsync();
 
@@ -444,7 +477,32 @@ namespace Services.Services
             try
             {
                 var matches = await _touramentMatchesRepository.getMatchByTouramentId(TouramentId);
-                var mapper = _mapper.Map<List<MatchResponseDTO>>(matches);
+                if (matches == null || !matches.Any())
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "No matches found for this tournament.";
+                    return response;
+                }
+                var matchIds = matches.Select(tm => tm.MatchesId).ToList();
+
+                var data = new List<Matches>();
+                foreach (var MatchId in matchIds)
+                {
+                    var match = await _matchesRepo.GetById(MatchId);
+                    if (match != null)
+                    {
+                        data.Add(match);
+
+                    }
+                }
+
+                if (matches == null || !matches.Any())
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Matches data not found.";
+                    return response;
+                }
+                var mapper = _mapper.Map<List<MatchResponseDTO>>(data);
                 response.Data = mapper;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get matches by tourament id successfully!";

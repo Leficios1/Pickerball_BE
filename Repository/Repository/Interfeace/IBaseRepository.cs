@@ -14,6 +14,7 @@ namespace Repository.Repository.Interfeace
         Task<TEntity?> GetById(object id, CancellationToken cancellationToken = default);
 
         Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
+        Task<List<TEntity?>> GetAll();
 
         Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 

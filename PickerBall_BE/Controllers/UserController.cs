@@ -28,6 +28,12 @@ namespace PickerBall_BE.Controllers
             var response = await _userServices.getUserById(UserId);
             return StatusCode((int)response.statusCode, response);
         }
+        [HttpGet("GetAllRefee")]
+        public async Task<IActionResult> GetRefeeUserById()
+        {
+            var response = await _userServices.getAllRefeeUser();
+            return StatusCode((int)response.statusCode, response);
+        }
         [HttpPost("AcceptUser/{sponserId}")]
         public async Task<IActionResult> AcceptUser([FromRoute] int sponserId)
         {

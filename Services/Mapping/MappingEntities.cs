@@ -13,12 +13,13 @@ namespace Services.Mapping
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId)).ReverseMap();
 
             CreateMap<User, UserResponseDTO>()
-                .ForMember(dest => dest.userDetails, opt => opt.MapFrom(src => src.Player))
-                .ForMember(dest => dest.sponsorDetails, opt => opt.MapFrom(src => src.Sponsor));
-            
+                       .ForMember(dest => dest.userDetails, opt => opt.MapFrom(src => src.Player))
+                       .ForMember(dest => dest.sponsorDetails, opt => opt.MapFrom(src => src.Sponsor));
+
             CreateMap<MatchRequestDTO, Matches>().ReverseMap();
             CreateMap<MatchResponseDTO, Matches>().ReverseMap();
             CreateMap<CreateRoomDTO, Matches>().ReverseMap();
+            CreateMap<MatchResponseDTO, RoomResponseDTO>().ReverseMap();
             CreateMap<RoomResponseDTO, Matches>().ReverseMap();
             CreateMap<TeamRequestDTO, Team>().ReverseMap();
             CreateMap<TeamResponseDTO, Team>().ReverseMap();
@@ -31,8 +32,13 @@ namespace Services.Mapping
             CreateMap<Tournaments, TournamentResponseDTO>().ReverseMap();
             CreateMap<MatchResponseDTO, Matches>().ReverseMap();
             CreateMap<MatchRequestDTO, Matches>().ReverseMap();
-            CreateMap<SponnerRequestDTO,Sponsor>().ReverseMap();
+            CreateMap<SponnerRequestDTO, Sponsor>().ReverseMap();
             CreateMap<Sponsor, SponnerResponseDTO>().ReverseMap();
+            CreateMap<MatchSentRequestRequestDTO, MatchesSendRequest>().ReverseMap();
+            CreateMap<MatchesSendRequest, MatchSentRequestResponseDTO>().ReverseMap();
+            CreateMap<FriendRequestDTO, Friends>().ReverseMap();
+            CreateMap<FriendResponseDTO, Friends>().ReverseMap();
+
         }
     }
 }

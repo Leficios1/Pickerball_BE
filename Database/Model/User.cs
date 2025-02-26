@@ -45,6 +45,7 @@ namespace Database.Model
         public ICollection<Payments> Payments { get; set; }
         public ICollection<Achievement> Achievements { get; set; }
         public ICollection<Notification> Notifications { get; set; }
+        public ICollection<Venues> Venues { get; set; }
         //public ICollection<TeamMembers> TeamMembers { get; set; } // Sửa lại đúng tên
 
     }
