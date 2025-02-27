@@ -16,12 +16,14 @@ namespace Services.Services
     public class PlayerServices : IPlayerServices
     {
         private readonly IPlayerRepository _playerRepository;
+        private readonly IUserRepository _userRepository;   
         private readonly IMapper _mapper;
 
-        public PlayerServices(IPlayerRepository playerRepository, IMapper mapper)
+        public PlayerServices(IPlayerRepository playerRepository, IMapper mapper, IUserRepository userRepository)
         {
             _playerRepository = playerRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<StatusResponse<PlayerDetails>> CreatePlayer(PlayerDetailsRequest player)
@@ -41,7 +43,17 @@ namespace Services.Services
                 requestData.TotalWins = 0;
                 requestData.RankingPoint = 0;
                 requestData.ExperienceLevel = 1;
+                var dataUser = await _userRepository.GetById(player.PlayerId);
+                if (dataUser == null)
+                {
+                    response.Message = "User not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                dataUser.RoleId = 1;
                 var responseData = await _playerRepository.CreatePlayer(requestData);
+                _userRepository.Update(dataUser);
+                await _userRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<PlayerDetails>(responseData);
                 response.Message = "Create player success!";
                 response.statusCode = HttpStatusCode.OK;

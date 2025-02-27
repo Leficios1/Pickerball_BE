@@ -92,5 +92,11 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
 
         }
+        [HttpPost("JoinMatch")]
+        public async Task<IActionResult> JoinMatch([FromBody] JoinMatchRequestDTO dto)
+        {
+            var response = await _matchService.joinMatch(dto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
     }
 }
