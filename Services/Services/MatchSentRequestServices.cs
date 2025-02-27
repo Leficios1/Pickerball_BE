@@ -3,6 +3,8 @@ using AutoMapper;
 using Database.DTO.Request;
 using Database.DTO.Response;
 using Database.Model;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Repository.Repository.Interface;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
@@ -75,12 +77,21 @@ namespace Services.Services
 
                     // 🔥 Kiểm tra số lượng thành viên hiện tại
                     int totalPlayers = teams.Sum(t => t.Members.Count);
-                    int maxPlayers = (match.MatchFormat == MatchFormat.Team) ? 4 : 2;
+                    var maxPlayers = 2;
+                    if(match.MatchFormat == MatchFormat.Team)
+                    {
+                        maxPlayers = 4;
+                    }
 
                     if (totalPlayers >= maxPlayers)
                     {
+                        data.status = SendRequestStatus.Reject;
+                        data.LastUpdatedAt = DateTime.UtcNow;
+                        _matchSentRequestRepository.Update(data);
+                        await _matchSentRequestRepository.SaveChangesAsync();
                         response.Message = "Match is full!";
                         response.statusCode = HttpStatusCode.BadRequest;
+                        transaction.Complete();
                         return response; // 🚨 Trả về ngay nếu trận đã full
                     }
                     if (Accpet == SendRequestStatus.Accept)
@@ -88,80 +99,20 @@ namespace Services.Services
                         data.status = Accpet;
                         data.LastUpdatedAt = DateTime.UtcNow;
 
-                        if (match.MatchFormat == MatchFormat.Team)
-                        {
-                            foreach (var team in teams)
-                            {
-                                if (team.CaptainId == null)
-                                {
-                                    team.CaptainId = UserAcceptId;
-                                    _teamRepository.Update(team);
-                                    await _teamRepository.SaveChangesAsync();
-                                    var teammember = new TeamMembers
-                                    {
-                                        TeamId = team.Id,
-                                        PlayerId = UserAcceptId,
-                                        JoinedAt = DateTime.UtcNow
-                                    };
-                                    await _teamMembersRepository.AddAsync(teammember);
-                                    await _teamMembersRepository.SaveChangesAsync();
-                                    response.Message = "Captain assigned!";
-                                    response.statusCode = HttpStatusCode.OK;
-                                    break;
-                                }
-                            }
+                        // 🔥 Xử lý cập nhật Team
+                        await ProcessTeamUpdate(teams, UserAcceptId, match.MatchFormat);
 
-                            // 🔥 Nếu cả hai Team đã có Captain, thêm vào thành viên
-                            foreach (var team in teams)
-                            {
-                                if (team.Members.Count < 2)
-                                {
-                                    var teamMember = new TeamMembers
-                                    {
-                                        TeamId = team.Id,
-                                        PlayerId = UserAcceptId,
-                                        JoinedAt = DateTime.UtcNow
-                                    };
+                        // 🔥 Cập nhật trạng thái Request & từ chối request khác
+                        await RejectOtherRequests(UserAcceptId, RequestId);
 
-                                    await _teamMembersRepository.AddAsync(teamMember);
-                                    await _teamMembersRepository.SaveChangesAsync();
-                                    response.Message = "Player added to team!";
-                                    response.statusCode = HttpStatusCode.OK;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (totalPlayers >= 2)
-                            {
-                                response.Message = "Match is full!";
-                                response.statusCode = HttpStatusCode.BadRequest;
-                                return response;
-                            }
-                            foreach (var team in teams)
-                            {
-                                if (team.CaptainId == null)
-                                {
-                                    team.CaptainId = UserAcceptId;
-                                    _teamRepository.Update(team);
-                                    await _teamRepository.SaveChangesAsync();
-                                    response.Message = "Captain assigned!";
-                                    response.statusCode = HttpStatusCode.OK;
-                                    break;
-                                }
-                            }
-                        }
-                        var getAllRequestByResponseId = await _matchSentRequestRepository.GetByReceviedId(UserAcceptId);
-
-                        foreach (var r in getAllRequestByResponseId)
-                        {
-                            if (r.Id != RequestId) // Không cập nhật chính request đã accept
-                            {
-                                r.status = SendRequestStatus.Reject;
-                                _matchSentRequestRepository.Update(r);
-                            }
-                        }
+                        _matchSentRequestRepository.Update(data);
+                        await _matchSentRequestRepository.SaveChangesAsync();
+                        _matchSentRequestRepository.Update(data);
+                        await _matchSentRequestRepository.SaveChangesAsync();
+                    }else if(Accpet == SendRequestStatus.Reject)
+                    {
+                        data.status = Accpet;
+                        data.LastUpdatedAt = DateTime.UtcNow;
                         _matchSentRequestRepository.Update(data);
                         await _matchSentRequestRepository.SaveChangesAsync();
                     }
@@ -187,6 +138,57 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.InternalServerError;
                 }
             return response;
+        }
+        internal async Task ProcessTeamUpdate(List<Team> teams, int UserAcceptId, MatchFormat format)
+        {
+            foreach (var team in teams)
+            {
+                if (team.CaptainId == null)
+                {
+                    team.CaptainId = UserAcceptId;
+                    var teamMember = new TeamMembers
+                    {
+                        TeamId = team.Id,
+                        PlayerId = UserAcceptId,
+                        JoinedAt = DateTime.UtcNow
+                    };
+                    _teamRepository.Update(team);
+                    await _teamMembersRepository.AddAsync(teamMember);
+                    await _teamMembersRepository.SaveChangesAsync();
+                    await _teamRepository.SaveChangesAsync();
+                    return;
+                }
+            }
+
+            foreach (var team in teams)
+            {
+                if (team.Members.Count < (format == MatchFormat.Team ? 2 : 1))
+                {
+                    var teamMember = new TeamMembers
+                    {
+                        TeamId = team.Id,
+                        PlayerId = UserAcceptId,
+                        JoinedAt = DateTime.UtcNow
+                    };
+
+                    await _teamMembersRepository.AddAsync(teamMember);
+                    await _teamMembersRepository.SaveChangesAsync();
+                    return;
+                }
+            }
+        }
+        internal async Task RejectOtherRequests(int UserAcceptId, int RequestId)
+        {
+            var otherRequests = await _matchSentRequestRepository.GetByReceviedId(UserAcceptId);
+            foreach (var request in otherRequests)
+            {
+                if (request.Id != RequestId)
+                {
+                    request.status = SendRequestStatus.Reject;
+                    _matchSentRequestRepository.Update(request);
+                }
+            }
+            await _matchSentRequestRepository.SaveChangesAsync();
         }
 
         public async Task<StatusResponse<List<MatchSentRequestResponseDTO>>> getAll()
@@ -258,7 +260,8 @@ namespace Services.Services
             try
             {
                 var data = await _matchSentRequestRepository.GetByReceviedId(UserAcceptId);
-                var mapper = _mapper.Map<List<MatchSentRequestResponseDTO>>(data);
+                var filteredData = data.Where(r => r.status == SendRequestStatus.Pending).ToList();
+                var mapper = _mapper.Map<List<MatchSentRequestResponseDTO>>(filteredData);
                 response.Data = mapper;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all request by user accept id successfully!";

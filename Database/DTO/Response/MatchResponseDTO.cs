@@ -20,5 +20,6 @@ namespace Database.DTO.Response
         public int? Team2Score { get; set; }
         public bool IsPublic { get; set; }
         public int? RefereeId { get; set; } // Nếu có trọng tài
+        public List<TeamResponseDTO> TeamResponse { get; set; }
     }
 }

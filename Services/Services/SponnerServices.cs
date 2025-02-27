@@ -16,11 +16,13 @@ namespace Services.Services
     public class SponnerServices : ISponnerServices
     {
         private readonly ISponsorRepository _sponsorRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        public SponnerServices(ISponsorRepository sponsorRepository, IMapper mapper)
+        public SponnerServices(ISponsorRepository sponsorRepository, IMapper mapper, IUserRepository userRepository)
         {
             _sponsorRepository = sponsorRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<StatusResponse<bool>> AccpetSponner(int SponnerId, bool isAccept)
@@ -77,7 +79,17 @@ namespace Services.Services
                 data.SponsorId = (int)dto.Id;
                 data.isAccept = false;
                 data.JoinedAt = DateTime.UtcNow;
+                var user = await _userRepository.GetById(dto.Id);
+                if (user == null)
+                {
+                    response.Message = "User not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                user.RoleId = 3;
                 await _sponsorRepository.AddAsync(data);
+                _userRepository.Update(user);
+                await _userRepository.SaveChangesAsync();
                 await _sponsorRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<SponnerResponseDTO>(data);
                 response.statusCode = HttpStatusCode.OK;

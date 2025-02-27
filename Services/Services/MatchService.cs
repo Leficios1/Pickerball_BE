@@ -1,4 +1,4 @@
-
+﻿
 using System.Net;
 using AutoMapper;
 using Database.DTO.Request;
@@ -12,6 +12,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Transactions;
+using Repository.Repository;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Services.Services
 {
@@ -24,10 +26,12 @@ namespace Services.Services
         private readonly ITeamMembersService _teamMembersService;
         private readonly ITouramentRepository _touramentRepository;
         private readonly ITeamRepository _teamRepository;
+        private readonly ITeamMembersRepository _teamMembersRepository;
 
 
         public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
-            ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository, ITouramentRepository touramentRepository, ITeamRepository teamRepository)
+            ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository,
+            ITouramentRepository touramentRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository)
         {
             _matchesRepo = matchesRepo;
             _mapper = mapper;
@@ -36,7 +40,7 @@ namespace Services.Services
             _touramentMatchesRepository = touramentMatchesRepository;
             _touramentRepository = touramentRepository;
             _teamRepository = teamRepository;
-
+            _teamMembersRepository = teamMembersRepository;
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
@@ -284,7 +288,8 @@ namespace Services.Services
             try
             {
                 var matches = await _matchesRepo.GetAllAsync();
-                var matchResponses = _mapper.Map<IEnumerable<MatchResponseDTO>>(matches);
+                var filterData = matches.OrderByDescending(x => x.CreateAt).ToList();
+                var matchResponses = _mapper.Map<IEnumerable<MatchResponseDTO>>(filterData);
 
                 response.Data = matchResponses;
                 response.statusCode = HttpStatusCode.OK;
@@ -303,7 +308,8 @@ namespace Services.Services
             try
             {
                 var matches = await _matchesRepo.GetRoomsByPublicStatusAsync(true);
-                var matchResponses = _mapper.Map<IEnumerable<RoomResponseDTO>>(matches);
+                var filterData = matches.OrderByDescending(x => x.CreateAt).ToList();
+                var matchResponses = _mapper.Map<IEnumerable<RoomResponseDTO>>(filterData);
 
                 foreach (var matchResponse in matchResponses)
                 {
@@ -485,25 +491,63 @@ namespace Services.Services
                 }
                 var matchIds = matches.Select(tm => tm.MatchesId).ToList();
 
-                var data = new List<Matches>();
-                foreach (var MatchId in matchIds)
+                var validMatches = new List<Matches>();
+                foreach (var matchId in matchIds)
                 {
-                    var match = await _matchesRepo.GetById(MatchId);
-                    if (match != null)
+                    var match = await _matchesRepo.GetById(matchId);
+                    if (match != null) validMatches.Add(match);
+                }
+
+                // 🔥 Lấy danh sách Teams từng trận đấu (lặp tuần tự tránh lỗi)
+                var teamsByMatch = new List<(int MatchId, List<Team> Teams)>();
+                foreach (var match in validMatches)
+                {
+                    var teams = await _teamRepository.GetTeamsWithMatchingIdAsync(match.Id);
+                    teamsByMatch.Add((match.Id, teams ?? new List<Team>()));
+                }
+
+                var matchResponseList = validMatches.Select(match =>
+                {
+                    var teams = teamsByMatch.FirstOrDefault(t => t.MatchId == match.Id).Teams;
+
+                    return new MatchResponseDTO
                     {
-                        data.Add(match);
+                        Id = match.Id,
+                        Title = match.Title,
+                        Description = match.Description,
+                        MatchDate = match.MatchDate,
+                        CreateAt = match.CreateAt,
+                        VenueId = match.VenueId,
+                        Status = match.Status,
+                        MatchCategory = match.MatchCategory,
+                        MatchFormat = match.MatchFormat,
+                        WinScore = match.WinScore,
+                        RoomOwner = match.RoomOwner,
+                        Team1Score = match.Team1Score,
+                        Team2Score = match.Team2Score,
+                        IsPublic = match.IsPublic,
+                        RefereeId = match.RefereeId,
 
-                    }
-                }
+                        // 🔹 Thêm thông tin team
+                        TeamResponse = teams?.Select(team => new TeamResponseDTO
+                        {
+                            Id = team.Id,
+                            Name = team.Name,
+                            CaptainId = team.CaptainId,
+                            MatchingId = match.Id,
 
-                if (matches == null || !matches.Any())
-                {
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.Message = "Matches data not found.";
-                    return response;
-                }
-                var mapper = _mapper.Map<List<MatchResponseDTO>>(data);
-                response.Data = mapper;
+                            // 🔹 Thêm danh sách thành viên team
+                            Members = team.Members?.Select(member => new TeamMemberDTO
+                            {
+                                Id = member.Id,
+                                PlayerId = member.PlayerId,
+                                TeamId = member.TeamId,
+                                JoinedAt = member.JoinedAt
+                            }).ToList() ?? new List<TeamMemberDTO>()
+                        }).ToList() ?? new List<TeamResponseDTO>()
+                    };
+                }).ToList();
+                response.Data = matchResponseList;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get matches by tourament id successfully!";
             }
@@ -526,16 +570,122 @@ namespace Services.Services
         public async Task<StatusResponse<bool>> joinMatch(JoinMatchRequestDTO dto)
         {
             var response = new StatusResponse<bool>();
-            try
-            {
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    response.Data = false;
+                    var match = await _matchesRepo.GetById(dto.MatchId);
+                    if (match == null)
+                    {
+                        response.Message = "Match not found";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    if(!match.IsPublic)
+                    {
+                        response.Message = "Match is not public";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                    }
+                    var teams = await _teamRepository.GetTeamsWithMatchingIdAsync(dto.MatchId);
+                    if (teams == null || teams.Count < 2)
+                    {
+                        response.Message = "Teams not found";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
 
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-                response.statusCode = HttpStatusCode.InternalServerError;
-            }
+                    }
+                    int totalPlayers = teams.Sum(t => t.Members.Count);
+                    int maxPlayers = match.MatchFormat == MatchFormat.Team ? 4 : 2;
+                    if (totalPlayers >= maxPlayers)
+                    {
+                        response.Message = "Match is full";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response;
+                    }
+                    bool isAlreadyInMatch = teams.Any(t => t.Members.Any(m => m.PlayerId == dto.UserJoinId));
+                    if (isAlreadyInMatch)
+                    {
+                        response.Message = "Player already in match";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response;
+                    }
+
+                    string message = "";
+                    if (match.MatchFormat == MatchFormat.Team)
+                    {
+                        foreach (var team in teams)
+                        {
+                            if (team.CaptainId == null)
+                            {
+                                team.CaptainId = dto.UserJoinId;
+                                _teamRepository.Update(team);
+                                await _teamRepository.SaveChangesAsync();
+                                message = "Player assigned as Captain!";
+                                break;
+                            }
+                        }
+                        foreach (var team in teams)
+                        {
+                            if (team.Members.Count < 2)
+                            {
+                                var teamMember = new TeamMembers
+                                {
+                                    TeamId = team.Id,
+                                    PlayerId = dto.UserJoinId,
+                                    JoinedAt = DateTime.UtcNow
+                                };
+
+                                await _teamMembersRepository.AddAsync(teamMember);
+                                await _teamMembersRepository.SaveChangesAsync();
+                                message = "Player added to team!";
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // If single Match, just add the player to the second team
+                        foreach (var team in teams)
+                        {
+                            if (team.CaptainId == null)
+                            {
+                                team.CaptainId = dto.UserJoinId;
+                                var teamMember = new TeamMembers
+                                {
+                                    TeamId = team.Id,
+                                    PlayerId = dto.UserJoinId,
+                                    JoinedAt = DateTime.UtcNow
+                                };
+                                _teamRepository.Update(team);
+                                await _teamMembersRepository.AddAsync(teamMember);
+                                await _teamMembersRepository.SaveChangesAsync();
+                                await _teamRepository.SaveChangesAsync();
+                                message = "Player assigned as Captain!";
+                                break;
+                            }
+                        }
+                    }
+                    response.Data = true;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = message;
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
             return response;
         }
+        private StatusResponse<bool> SuccessResponse(string message)
+        {
+            return new StatusResponse<bool>
+            {
+                statusCode = HttpStatusCode.OK,
+                Message = message,
+                Data = true
+            };
+        }
+
     }
 }
