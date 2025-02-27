@@ -41,5 +41,11 @@ namespace PickerBall_BE.Controllers
             var response = await _matchSentRequestServices.SentRequest(matchSentRequestDTO);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
+        [HttpPut("AcceptRequest")]
+        public async Task<IActionResult> AcceptRequest([FromBody] AcceptSentRequestDTO dto)
+        {
+            var response = await _matchSentRequestServices.AcceptRequest(dto.RequestId, dto.UserAcceptId, dto.Status);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
     }
 }

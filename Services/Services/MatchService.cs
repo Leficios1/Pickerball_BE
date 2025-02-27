@@ -63,8 +63,8 @@ namespace Services.Services
                 var createRoomResponse = _mapper.Map<RoomResponseDTO>(response.Data);
                 createRoomResponse.Teams = new List<TeamResponseDTO>();
 
-                var team1Response = await CreateTeamForRoom(response.Data.Id, "Team 1");
-                var team2Response = await CreateTeamForRoom(response.Data.Id, "Team 2");
+                var team1Response = await CreateTeamForRoom(response.Data.Id, "Team 1", dto.Player1Id);
+                var team2Response = await CreateTeamForRoom(response.Data.Id, "Team 2", dto.Player2Id);
 
                 if (team1Response.statusCode == HttpStatusCode.OK && team2Response.statusCode == HttpStatusCode.OK)
                 {
@@ -91,9 +91,9 @@ namespace Services.Services
             };
         }
 
-        private async Task<StatusResponse<TeamResponseDTO>> CreateTeamForRoom(int roomId, string teamName)
+        private async Task<StatusResponse<TeamResponseDTO>> CreateTeamForRoom(int roomId, string teamName, int? CaptainId)
         {
-            var teamRequest = new TeamRequestDTO { Name = teamName, MatchingId = roomId };
+            var teamRequest = new TeamRequestDTO { Name = teamName, MatchingId = roomId, CaptainId = CaptainId };
             return await _teamService.CreateTeamAsync(teamRequest);
         }
 
@@ -521,6 +521,21 @@ namespace Services.Services
                 statusCode = statusCode,
                 Message = message
             };
+        }
+
+        public async Task<StatusResponse<bool>> joinMatch(JoinMatchRequestDTO dto)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
         }
     }
 }

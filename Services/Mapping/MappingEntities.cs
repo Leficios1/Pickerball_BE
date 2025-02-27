@@ -38,6 +38,8 @@ namespace Services.Mapping
             CreateMap<MatchesSendRequest, MatchSentRequestResponseDTO>().ReverseMap();
             CreateMap<FriendRequestDTO, Friends>().ReverseMap();
             CreateMap<FriendResponseDTO, Friends>().ReverseMap();
+            CreateMap<VenuesRequestDTO,Venues>().ReverseMap();
+            CreateMap<Venues, VenuesResponseDTO>().ReverseMap();
 
         }
     }
