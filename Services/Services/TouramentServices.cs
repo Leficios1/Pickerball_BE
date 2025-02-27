@@ -13,6 +13,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Services.Partial;
 
 namespace Services.Services
 {
@@ -50,6 +51,13 @@ namespace Services.Services
             var response = new StatusResponse<TournamentResponseDTO>();
             try
             {
+                var sponnerData = await _sponsorRepository.GetById(dto.OrganizerId);
+                if (sponnerData == null || sponnerData.isAccept == false)
+                {
+                    response.Message = "Sponner not found or not accept";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
                 var data = _mapper.Map<Tournaments>(dto);
                 data.Status = "Pending"; // Default status is "Pending"
                 data.IsAccept = false; // Default is not accept
@@ -179,11 +187,14 @@ namespace Services.Services
                             {
                                 Id = playerRegistrationDetails.Id,
                                 PlayerId = playerRegistrationDetails.PlayerId,
-                                PaymentId = paymentData.Id,
                                 RegisteredAt = playerRegistrationDetails.RegisteredAt,
                                 isApproved = playerRegistrationDetails.IsApproved,
                                 PlayerDetails = playerRegistration
                             };
+                            if(paymentData != null)
+                            {
+                                regis.PaymentId = paymentData.Id;
+                            }
                             registrationDetails.Add(regis);
                         }
                     }
@@ -212,7 +223,7 @@ namespace Services.Services
             var response = new StatusResponse<List<TournamentResponseDTO>>();
             try
             {
-                var registrations = await _tournamentRegistrationRepository.getByPlayerId(PlayerId);
+                var registrations = await _tournamentRegistrationRepository.getAllByPlayerId(PlayerId);
                 if (registrations == null || !registrations.Any())
                 {
                     response.Message = "This player hasn't joined any tournaments";
@@ -220,10 +231,18 @@ namespace Services.Services
                     return response;
                 }
                 var tournamentIds = registrations.Select(r => r.TournamentId).Distinct().ToList();
-                var tournaments = await _touramentRepository.GetById(tournamentIds);
+                var data = new List<Tournaments>();
+                foreach(var t in tournamentIds)
+                {
+                    var tourament = await _touramentRepository.GetById(t);
+                    if(tourament != null)
+                    {
+                        data.Add(tourament);
+                    }
+                }
 
                 // Map dữ liệu sang DTO
-                var tournamentList = _mapper.Map<List<TournamentResponseDTO>>(tournaments);
+                var tournamentList = _mapper.Map<List<TournamentResponseDTO>>(data);
                 response.Data = tournamentList;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get Tournament Successfully";
@@ -236,39 +255,52 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<TournamentResponseDTO>> UpdateTournament(TournamentRequestDTO dto)
+        public async Task<StatusResponse<TournamentResponseDTO>> UpdateTournament(TournamenUpdatetRequestDTO dto, int id)
         {
             var response = new StatusResponse<TournamentResponseDTO>();
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
                 try
                 {
-                    if (dto.Id == null)
-                    {
-                        response.Message = "Missing Id Tourament";
-                        response.statusCode = HttpStatusCode.BadRequest;
-                        return response;
-                    }
-                    var existingTournament = await _touramentRepository.GetById(dto.Id);
+                    var existingTournament = await _touramentRepository.GetById(id);
                     if (existingTournament == null)
                     {
-                        response.Message = "Tournament not found";
-                        response.statusCode = HttpStatusCode.NotFound;
-                        return response;
+                        return new StatusResponse<TournamentResponseDTO>
+                        {
+                            Message = "Tournament not found",
+                            statusCode = HttpStatusCode.NotFound
+                        };
                     }
-                    var data = _mapper.Map<Tournaments>(dto);
-                    _touramentRepository.Update(data);
+
+                    // Apply the values from TournamenUpdatetRequestDTO
+                    foreach (var property in typeof(TournamenUpdatetRequestDTO).GetProperties())
+                    {
+                        var value = property.GetValue(dto);
+                        if (value != null)
+                        {
+                            var existingProperty = typeof(Tournaments).GetProperty(property.Name);
+                            if (existingProperty != null)
+                            {
+                                existingProperty.SetValue(existingTournament, value);
+                            }
+                        }
+                    }
+
+                    _touramentRepository.Update(existingTournament);
                     await _touramentRepository.SaveChangesAsync();
-                    response.Data = _mapper.Map<TournamentResponseDTO>(data);
+
+                    response.Data = _mapper.Map<TournamentResponseDTO>(existingTournament);
                     response.statusCode = HttpStatusCode.OK;
                     response.Message = "Tournament Updated Successfully";
                     transaction.Complete();
-                    return response;
                 }
                 catch (Exception ex)
                 {
                     response.Message = ex.Message;
                     response.statusCode = HttpStatusCode.InternalServerError;
                 }
+            }
             return response;
         }
     }

@@ -13,7 +13,7 @@ namespace Services.Services.Interface
         Task<StatusResponse<SponnerResponseDTO>> getSponnerById(int SponnerId);
         Task<StatusResponse<List<SponnerResponseDTO>>> getAllSponner();
         Task<StatusResponse<SponnerResponseDTO>> CreateSponner(SponnerRequestDTO dto);
-        Task<StatusResponse<SponnerResponseDTO>> UpdateSponner(SponnerRequestDTO dto);
+        Task<StatusResponse<SponnerResponseDTO>> UpdateSponner(SponnerUpdateRequestDTO dto, int id);
         Task<StatusResponse<bool>> AccpetSponner(int SponnerId, bool isAccept);
     }
 }

@@ -11,7 +11,7 @@ namespace Services.Services.Interface
         Task<StatusResponse<MatchResponseDTO>> CreateRoomAsync(MatchRequestDTO dto);
         Task<StatusResponse<RoomResponseDTO>> GetRoomByIdAsync(int id);
         Task<StatusResponse<bool>> DeleteRoomAsync(int id);
-        Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchRequestDTO dto);
+        Task<StatusResponse<MatchResponseDTO>> UpdateRoomAsync(int id, MatchUpdateRequestDTO dto);
         Task<StatusResponse<List<MatchResponseDTO>>> GetMatchesByTouramentId(int TouramentId);
         Task<StatusResponse<TeamResponseDTO>> AddPlayerToTeamAsync(AddPlayerToTeamDTO dto);
         Task<StatusResponse<IEnumerable<MatchResponseDTO>>> GetAllMatchingsAsync();

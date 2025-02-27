@@ -65,7 +65,7 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RuleCategories");
+                    b.ToTable("BlogCategories");
                 });
 
             modelBuilder.Entity("Database.Model.Friends", b =>
@@ -127,6 +127,9 @@ namespace Database.Migrations
                     b.Property<int?>("RefereeId")
                         .HasColumnType("int");
 
+                    b.Property<int>("RoomOwner")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -149,6 +152,8 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("RefereeId");
+
+                    b.HasIndex("RoomOwner");
 
                     b.HasIndex("VenueId");
 
@@ -353,6 +358,11 @@ namespace Database.Migrations
                         {
                             RoleId = 4,
                             RoleName = "Refree"
+                        },
+                        new
+                        {
+                            RoleId = 5,
+                            RoleName = "User"
                         });
                 });
 
@@ -364,12 +374,12 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BlogCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RuleCategoryId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -377,7 +387,7 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RuleCategoryId");
+                    b.HasIndex("BlogCategoryId");
 
                     b.ToTable("Rules");
                 });
@@ -433,6 +443,13 @@ namespace Database.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UrlSocial")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UrlSocial1")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("isAccept")
@@ -720,11 +737,19 @@ namespace Database.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
+                    b.Property<int>("CreateBy")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UrlImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreateBy");
 
                     b.ToTable("Venues");
                 });
@@ -765,10 +790,18 @@ namespace Database.Migrations
                         .WithMany()
                         .HasForeignKey("RefereeId");
 
+                    b.HasOne("Database.Model.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("RoomOwner")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Database.Model.Venues", "Venue")
                         .WithMany("Matches")
                         .HasForeignKey("VenueId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Owner");
 
                     b.Navigation("Referee");
 
@@ -864,13 +897,13 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Rule", b =>
                 {
-                    b.HasOne("Database.Model.BlogCategory", "RuleCategory")
+                    b.HasOne("Database.Model.BlogCategory", "BlogCategory")
                         .WithMany("Rules")
-                        .HasForeignKey("RuleCategoryId")
+                        .HasForeignKey("BlogCategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("RuleCategory");
+                    b.Navigation("BlogCategory");
                 });
 
             modelBuilder.Entity("Database.Model.Sponsor", b =>
@@ -991,6 +1024,17 @@ namespace Database.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Database.Model.Venues", b =>
+                {
+                    b.HasOne("Database.Model.User", "User")
+                        .WithMany("Venues")
+                        .HasForeignKey("CreateBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Database.Model.BlogCategory", b =>
                 {
                     b.Navigation("Rules");
@@ -1046,6 +1090,8 @@ namespace Database.Migrations
 
                     b.Navigation("Sponsor")
                         .IsRequired();
+
+                    b.Navigation("Venues");
                 });
 
             modelBuilder.Entity("Database.Model.Venues", b =>

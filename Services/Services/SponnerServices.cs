@@ -28,7 +28,7 @@ namespace Services.Services
             var response = new StatusResponse<bool>();
             try
             {
-                var data = await _sponsorRepository.GetById(SponnerId);
+                var data = (await _sponsorRepository.Find(x => x.SponsorId == SponnerId)).FirstOrDefault();
                 if (data == null)
                 {
                     response.Message = "Sponner not found";
@@ -74,6 +74,7 @@ namespace Services.Services
             try
             {
                 var data = _mapper.Map<Sponsor>(dto);
+                data.SponsorId = (int)dto.Id;
                 data.isAccept = false;
                 data.JoinedAt = DateTime.UtcNow;
                 await _sponsorRepository.AddAsync(data);
@@ -96,7 +97,7 @@ namespace Services.Services
             var response = new StatusResponse<SponnerResponseDTO>();
             try
             {
-                var data = (await _sponsorRepository.Find(s => s.SponsorId == SponnerId, orderBy: q => q.OrderByDescending(s => s.JoinedAt))).FirstOrDefault();
+                var data = (await _sponsorRepository.Find(s => s.SponsorId == SponnerId)).FirstOrDefault();
                 if (data == null)
                 {
                     response.Message = "Sponner not found";
@@ -114,20 +115,35 @@ namespace Services.Services
             }
             return response;
         }
-
-        public async Task<StatusResponse<SponnerResponseDTO>> UpdateSponner(SponnerRequestDTO dto)
+        
+        public async Task<StatusResponse<SponnerResponseDTO>> UpdateSponner(SponnerUpdateRequestDTO dto, int id)
         {
             var response = new StatusResponse<SponnerResponseDTO>();
             try
             {
-                var data = await _sponsorRepository.GetById(dto.Id);
+                var data = await _sponsorRepository.GetById(id);
                 if (data == null)
                 {
                     response.Message = "Sponner not found";
                     response.statusCode = HttpStatusCode.NotFound;
                     return response;
                 }
-                _sponsorRepository.Update(_mapper.Map(dto, data));
+
+                // Apply the values from SponnerUpdateRequestDTO
+                foreach (var property in typeof(SponnerUpdateRequestDTO).GetProperties())
+                {
+                    var value = property.GetValue(dto);
+                    if (value != null)
+                    {
+                        var existingProperty = typeof(Sponsor).GetProperty(property.Name);
+                        if (existingProperty != null)
+                        {
+                            existingProperty.SetValue(data, value);
+                        }
+                    }
+                }
+
+                _sponsorRepository.Update(data);
                 await _sponsorRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<SponnerResponseDTO>(data);
                 response.statusCode = HttpStatusCode.OK;

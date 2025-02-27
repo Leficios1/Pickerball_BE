@@ -17,6 +17,9 @@ namespace Database.DTO.Request
 
         // Venue information
         public int? VenueId { get; set; }
+        // Tourament information
+        public int? TournamentId { get; set; }
+        public int RoomOnwer {  get; set; }
 
         // Team information
         public int? Player1Id { get; set; }

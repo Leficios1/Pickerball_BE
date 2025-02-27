@@ -211,6 +211,13 @@ namespace Database.Model.Dbcontext
                 .HasForeignKey(r => r.BlogCategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // ===================== [ Venue System ] =====================
+            modelBuilder.Entity<Venues>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Venues)
+                .HasForeignKey(v => v.CreateBy)
+                .OnDelete(DeleteBehavior.NoAction);
+
             // ===================== [ Seeder ] =====================
             base.OnModelCreating(modelBuilder);
             PickerBallSeeder.Seed(modelBuilder);

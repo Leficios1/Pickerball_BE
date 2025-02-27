@@ -31,7 +31,8 @@ namespace Services.Services
         private readonly IMapper _map;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AuthServices(IUserRepository userRepo, IConfiguration configuration, IPasswordHasher<User> passwordHasher, IMapper mapper)
+        public AuthServices(IUserRepository userRepo, IConfiguration configuration,
+            IPasswordHasher<User> passwordHasher, IMapper mapper)
         {
             _userRepo = userRepo;
             _configuration = configuration;
@@ -48,7 +49,9 @@ namespace Services.Services
                     .Include(x => x.Role)
                     .FirstOrDefaultAsync(u => u.Email.ToLower().Trim() == dto.Email.ToLower().Trim());
 
-                if (checkUser == null || _passwordHasher.VerifyHashedPassword(checkUser, checkUser.PasswordHash, dto.Password) != PasswordVerificationResult.Success)
+                if (checkUser == null ||
+                    _passwordHasher.VerifyHashedPassword(checkUser, checkUser.PasswordHash, dto.Password) !=
+                    PasswordVerificationResult.Success)
                 {
                     response.statusCode = HttpStatusCode.Unauthorized;
                     response.Message = "Invalid email or password!";
@@ -98,10 +101,10 @@ namespace Services.Services
         {
             List<Claim> authClaims = new List<Claim>
             {
-                 new Claim(ClaimTypes.Name, user.FirstName),
-                 new Claim(ClaimTypes.Email, user.Email),
-                 new Claim(ClaimTypes.Role, user.RoleId.ToString()),
-                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.Name, user.FirstName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.RoleId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -148,6 +151,7 @@ namespace Services.Services
                 return null;
             }
         }
+
         public async Task<UserResponseDTO> GetUserByToken(string token)
         {
             var principals = DecodeToken(token);
@@ -168,10 +172,10 @@ namespace Services.Services
                 AvatarUrl = x.AvatarUrl,
                 Gender = x.Gender,
                 Email = x.Email,
-                RoleId = x.RoleId,
                 RefreshToken = x.RefreshToken,
                 RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
-                CreateAt = x.CreateAt
+                CreateAt = x.CreateAt,
+                RoleId = x.RoleId,
 
             }).FirstOrDefaultAsync(x => x.Id.ToString().Equals(id));
 
@@ -180,9 +184,11 @@ namespace Services.Services
             return user;
 
         }
+
         private long ToUnixEpochDate(DateTime date)
         {
-            return (long)Math.Round((date.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds);
+            return (long)Math.Round((date.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                .TotalSeconds);
         }
 
         public async Task<StatusResponse<UserResponseDTO>> RegisterAsync(UserRegisterRequestDTO dto)
@@ -205,13 +211,14 @@ namespace Services.Services
                     LastName = dto.LastName,
                     SecondName = dto.SecondName,
                     DateOfBirth = dto.DateOfBirth,
-                    AvatarUrl = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg",
-                    RoleId = dto.RoleId,
+                    AvatarUrl =
+                        "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg",
                     Status = true,
                     Gender = dto.Gender,
                     CreateAt = DateTime.UtcNow,
                     RefreshToken = GenerateRefreshToken(),
-                    RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7)
+                    RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7),
+                    RoleId = 5
                 };
 
                 user.PasswordHash = _passwordHasher.HashPassword(user, dto.PasswordHash);
@@ -230,7 +237,6 @@ namespace Services.Services
                     AvatarUrl = user.AvatarUrl,
                     Gender = user.Gender,
                     Status = user.Status,
-                    RoleId = user.RoleId,
                     RefreshToken = user.RefreshToken,
                     CreateAt = user.CreateAt,
                     RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
@@ -261,6 +267,7 @@ namespace Services.Services
                     response.Message = "Invalid or expired refresh token";
                     return response;
                 }
+
                 var newAccessToken = GetToken(userInfo);
                 var newRefreshToken = GenerateRefreshToken();
 
@@ -283,7 +290,70 @@ namespace Services.Services
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.Message = ex.Message;
             }
+
             return response;
+        }
+        public async Task<StatusResponse<UserResponseDTO>> RefereeRegisterAsync(UserRegisterRequestDTO dto)
+        {
+            var response = new StatusResponse<UserResponseDTO>();
+            try
+            {
+                var existingUser = await _userRepo.GetByEmailAsync(dto.Email);
+                if (existingUser != null)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.Message = "Email already exists";
+                    return response;
+                }
+
+                var user = new User
+                {
+                    Email = dto.Email,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    SecondName = dto.SecondName,
+                    DateOfBirth = dto.DateOfBirth,
+                    AvatarUrl = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg",
+                    Status = true,
+                    Gender = dto.Gender,
+                    CreateAt = DateTime.UtcNow,
+                    RefreshToken = GenerateRefreshToken(),
+                    RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7),
+                    RoleId = 5
+                };
+
+                user.PasswordHash = _passwordHasher.HashPassword(user, dto.PasswordHash);
+
+                await _userRepo.AddAsync(user);
+                await _userRepo.SaveChangesAsync();
+
+                var userResponse = new UserResponseDTO
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    SecondName = user.SecondName,
+                    Email = user.Email,
+                    DateOfBirth = user.DateOfBirth,
+                    AvatarUrl = user.AvatarUrl,
+                    Gender = user.Gender,
+                    Status = user.Status,
+                    RefreshToken = user.RefreshToken,
+                    CreateAt = user.CreateAt,
+                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                };
+
+                response.Data = userResponse;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Registration Successful!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+                return response;
+            }
         }
     }
 }

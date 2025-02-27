@@ -96,6 +96,24 @@ namespace Services.Services
             return response;
         }
 
+        public async Task<StatusResponse<List<UserResponseDTO>>> getAllRefeeUser()
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var data = await _userRepository.GetAllRefeeUserAsync();
+                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all refee user success!";
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
+
         public async Task<StatusResponse<List<UserResponseDTO>>> getAllUser(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
         {
             var response = new StatusResponse<List<UserResponseDTO>>();

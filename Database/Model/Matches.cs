@@ -31,7 +31,6 @@ namespace Database.Model
         public User Owner { get; set; }
         [ForeignKey("Referee")] public int? RefereeId { get; set; } // Nếu có trọng tài
         public User? Referee { get; set; }
-
         // Navigation properties
         public ICollection<TouramentMatches> TournamentMatches { get; set; } = new List<TouramentMatches>();
         public ICollection<MatchesSendRequest> MatchRequests { get; set; } = new List<MatchesSendRequest>();

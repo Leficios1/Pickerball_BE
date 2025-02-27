@@ -10,6 +10,7 @@ namespace Repository.Repository.Interfeace
     public interface ITournamentRegistrationRepository : IBaseRepository<TournamentRegistration>
     {
         Task<List<TournamentRegistration>> getByTournamentId(int TournamentId);
-        Task<List<TournamentRegistration>> getByPlayerId(int PlayerId);
+        Task<List<TournamentRegistration>> getAllByPlayerId(int PlayerId);
+        Task<TournamentRegistration> getByPlayerId(int PlayerId);
     }
 }

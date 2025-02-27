@@ -32,6 +32,11 @@ namespace Database.Model.Dbcontext
                 {
                     RoleId = 4,
                     RoleName = "Refree"
+                },
+                new Role
+                {
+                    RoleId = 5,
+                    RoleName = "User"
                 }
             );
         }

@@ -13,7 +13,8 @@ namespace Services.Services.Interface
         public Task<StatusResponse<TokenReponse>> LoginAccount(AuthRequestDTO dto);
         public Task<StatusResponse<UserResponseDTO>> RegisterAsync(UserRegisterRequestDTO dto);
         public Task<StatusResponse<RefershTokenResponseDTO>> getRefershToken(RefershTokenRequestDTO dto);
-
         public Task<UserResponseDTO> GetUserByToken(string token);
+
+        public Task<StatusResponse<UserResponseDTO>> RefereeRegisterAsync(UserRegisterRequestDTO dto);
     }
 }

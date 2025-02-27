@@ -23,6 +23,31 @@ namespace Services.Services
             _mapper = mapper;
         }
 
+        public async Task<StatusResponse<bool>> AcceptPlayer(int PlayerId, bool isAccept)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var data = await _tournamentRegistrationRepository.getByPlayerId(PlayerId);
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Player not found!";
+                    return response;
+                }
+                data.IsApproved = isAccept;
+                response.Data = true;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Change status player successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<StatusResponse<bool>> CreateRegistration(TouramentRegistrationDTO dto)
         {
             var response = new StatusResponse<bool>();

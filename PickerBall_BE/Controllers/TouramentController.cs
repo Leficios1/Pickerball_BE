@@ -2,6 +2,7 @@
 using Database.DTO.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Partial;
 using Services.Services.Interface;
 
 namespace PickerBall_BE.Controllers
@@ -41,10 +42,10 @@ namespace PickerBall_BE.Controllers
             var response = await _touramentServices.getByPlayerId(PlayerId);
             return StatusCode((int)response.statusCode, response);
         }
-        [HttpPut("UpdateTourament")]
-        public async Task<IActionResult> UpdateTourament([FromBody] TournamentRequestDTO tournamentRequestDTO)
+        [HttpPatch("UpdateTournament/{id}")]
+        public async Task<IActionResult> UpdateTournament([FromBody] TournamenUpdatetRequestDTO tournamentRequestDTO, [FromRoute] int id)
         {
-            var response = await _touramentServices.UpdateTournament(tournamentRequestDTO);
+            var response = await _touramentServices.UpdateTournament(tournamentRequestDTO, id);
             return StatusCode((int)response.statusCode, response);
         }
     }
