@@ -34,8 +34,8 @@ namespace Database.Model
     }
     public enum SendRequestStatus
     {
-        Accept,
-        Reject,
-        Pending
+        Accept = 1,
+        Reject = 2,
+        Pending = 3
     }
 }

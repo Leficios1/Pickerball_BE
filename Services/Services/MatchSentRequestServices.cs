@@ -24,9 +24,10 @@ namespace Services.Services
         private readonly IMapper _mapper;
         private readonly ITeamMembersRepository _membersRepository;
         private readonly ITeamRepository _teamRepository;
+        private readonly ITeamMembersRepository _teamMembersRepository;
 
         public MatchSentRequestServices(IMatchSentRequestRepository matchSentRequestRepository, IPlayerRepository playerRepository, IMatchesRepository matchRepository,
-            IMapper mapper, ITeamMembersRepository membersRepository, ITeamRepository teamRepository)
+            IMapper mapper, ITeamMembersRepository membersRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository)
         {
             _matchSentRequestRepository = matchSentRequestRepository;
             _playerRepository = playerRepository;
@@ -34,6 +35,7 @@ namespace Services.Services
             _mapper = mapper;
             _membersRepository = membersRepository;
             _teamRepository = teamRepository;
+            _teamMembersRepository = teamMembersRepository;
         }
 
 
@@ -56,11 +58,102 @@ namespace Services.Services
                         response.statusCode = HttpStatusCode.Forbidden;
                         return response;
                     }
-                    var getAllRequestByResponseId = await _matchSentRequestRepository.GetByReceviedId(UserAcceptId);
+                    var match = await _matchRepository.GetById(data.MatchingId);
+                    if (match == null)
+                    {
+                        response.Message = "Match not found!";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    var teams = await _teamRepository.GetTeamsWithMatchingIdAsync(match.Id);
+                    if (teams == null || teams.Count < 2)
+                    {
+                        response.Message = "Teams not found for this match!";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+
+                    // 🔥 Kiểm tra số lượng thành viên hiện tại
+                    int totalPlayers = teams.Sum(t => t.Members.Count);
+                    int maxPlayers = (match.MatchFormat == MatchFormat.Team) ? 4 : 2;
+
+                    if (totalPlayers >= maxPlayers)
+                    {
+                        response.Message = "Match is full!";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response; // 🚨 Trả về ngay nếu trận đã full
+                    }
                     if (Accpet == SendRequestStatus.Accept)
                     {
                         data.status = Accpet;
                         data.LastUpdatedAt = DateTime.UtcNow;
+
+                        if (match.MatchFormat == MatchFormat.Team)
+                        {
+                            foreach (var team in teams)
+                            {
+                                if (team.CaptainId == null)
+                                {
+                                    team.CaptainId = UserAcceptId;
+                                    _teamRepository.Update(team);
+                                    await _teamRepository.SaveChangesAsync();
+                                    var teammember = new TeamMembers
+                                    {
+                                        TeamId = team.Id,
+                                        PlayerId = UserAcceptId,
+                                        JoinedAt = DateTime.UtcNow
+                                    };
+                                    await _teamMembersRepository.AddAsync(teammember);
+                                    await _teamMembersRepository.SaveChangesAsync();
+                                    response.Message = "Captain assigned!";
+                                    response.statusCode = HttpStatusCode.OK;
+                                    break;
+                                }
+                            }
+
+                            // 🔥 Nếu cả hai Team đã có Captain, thêm vào thành viên
+                            foreach (var team in teams)
+                            {
+                                if (team.Members.Count < 2)
+                                {
+                                    var teamMember = new TeamMembers
+                                    {
+                                        TeamId = team.Id,
+                                        PlayerId = UserAcceptId,
+                                        JoinedAt = DateTime.UtcNow
+                                    };
+
+                                    await _teamMembersRepository.AddAsync(teamMember);
+                                    await _teamMembersRepository.SaveChangesAsync();
+                                    response.Message = "Player added to team!";
+                                    response.statusCode = HttpStatusCode.OK;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (totalPlayers >= 2)
+                            {
+                                response.Message = "Match is full!";
+                                response.statusCode = HttpStatusCode.BadRequest;
+                                return response;
+                            }
+                            foreach (var team in teams)
+                            {
+                                if (team.CaptainId == null)
+                                {
+                                    team.CaptainId = UserAcceptId;
+                                    _teamRepository.Update(team);
+                                    await _teamRepository.SaveChangesAsync();
+                                    response.Message = "Captain assigned!";
+                                    response.statusCode = HttpStatusCode.OK;
+                                    break;
+                                }
+                            }
+                        }
+                        var getAllRequestByResponseId = await _matchSentRequestRepository.GetByReceviedId(UserAcceptId);
+
                         foreach (var r in getAllRequestByResponseId)
                         {
                             if (r.Id != RequestId) // Không cập nhật chính request đã accept
@@ -72,31 +165,12 @@ namespace Services.Services
                         _matchSentRequestRepository.Update(data);
                         await _matchSentRequestRepository.SaveChangesAsync();
                     }
-                    var creatTeam = new Team()
-                    {
-                        Name = "Team Room: " + Guid.NewGuid().ToString().Substring(0, 6), // 🔥 Sử dụng GUID tránh lỗi ID null
-                        CaptainId = data.PlayerRequestId,
-                        Members = new List<TeamMembers>() // 🔥 Phải là danh sách
-                    {
-                        new TeamMembers
-                        {
-                            PlayerId = data.PlayerRequestId,
-                            JoinedAt = DateTime.UtcNow
-                        }
-                    }
-                    };
 
-                    await _teamRepository.AddAsync(creatTeam);
-                    await _teamRepository.SaveChangesAsync(); // 🔥 Lưu vào DB để có ID
-
-                    // 🔥 Cập nhật TeamMembers sau khi Team đã có ID
-                    creatTeam.Members.First().TeamId = creatTeam.Id;
-                    _teamRepository.Update(creatTeam);
-                    await _teamRepository.SaveChangesAsync();
 
                     response.Data = new MatchSentRequestResponseDTO
                     {
                         Id = data.Id,
+                        MatchingId = data.MatchingId,
                         PlayerRequestId = data.PlayerRequestId,
                         PlayerRecieveId = data.PlayerRecieveId,
                         status = data.status,

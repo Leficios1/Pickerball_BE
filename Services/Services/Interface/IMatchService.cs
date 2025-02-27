@@ -19,6 +19,7 @@ namespace Services.Services.Interface
         Task<StatusResponse<IEnumerable<RoomResponseDTO>>> GetAllPublicRoomsAsync();
 
         Task<StatusResponse<List<RoomResponseDTO>>> GetRoomsByUserIdAsync(int userId);
+        Task<StatusResponse<bool>> joinMatch(JoinMatchRequestDTO dto);
         
     }
 }

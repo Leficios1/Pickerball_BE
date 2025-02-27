@@ -107,9 +107,22 @@ namespace Services.Services
             var response = new StatusResponse<List<FriendResponseDTO>>();
             try
             {
-                var data = await _friendRepository.getFriendResponseByUserId(userId);
-                var friendRequests = data.Where(x => x.Status == FriendStatus.Pending).ToList();
-                response.Data = _mapper.Map<List<FriendResponseDTO>>(friendRequests);
+                var friendships = await _friendRepository.getFriendResponseByUserId(userId);
+                var friendRequests = friendships.Where(x => x.Status == FriendStatus.Pending).ToList();
+                var result = friendships.Select(f => new FriendResponseDTO
+                {
+                    Id = f.Id,
+                    User1Id = f.User1Id,
+                    User2Id = f.User2Id,
+                    UserFriendId = f.User1Id == userId ? f.User2Id : f.User1Id,
+                    UserFriendName = f.User1Id == userId ? f.User2.FirstName + " " + f.User2.LastName : f.User1.FirstName + " " + f.User1.LastName,
+                    UserFriendAvatar = f.User1Id == userId ? f.User2.AvatarUrl : f.User1.AvatarUrl,
+                    Status = f.Status,
+                    CreatedAt = f.CreatedAt
+                }).ToList();
+
+
+                response.Data = result;
                 response.Message = "Friend requests fetched successfully";
                 response.statusCode = System.Net.HttpStatusCode.OK;
             }

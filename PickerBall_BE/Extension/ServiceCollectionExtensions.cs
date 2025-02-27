@@ -34,6 +34,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IRuleRepository, RuleRepository>();
             services.AddScoped<IMatchSentRequestRepository, MatchSentRequestRepository>();
             services.AddScoped<IFriendRepository, FriendRepository>();
+            services.AddScoped<IVenusRepository, VenuesRepository>();
 
 
             // Register Services here
@@ -52,6 +53,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IRuleService, RuleService>();
             services.AddScoped<IMatchSentRequestServices, MatchSentRequestServices>();
             services.AddScoped<IFriendServices, FriendServices>();
+            services.AddScoped<IVenuesServices, VenuesServices>();
 
 
             return services;
