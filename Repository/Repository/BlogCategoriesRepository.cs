@@ -38,5 +38,10 @@ namespace Repository.Repository
             result.CurrentPage = currentPage ?? 1;
             return result;
         }
+
+        public async Task<BlogCategory?> GetBlogCategoryById(int blogCategoryId) => await _context.BlogCategories
+                                                                                                .Include(b => b.Rules)
+                                                                                                .FirstOrDefaultAsync(b => b.Id == blogCategoryId);
+
     }
 }
