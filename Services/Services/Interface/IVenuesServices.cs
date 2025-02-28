@@ -13,5 +13,7 @@ namespace Services.Services.Interface
         Task<StatusResponse<VenuesResponseDTO>> GetVenuesAsync(int id);
         Task<StatusResponse<List<VenuesResponseDTO>>> GetAllVenuesAsync();
         Task<StatusResponse<VenuesResponseDTO>> CreateVenuesAsync(VenuesRequestDTO dto);
+        Task<StatusResponse<List<VenuesResponseDTO>>> GetVenuesSponner(int id);
+        Task<StatusResponse<VenuesResponseDTO>> UpdateVenuesAsync(int id, VenuesRequestDTO dto);
     }
 }
