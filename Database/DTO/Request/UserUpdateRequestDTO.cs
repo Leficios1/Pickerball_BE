@@ -18,6 +18,5 @@ namespace Database.DTO.Request
         public DateTime? DateOfBirth { get; set; }
         public string? Gender { get; set; } = null!;
         public string? AvatarUrl { get; set; }
-
     }
 }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Services.Services
 {
@@ -29,9 +30,10 @@ namespace Services.Services
             var response = new StatusResponse<VenuesResponseDTO>();
             try
             {
-                await _venuesRepository.AddAsync(_mapper.Map<Venues>(dto));
+                var venueEntity = _mapper.Map<Venues>(dto);
+                await _venuesRepository.AddAsync(venueEntity);
                 await _venuesRepository.SaveChangesAsync();
-                var data = _mapper.Map<VenuesResponseDTO>(dto);
+                var data = _mapper.Map<VenuesResponseDTO>(venueEntity);
                 response.Data = data;
                 response.Message = "Venues created successfully";
                 response.statusCode = HttpStatusCode.OK;
@@ -76,6 +78,75 @@ namespace Services.Services
             {
                 response.Message = ex.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
+            }
+
+            return response;
+        }
+
+        public async Task<StatusResponse<List<VenuesResponseDTO>>> GetVenuesSponner(int id)
+        {
+            var response = new StatusResponse<List<VenuesResponseDTO>>();
+            try
+            {
+                var data = await _venuesRepository.GetVenuesByCreateByAsync(id);
+                response.Data = _mapper.Map<List<VenuesResponseDTO>>(data);
+                response.Message = "Venues fetched successfully";
+                response.statusCode = HttpStatusCode.OK;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+
+            return response;
+        }
+        
+        public async Task<StatusResponse<VenuesResponseDTO>> UpdateVenuesAsync(int id, VenuesRequestDTO dto)
+        {
+            var response = new StatusResponse<VenuesResponseDTO>();
+        
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var existingVenue = await _venuesRepository.GetById(id);
+                    if (existingVenue == null)
+                    {
+                        return new StatusResponse<VenuesResponseDTO>
+                        {
+                            Message = "Venue not found",
+                            statusCode = HttpStatusCode.NotFound
+                        };
+                    }
+        
+                    // Apply the values from VenuesRequestDTO
+                    foreach (var property in typeof(VenuesRequestDTO).GetProperties())
+                    {
+                        var value = property.GetValue(dto);
+                        if (value != null)
+                        {
+                            var existingProperty = typeof(Venues).GetProperty(property.Name);
+                            if (existingProperty != null)
+                            {
+                                existingProperty.SetValue(existingVenue, value);
+                            }
+                        }
+                    }
+        
+                    _venuesRepository.Update(existingVenue);
+                    await _venuesRepository.SaveChangesAsync();
+        
+                    response.Data = _mapper.Map<VenuesResponseDTO>(existingVenue);
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Venue Updated Successfully";
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
             }
             return response;
         }

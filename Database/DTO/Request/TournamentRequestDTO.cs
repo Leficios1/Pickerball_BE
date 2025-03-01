@@ -25,7 +25,6 @@ namespace Database.DTO.Request
     
     public class TournamenUpdatetRequestDTO
     {
-        public int? Id { get; set; }
         public string? Name { get; set; }
         public string? Location { get; set; }
         public int? MaxPlayer { get; set; }
@@ -35,6 +34,8 @@ namespace Database.DTO.Request
         public decimal? TotalPrize { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public TournamentType? Type { get; set; } // Singles, Doubles, Mixed
+        public TournamentType? Type { get; set; } // Singles, Doubles, Mixe
+        public string? Status {  get; set; }
+        public bool? IsAccept { get; set; }
     }
 }

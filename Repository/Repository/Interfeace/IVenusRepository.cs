@@ -9,5 +9,6 @@ namespace Repository.Repository.Interfeace
 {
     public interface IVenusRepository : IBaseRepository<Venues>
     {
+        Task<List<Venues>> GetVenuesByCreateByAsync(int createBy);
     }
 }
