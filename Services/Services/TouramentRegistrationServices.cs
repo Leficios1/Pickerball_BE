@@ -23,19 +23,22 @@ namespace Services.Services
             _mapper = mapper;
         }
 
-        public async Task<StatusResponse<bool>> AcceptPlayer(int PlayerId, bool isAccept)
+        public async Task<StatusResponse<bool>> AcceptPlayer(UpdateApprovalDTO dto)
         {
             var response = new StatusResponse<bool>();
             try
             {
-                var data = await _tournamentRegistrationRepository.getByPlayerId(PlayerId);
+                var data = await _tournamentRegistrationRepository.GetById(dto.id);
                 if (data == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "Player not found!";
                     return response;
                 }
-                data.IsApproved = isAccept;
+
+                data.IsApproved = dto.isApproved;
+                _tournamentRegistrationRepository.Update(data);
+                await _tournamentRegistrationRepository.SaveChangesAsync(); 
                 response.Data = true;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Change status player successfully!";
@@ -66,12 +69,15 @@ namespace Services.Services
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Registration Created Successfully";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.Message = ex.Message;
             }
+
             return response;
         }
+        
+        
     }
 }

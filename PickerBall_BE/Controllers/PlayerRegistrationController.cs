@@ -18,13 +18,13 @@ namespace PickerBall_BE.Controllers
             _playerRegistrationServices = playerRegistrationServices;
         }
 
-        [HttpPut("ChangeStatus/{PlayerId}/{isAccept}")]
-        public async Task<IActionResult> ChangeStatus([FromRoute] int PlayerId,[FromRoute] bool isAccept)
+        [HttpPut("ChangeStatus")]
+        public async Task<IActionResult> ChangeStatus([FromBody] UpdateApprovalDTO updateApprovalDTO)
         {
-            var response = await _playerRegistrationServices.AcceptPlayer(PlayerId, isAccept);
+            var response = await _playerRegistrationServices.AcceptPlayer(updateApprovalDTO);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
-
+        
         [HttpPost("CreateRegistration")]
         public async Task<IActionResult> CreateRegistration([FromBody] TouramentRegistrationDTO touramentRegistrationDTO)
         {
