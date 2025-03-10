@@ -15,6 +15,7 @@ namespace Database.DTO.Request
         public string Email { get; set; } = null!;
         public string PasswordHash { get; set; } = null!; //password
         public DateTime? DateOfBirth { get; set; }
+        public string PhoneNumber { get; set; }
 
         [MaxLength(10)]
         public string? Gender { get; set; }

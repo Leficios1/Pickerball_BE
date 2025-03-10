@@ -23,6 +23,12 @@ namespace PickerBall_BE.Controllers
         {
             var response = await _touramentServices.CreateTournament(tournamentRequestDTO);
             return StatusCode((int)response.statusCode, response);
+        } 
+        [HttpPost("DonateForTourament")]
+        public async Task<IActionResult> DonateForTourament([FromBody] SponnerTouramentRequestDTO dto)
+        {
+            var response = await _touramentServices.DonateForTourament(dto);
+            return StatusCode((int)response.statusCode, response);
         }
         [HttpGet("GetAllTournament")]
         public async Task<IActionResult> GetAllTournament(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
@@ -40,6 +46,12 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> GetTouramentByPlayerId([FromRoute] int PlayerId)
         {
             var response = await _touramentServices.getByPlayerId(PlayerId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("GetAllSponnerByTouramentId/{SponnerId}")]
+        public async Task<IActionResult> GetAllSponnerByTouramentId([FromRoute] int SponnerId)
+        {
+            var response = await _touramentServices.GetAllSponnerByTouramentId(SponnerId);
             return StatusCode((int)response.statusCode, response);
         }
         [HttpPatch("UpdateTournament/{id}")]

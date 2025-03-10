@@ -96,8 +96,6 @@ builder.Services.AddSwaggerGen(opt =>
 
 builder.Services.Configure<VnpayConfig>(builder.Configuration.GetSection("VNPAY"));
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IVnpayRepository, VnpayRepository>();
-builder.Services.AddScoped<IVnpayService, VnpayService>();
 var app = builder.Build();
 app.UseCors("AllowAll");
 app.UseDeveloperExceptionPage();

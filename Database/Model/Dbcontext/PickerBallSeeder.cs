@@ -31,12 +31,22 @@ namespace Database.Model.Dbcontext
                 new Role
                 {
                     RoleId = 4,
-                    RoleName = "Refree"
+                    RoleName = "Referee"
                 },
                 new Role
                 {
                     RoleId = 5,
                     RoleName = "User"
+                },
+                new Role
+                {
+                    RoleId = 6,
+                    RoleName = "Staff"
+                },
+                new Role
+                {
+                    RoleId = 7,
+                    RoleName = "=Admin Club"
                 }
             );
         }

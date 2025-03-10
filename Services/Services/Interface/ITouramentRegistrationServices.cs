@@ -10,7 +10,10 @@ namespace Services.Services.Interface
 {
     public interface ITouramentRegistrationServices
     {
-        Task<StatusResponse<bool>> CreateRegistration(TouramentRegistrationDTO dto);
-        Task<StatusResponse<bool>> AcceptPlayer(int PlayerId, bool isAccept);
+        Task<StatusResponse<TouramentRegistraionResponseDTO>> CreateRegistration(TouramentRegistrationDTO dto);
+        Task<StatusResponse<TouramentRegistraionResponseDTO>> AcceptPlayer(int PlayerId, bool isAccept, int touramentId);
+        Task<StatusResponse<List<TouramentRegistraionResponseDTO>>> GetAll();
+        Task<StatusResponse<TouramentRegistraionResponseDTO>> GetById(int id);
+        Task<StatusResponse<List<TouramentRegistraionResponseDTO>>> GetByTouramentId(int TourId);
     }
 }

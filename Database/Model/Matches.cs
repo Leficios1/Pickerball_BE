@@ -23,8 +23,10 @@ namespace Database.Model
         public MatchCategory MatchCategory { get; set; } // Competitive, Custom, Tournament
         public MatchFormat MatchFormat { get; set; } // Single, Team(Double)
         public WinScore WinScore { get; set; } // 11, 15, 21
-        public int? Team1Score { get; set; }
-        public int? Team2Score { get; set; }
+        [Url]
+        public string? UrlVideoMatch { get; set; }
+        public int? Team1Score { get; set; }//2
+        public int? Team2Score { get; set; }//1
         public bool IsPublic { get; set; }
         [ForeignKey("Owner")]
         public int RoomOwner { get; set; }
@@ -34,6 +36,7 @@ namespace Database.Model
         // Navigation properties
         public ICollection<TouramentMatches> TournamentMatches { get; set; } = new List<TouramentMatches>();
         public ICollection<MatchesSendRequest> MatchRequests { get; set; } = new List<MatchesSendRequest>();
+        public ICollection<MatchScore> MatchScores { get; set; } = new List<MatchScore>();
     }
 
     public enum WinScore
@@ -60,7 +63,10 @@ namespace Database.Model
 
     public enum MatchFormat
     {
-        Single = 1,
-        Team = 2
+        SingleMale= 1,
+        SingleFemale = 2,
+        DoubleMale = 3,
+        DoubleFemale = 4,
+        DoubleMix = 5
     }
 }

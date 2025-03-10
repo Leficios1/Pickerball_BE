@@ -23,6 +23,8 @@ namespace Database.Model
         public Tournaments Tournament { get; set; }
 
         public decimal Amount { get; set; }
+        public string? Note { get; set; }
+        public string? PaymentMethod { get; set; }
         public PaymentStatus Status { get; set; } // Pending, Completed, Failed
         public TypePayment Type {  get; set; }
         public DateTime PaymentDate { get; set; }
@@ -37,6 +39,7 @@ namespace Database.Model
     public enum TypePayment
     {
         Donate,
-
+        Fee,
+        Sponsor
     }
 }

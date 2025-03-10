@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using Services.Partial;
+using Repository.Repository;
 
 namespace Services.Services
 {
@@ -29,10 +30,11 @@ namespace Services.Services
         private readonly ITouramentMatchesRepository _touramentMatchesRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly IPaymentRepository _paymentRepository;
+        private readonly ISponserTouramentRepository _sponserTouramentRepository;
 
         public TouramentServices(ITouramentRepository touramentRepository, IMapper mapper, ISponsorRepository sponsorRepository, IPlayerRepository playerRepository,
             IMatchesRepository matchRepository, ITournamentRegistrationRepository tournamentRegistrationRepository, ITouramentMatchesRepository touramentMatchesRepository
-            , ITeamRepository teamRepository, IUserRepository userRepository, IPaymentRepository paymentRepository)
+            , ITeamRepository teamRepository, IUserRepository userRepository, IPaymentRepository paymentRepository, ISponserTouramentRepository sponserTouramentRepository)
         {
             _touramentRepository = touramentRepository;
             _mapper = mapper;
@@ -44,6 +46,7 @@ namespace Services.Services
             _teamRepository = teamRepository;
             _userRepository = userRepository;
             _paymentRepository = paymentRepository;
+            _sponserTouramentRepository = sponserTouramentRepository;
         }
 
         public async Task<StatusResponse<TournamentResponseDTO>> CreateTournament(TournamentRequestDTO dto)
@@ -78,6 +81,95 @@ namespace Services.Services
         public Task<StatusResponse<TournamentResponseDTO>> DeleteTournament(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<StatusResponse<bool>> DonateForTourament(SponnerTouramentRequestDTO dto)
+        {
+            var response = new StatusResponse<bool>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    // Kiểm tra nhà tài trợ có tồn tại không?
+                    var sponsor = await _sponsorRepository.GetById(dto.SponnerId);
+                    if (sponsor == null || !sponsor.isAccept)
+                    {
+                        response.Message = "Sponsor not found or not approved!";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response;
+                    }
+
+                    // Kiểm tra Tournament có tồn tại không?
+                    var tournament = await _touramentRepository.GetById(dto.TouramentId);
+                    if (tournament == null)
+                    {
+                        response.Message = "Tournament not found!";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+
+                    // Thêm khoản tài trợ vào bảng `TournamentSponsors`
+                    var tournamentSponsor = new SponnerTourament
+                    {
+                        TournamentId = dto.TouramentId,
+                        SponsorId = dto.SponnerId,
+                        SponsorAmount = dto.Amount,
+                        SponsorNote = dto.Note,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _sponserTouramentRepository.AddAsync(tournamentSponsor);
+                    await _sponserTouramentRepository.SaveChangesAsync();
+
+                    // 4Cập nhật tổng số tiền tài trợ của Tournament
+                    tournament.TotalPrize += dto.Amount;
+                    _touramentRepository.Update(tournament);
+                    await _touramentRepository.SaveChangesAsync();
+
+                    // Trả về kết quả
+                    response.Data = true;
+                    response.Message = "Donate successful!";
+                    response.statusCode = HttpStatusCode.OK;
+
+                    //Hoàn thành Transaction
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<SponerDetails>>> GetAllSponnerByTouramentId(int TouramentId)
+        {
+            var response = new StatusResponse<List<SponerDetails>>();
+            try
+            {
+                var data = await _sponserTouramentRepository.GetAllSponnerByTouramentId(TouramentId);
+                if (data == null)
+                {
+                    response.Message = "Sponner not found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                var sponnerList = data.Select(dataItem => new SponerDetails
+                {
+                    Id = dataItem.Sponsor.SponsorId,
+                    Name = dataItem.Sponsor.CompanyName,
+                    Logo = dataItem.Sponsor.LogoUrl,
+                    Website = dataItem.Sponsor.UrlSocial
+                }).ToList();
+                response.Data = sponnerList;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get All Sponner Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
         }
 
         public async Task<StatusResponse<List<TournamentResponseDTO>>> GetAllTournament(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
@@ -132,6 +224,7 @@ namespace Services.Services
                 var ListMatchByTourament = await _touramentMatchesRepository.getMatchByTouramentId(id);
                 List<MatcheDetails>? matcheDetailsList = new List<MatcheDetails>();
                 List<RegistrationDetails>? registrationDetails = new List<RegistrationDetails>();
+                List<SponerDetails>? sponerDetails = new List<SponerDetails>();
                 if (ListMatchByTourament != null)
                 {
                     foreach (var matchDetails in ListMatchByTourament)
@@ -170,6 +263,8 @@ namespace Services.Services
                     foreach (var playerRegistrationDetails in playerRegistrationData)
                     {
                         var playerData = await _playerRepository.GetById(playerRegistrationDetails.PlayerId);
+                        var partner = playerRegistrationDetails.PartnerId.HasValue
+                                    ? await _playerRepository.GetById(playerRegistrationDetails.PartnerId.Value): null;
                         if (playerData != null)
                         {
                             var userData = await _userRepository.GetById(playerData.PlayerId);
@@ -183,15 +278,19 @@ namespace Services.Services
                                 Ranking = playerData.RankingPoint,
                                 AvatarUrl = userData.AvatarUrl
                             };
+                            var partnerDetails = partner != null ? await GetPartnerDetails(partner) : null;
+
                             var regis = new RegistrationDetails
                             {
                                 Id = playerRegistrationDetails.Id,
                                 PlayerId = playerRegistrationDetails.PlayerId,
                                 RegisteredAt = playerRegistrationDetails.RegisteredAt,
-                                isApproved = playerRegistrationDetails.IsApproved,
-                                PlayerDetails = playerRegistration
+                                PartnerId = playerRegistrationDetails.PartnerId,
+                                //isApproved = playerRegistrationDetails.IsApproved.,
+                                PlayerDetails = playerRegistration,
+                                PartnerDetails = partnerDetails
                             };
-                            if(paymentData != null)
+                            if (paymentData != null)
                             {
                                 regis.PaymentId = paymentData.Id;
                             }
@@ -218,6 +317,20 @@ namespace Services.Services
             return response;
         }
 
+        private async Task<PlayerRegistrationDetails> GetPartnerDetails(Player partner)
+        {
+            var partnerUser = await _userRepository.GetById(partner.PlayerId);
+            return new PlayerRegistrationDetails
+            {
+                FirstName = partnerUser.FirstName,
+                LastName = partnerUser.LastName,
+                SecondName = partnerUser.SecondName,
+                Email = partnerUser.Email,
+                Ranking = partner.RankingPoint,
+                AvatarUrl = partnerUser.AvatarUrl
+            };
+        }
+
         public async Task<StatusResponse<List<TournamentResponseDTO>>> getByPlayerId(int PlayerId)
         {
             var response = new StatusResponse<List<TournamentResponseDTO>>();
@@ -232,10 +345,10 @@ namespace Services.Services
                 }
                 var tournamentIds = registrations.Select(r => r.TournamentId).Distinct().ToList();
                 var data = new List<Tournaments>();
-                foreach(var t in tournamentIds)
+                foreach (var t in tournamentIds)
                 {
                     var tourament = await _touramentRepository.GetById(t);
-                    if(tourament != null)
+                    if (tourament != null)
                     {
                         data.Add(tourament);
                     }

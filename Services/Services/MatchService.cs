@@ -104,8 +104,8 @@ namespace Services.Services
         private List<TeamMemberRequestDTO> CreateTeamMembers(CreateRoomDTO dto, int team1Id, int team2Id)
         {
             var teamMembers = new List<TeamMemberRequestDTO>();
-
-            if (dto.MatchFormat == MatchFormat.Team)
+            //Sửa lại
+            if (dto.MatchFormat == MatchFormat.DoubleMix || dto.MatchFormat == MatchFormat.DoubleMale || dto.MatchFormat == MatchFormat.DoubleFemale)
             {
                 if (dto.Player1Id.HasValue)
                     teamMembers.Add(new TeamMemberRequestDTO { TeamId = team1Id, PlayerId = dto.Player1Id.Value });
@@ -595,7 +595,9 @@ namespace Services.Services
 
                     }
                     int totalPlayers = teams.Sum(t => t.Members.Count);
-                    int maxPlayers = match.MatchFormat == MatchFormat.Team ? 4 : 2;
+                    //Sửa lại
+                    int maxPlayers = match.MatchFormat == MatchFormat.DoubleMix || match.MatchFormat == MatchFormat.DoubleFemale || 
+                        match.MatchFormat == MatchFormat.DoubleMale ? 4 : 2;
                     if (totalPlayers >= maxPlayers)
                     {
                         response.Message = "Match is full";
@@ -611,7 +613,8 @@ namespace Services.Services
                     }
 
                     string message = "";
-                    if (match.MatchFormat == MatchFormat.Team)
+                    //Sửa lại
+                    if (match.MatchFormat == MatchFormat.DoubleMix || match.MatchFormat == MatchFormat.DoubleFemale || match.MatchFormat == MatchFormat.DoubleMale)
                     {
                         foreach (var team in teams)
                         {

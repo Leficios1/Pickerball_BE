@@ -25,8 +25,10 @@ namespace Database.Model
         public bool isAccept {  get; set; }
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
-        //Fk
-        
+        //Navigation
+        public ICollection<SponnerTourament> SponsoredTournaments { get; set; }
+
+
 
     }
 }

@@ -18,10 +18,10 @@ namespace PickerBall_BE.Controllers
             _playerRegistrationServices = playerRegistrationServices;
         }
 
-        [HttpPut("ChangeStatus/{PlayerId}/{isAccept}")]
-        public async Task<IActionResult> ChangeStatus([FromRoute] int PlayerId,[FromRoute] bool isAccept)
+        [HttpPut("ChangeStatus")]
+        public async Task<IActionResult> ChangeStatus([FromBody] TouramentRegistrationDTO dto)
         {
-            var response = await _playerRegistrationServices.AcceptPlayer(PlayerId, isAccept);
+            var response = await _playerRegistrationServices.AcceptPlayer(dto.PlayerId, dto.isAccept, dto.TournamentId);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
 
@@ -29,6 +29,24 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> CreateRegistration([FromBody] TouramentRegistrationDTO touramentRegistrationDTO)
         {
             var response = await _playerRegistrationServices.CreateRegistration(touramentRegistrationDTO);
+            return StatusCode((int)response.statusCode, response);
+        } 
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var response = await _playerRegistrationServices.GetAll();
+            return StatusCode((int)response.statusCode, response);
+        } 
+        [HttpGet("GetById/{id}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
+        {
+            var response = await _playerRegistrationServices.GetById(id);
+            return StatusCode((int)response.statusCode, response);
+        } 
+        [HttpGet("GetByTouramentId/{tourId}")]
+        public async Task<IActionResult> GetByTouramentId([FromRoute] int tourId)
+        {
+            var response = await _playerRegistrationServices.GetByTouramentId(tourId);
             return StatusCode((int)response.statusCode, response);
         }
     }

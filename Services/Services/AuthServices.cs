@@ -170,6 +170,7 @@ namespace Services.Services
                 Status = x.Status,
                 DateOfBirth = x.DateOfBirth,
                 AvatarUrl = x.AvatarUrl,
+                PhoneNumber = x.PhoneNumber,
                 Gender = x.Gender,
                 Email = x.Email,
                 RefreshToken = x.RefreshToken,
@@ -203,7 +204,13 @@ namespace Services.Services
                     response.Message = "Email already exists";
                     return response;
                 }
-
+                var checkUser = await _userRepo.Get().Where(x => x.PhoneNumber == dto.PhoneNumber).SingleOrDefaultAsync();
+                if (checkUser != null)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.Message = "Phone Number already exists";
+                    return response;
+                }
                 var user = new User
                 {
                     Email = dto.Email,
@@ -216,6 +223,7 @@ namespace Services.Services
                     Status = true,
                     Gender = dto.Gender,
                     CreateAt = DateTime.UtcNow,
+                    PhoneNumber = dto.PhoneNumber,
                     RefreshToken = GenerateRefreshToken(),
                     RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7),
                     RoleId = 5

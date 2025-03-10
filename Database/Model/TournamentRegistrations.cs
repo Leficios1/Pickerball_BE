@@ -16,12 +16,22 @@ namespace Database.Model
         [ForeignKey("Player")]
         public int PlayerId { get; set; }
         public Player Player { get; set; }
-
-
-        public DateTime RegisteredAt { get; set; }
-        public bool IsApproved { get; set; } = false;
+        [ForeignKey("Partner")]
+        public int? PartnerId { get; set; }
+        public Player? Partner { get; set; }
+        public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+        public TouramentregistrationStatus IsApproved { get; set; }
+        public string? Reason { get; set; }
 
         //Fk
-        
+
+    }
+    public enum TouramentregistrationStatus
+    {
+        Pending = 1,// Da payment nhung chua duoc duyet
+        Approved = 2,// Da duoc duyet
+        Rejected = 3, // Ko dong y cho tham gia giai dau
+        Waiting = 4, // Chua payment
+        Eliminated = 5 // Bi loai
     }
 }

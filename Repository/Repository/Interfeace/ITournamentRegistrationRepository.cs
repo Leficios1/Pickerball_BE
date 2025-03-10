@@ -12,5 +12,6 @@ namespace Repository.Repository.Interfeace
         Task<List<TournamentRegistration>> getByTournamentId(int TournamentId);
         Task<List<TournamentRegistration>> getAllByPlayerId(int PlayerId);
         Task<TournamentRegistration> getByPlayerId(int PlayerId);
+        Task<TournamentRegistration> getByPlayerIdAndTournamentId(int PlayerId, int TournamentId);
     }
 }

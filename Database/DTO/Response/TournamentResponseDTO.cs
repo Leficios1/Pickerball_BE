@@ -25,6 +25,7 @@ namespace Database.DTO.Response
         public int OrganizerId { get; set; }
         public List<MatcheDetails>? TouramentDetails { get; set; }
         public List<RegistrationDetails>? RegistrationDetails { get; set; }
+        public List<SponerDetails>? sponerDetails { get; set; }
 
     }
     public class MatcheDetails
@@ -45,8 +46,11 @@ namespace Database.DTO.Response
         public int PlayerId { get; set; }
         public int PaymentId { get; set; }
         public DateTime RegisteredAt { get; set; }
+        public int? PartnerId { get; set; }
         public bool isApproved { get; set; }
         public PlayerRegistrationDetails PlayerDetails { get; set; }
+        public PlayerRegistrationDetails? PartnerDetails { get; set; }
+
     }
     public class PlayerRegistrationDetails
     {
@@ -57,5 +61,13 @@ namespace Database.DTO.Response
         public int Ranking { get; set; }
         [Url]
         public string AvatarUrl { get; set; }
+    }
+    public class SponerDetails
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Logo { get; set; }
+        public string Description { get; set; }
+        public string? Website { get; set; }
     }
 }

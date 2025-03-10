@@ -28,6 +28,11 @@ namespace Repository.Repository
             return await _context.TournamentRegistrations.SingleOrDefaultAsync(x => x.PlayerId == PlayerId);
         }
 
+        public async Task<TournamentRegistration> getByPlayerIdAndTournamentId(int PlayerId, int TournamentId)
+        {
+            return await _context.TournamentRegistrations.SingleOrDefaultAsync(x => x.PlayerId == PlayerId && x.TournamentId == TournamentId);
+        }
+
         public async Task<List<TournamentRegistration>> getByTournamentId(int TournamentId)
         {
             return await _context.TournamentRegistrations.Where(x => x.TournamentId == TournamentId).ToListAsync();

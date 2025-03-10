@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(PickerBallDbcontext))]
-    [Migration("20250219164346_UpdateDbVN+1")]
-    partial class UpdateDbVN1
+    [Migration("20250307050102_UpdateDbV1")]
+    partial class UpdateDbV1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,7 +68,7 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RuleCategories");
+                    b.ToTable("BlogCategories");
                 });
 
             modelBuilder.Entity("Database.Model.Friends", b =>
@@ -98,6 +98,43 @@ namespace Database.Migrations
                     b.HasIndex("User2Id");
 
                     b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("Database.Model.MatchScore", b =>
+                {
+                    b.Property<int>("MatchScoreId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MatchScoreId"));
+
+                    b.Property<int?>("CurrentHaft")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Round")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Team1Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Team2Score")
+                        .HasColumnType("int");
+
+                    b.HasKey("MatchScoreId");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("Team1Score");
+
+                    b.HasIndex("Team2Score");
+
+                    b.ToTable("MatchScore");
                 });
 
             modelBuilder.Entity("Database.Model.Matches", b =>
@@ -144,6 +181,9 @@ namespace Database.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UrlVideoMatch")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("VenueId")
@@ -239,8 +279,14 @@ namespace Database.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -267,6 +313,9 @@ namespace Database.Migrations
                 {
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CCCD")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -325,6 +374,34 @@ namespace Database.Migrations
                     b.ToTable("Rankings");
                 });
 
+            modelBuilder.Entity("Database.Model.Refree", b =>
+                {
+                    b.Property<int>("RefreeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RefreeCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreeLevel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreeNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isAccept")
+                        .HasColumnType("bit");
+
+                    b.HasKey("RefreeId");
+
+                    b.ToTable("Refree");
+                });
+
             modelBuilder.Entity("Database.Model.Role", b =>
                 {
                     b.Property<int>("RoleId")
@@ -360,7 +437,22 @@ namespace Database.Migrations
                         new
                         {
                             RoleId = 4,
-                            RoleName = "Refree"
+                            RoleName = "Referee"
+                        },
+                        new
+                        {
+                            RoleId = 5,
+                            RoleName = "User"
+                        },
+                        new
+                        {
+                            RoleId = 6,
+                            RoleName = "Staff"
+                        },
+                        new
+                        {
+                            RoleId = 7,
+                            RoleName = "=Admin Club"
                         });
                 });
 
@@ -372,12 +464,12 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BlogCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RuleCategoryId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -385,7 +477,7 @@ namespace Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RuleCategoryId");
+                    b.HasIndex("BlogCategoryId");
 
                     b.ToTable("Rules");
                 });
@@ -419,6 +511,38 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RulesScores");
+                });
+
+            modelBuilder.Entity("Database.Model.SponnerTourament", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("SponsorAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SponsorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SponsorNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("sponnerTouraments");
                 });
 
             modelBuilder.Entity("Database.Model.Sponsor", b =>
@@ -570,6 +694,38 @@ namespace Database.Migrations
                     b.ToTable("TournamentProgresses");
                 });
 
+            modelBuilder.Entity("Database.Model.TournamentReferees", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RefereeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RefereeId");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("TournamentReferees");
+                });
+
             modelBuilder.Entity("Database.Model.TournamentRegistration", b =>
                 {
                     b.Property<int>("Id")
@@ -578,11 +734,17 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
+                    b.Property<int>("IsApproved")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PartnerId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("datetime2");
@@ -591,6 +753,8 @@ namespace Database.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PartnerId");
 
                     b.HasIndex("PlayerId");
 
@@ -620,8 +784,20 @@ namespace Database.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("EntryFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("IsAccept")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsFree")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IsMaxRanking")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IsMinRanking")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -639,6 +815,9 @@ namespace Database.Migrations
 
                     b.Property<int>("OrganizerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Social")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -695,6 +874,12 @@ namespace Database.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RefreshToken")
@@ -782,6 +967,33 @@ namespace Database.Migrations
                     b.Navigation("User2");
                 });
 
+            modelBuilder.Entity("Database.Model.MatchScore", b =>
+                {
+                    b.HasOne("Database.Model.Matches", "Match")
+                        .WithMany("MatchScores")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Team", "Team1")
+                        .WithMany()
+                        .HasForeignKey("Team1Score")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Team", "Team2")
+                        .WithMany()
+                        .HasForeignKey("Team2Score")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Team1");
+
+                    b.Navigation("Team2");
+                });
+
             modelBuilder.Entity("Database.Model.Matches", b =>
                 {
                     b.HasOne("Database.Model.User", "Referee")
@@ -797,7 +1009,7 @@ namespace Database.Migrations
                     b.HasOne("Database.Model.Venues", "Venue")
                         .WithMany("Matches")
                         .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Owner");
 
@@ -893,15 +1105,45 @@ namespace Database.Migrations
                     b.Navigation("Tournament");
                 });
 
+            modelBuilder.Entity("Database.Model.Refree", b =>
+                {
+                    b.HasOne("Database.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("RefreeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Database.Model.Rule", b =>
                 {
-                    b.HasOne("Database.Model.BlogCategory", "RuleCategory")
+                    b.HasOne("Database.Model.BlogCategory", "BlogCategory")
                         .WithMany("Rules")
-                        .HasForeignKey("RuleCategoryId")
+                        .HasForeignKey("BlogCategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("RuleCategory");
+                    b.Navigation("BlogCategory");
+                });
+
+            modelBuilder.Entity("Database.Model.SponnerTourament", b =>
+                {
+                    b.HasOne("Database.Model.Sponsor", "Sponsor")
+                        .WithMany("SponsoredTournaments")
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Tournaments", "Tournament")
+                        .WithMany("Sponsors")
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Sponsor");
+
+                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("Database.Model.Sponsor", b =>
@@ -981,8 +1223,31 @@ namespace Database.Migrations
                     b.Navigation("TournamentRegistration");
                 });
 
+            modelBuilder.Entity("Database.Model.TournamentReferees", b =>
+                {
+                    b.HasOne("Database.Model.Refree", "Referee")
+                        .WithMany("TournamentReferees")
+                        .HasForeignKey("RefereeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Database.Model.Tournaments", "Tournament")
+                        .WithMany("TournamentReferees")
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Referee");
+
+                    b.Navigation("Tournament");
+                });
+
             modelBuilder.Entity("Database.Model.TournamentRegistration", b =>
                 {
+                    b.HasOne("Database.Model.Player", "Partner")
+                        .WithMany()
+                        .HasForeignKey("PartnerId");
+
                     b.HasOne("Database.Model.Player", "Player")
                         .WithMany("TournamentRegistrations")
                         .HasForeignKey("PlayerId")
@@ -995,6 +1260,8 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Partner");
+
                     b.Navigation("Player");
 
                     b.Navigation("Tournament");
@@ -1002,7 +1269,7 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Model.Tournaments", b =>
                 {
-                    b.HasOne("Database.Model.Sponsor", "Organizer")
+                    b.HasOne("Database.Model.User", "Organizer")
                         .WithMany()
                         .HasForeignKey("OrganizerId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1042,6 +1309,8 @@ namespace Database.Migrations
                 {
                     b.Navigation("MatchRequests");
 
+                    b.Navigation("MatchScores");
+
                     b.Navigation("TournamentMatches");
                 });
 
@@ -1056,9 +1325,19 @@ namespace Database.Migrations
                     b.Navigation("TournamentRegistrations");
                 });
 
+            modelBuilder.Entity("Database.Model.Refree", b =>
+                {
+                    b.Navigation("TournamentReferees");
+                });
+
             modelBuilder.Entity("Database.Model.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Database.Model.Sponsor", b =>
+                {
+                    b.Navigation("SponsoredTournaments");
                 });
 
             modelBuilder.Entity("Database.Model.Team", b =>
@@ -1073,6 +1352,10 @@ namespace Database.Migrations
                     b.Navigation("Rankings");
 
                     b.Navigation("Registrations");
+
+                    b.Navigation("Sponsors");
+
+                    b.Navigation("TournamentReferees");
                 });
 
             modelBuilder.Entity("Database.Model.User", b =>

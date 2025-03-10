@@ -78,7 +78,7 @@ namespace Services.Services
                     // 🔥 Kiểm tra số lượng thành viên hiện tại
                     int totalPlayers = teams.Sum(t => t.Members.Count);
                     var maxPlayers = 2;
-                    if(match.MatchFormat == MatchFormat.Team)
+                    if(match.MatchFormat == MatchFormat.DoubleFemale || match.MatchFormat == MatchFormat.DoubleMale || match.MatchFormat == MatchFormat.DoubleMix)
                     {
                         maxPlayers = 4;
                     }
@@ -162,7 +162,10 @@ namespace Services.Services
 
             foreach (var team in teams)
             {
-                if (team.Members.Count < (format == MatchFormat.Team ? 2 : 1))
+                //Sửa lại
+                if (team.Members.Count < (format == MatchFormat.DoubleMale ||
+                                          format == MatchFormat.DoubleFemale ||
+                                          format == MatchFormat.DoubleMix ? 2 : 1))
                 {
                     var teamMember = new TeamMembers
                     {

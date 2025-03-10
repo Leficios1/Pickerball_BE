@@ -10,5 +10,7 @@ namespace Database.DTO.Request
     {
         public int TournamentId { get; set; }
         public int PlayerId { get; set; }
+        public bool isAccept { get; set; } = false;
+        public int? PartnerId { get; set; }
     }
 }

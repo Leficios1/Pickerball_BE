@@ -25,11 +25,14 @@ namespace Database.Model.Dbcontext
         public DbSet<Tournaments> Tournaments { get; set; }
         public DbSet<TournamentRegistration> TournamentRegistrations { get; set; }
         public DbSet<Matches> Matches { get; set; }
-        //public DbSet<mat> MatchTeams { get; set; }
+        public DbSet<MatchScore> MatchScore { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMembers> TeamMembers { get; set; }
         public DbSet<Venues> Venues { get; set; }
-        //public DbSet<TournamentVenues> TournamentVenues { get; set; }
+        public DbSet<SponnerTourament> sponnerTouraments { get; set; }
+        public DbSet<TournamentReferees> TournamentReferees { get; set; }
+        public DbSet<TournamentTeamRequest> tournamentTeamRequests { get; set; }
+        public DbSet<Refree> Refree { get; set; }
         public DbSet<Ranking> Rankings { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<Rule> Rules { get; set; }
@@ -144,7 +147,25 @@ namespace Database.Model.Dbcontext
                 .HasOne(m => m.Venue)
                 .WithMany(v => v.Matches)
                 .HasForeignKey(m => m.VenueId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchScore>()
+                .HasOne(ms => ms.Match)
+                .WithMany(m => m.MatchScores)
+                .HasForeignKey(ms => ms.MatchId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchScore>()
+                .HasOne(ms => ms.Team1)
+                .WithMany()
+                .HasForeignKey(ms => ms.Team1Score)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchScore>()
+                .HasOne(ms => ms.Team2)
+                .WithMany()
+                .HasForeignKey(ms => ms.Team2Score)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ MatchesSendRequest Relationships ] =====================
             modelBuilder.Entity<MatchesSendRequest>()
@@ -216,6 +237,32 @@ namespace Database.Model.Dbcontext
                 .HasOne(v => v.User)
                 .WithMany(u => u.Venues)
                 .HasForeignKey(v => v.CreateBy)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ===================== [ SponerTourament System ] =====================
+            modelBuilder.Entity<SponnerTourament>()
+                .HasOne(ts => ts.Tournament)
+                .WithMany(t => t.Sponsors)
+                .HasForeignKey(ts => ts.TournamentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SponnerTourament>()
+                .HasOne(ts => ts.Sponsor)
+                .WithMany(s => s.SponsoredTournaments)
+                .HasForeignKey(ts => ts.SponsorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ===================== [ TournamentReferees System ] =====================
+            modelBuilder.Entity<TournamentReferees>()
+                .HasOne(tr => tr.Tournament)
+                .WithMany(t => t.TournamentReferees)
+                .HasForeignKey(tr => tr.TournamentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TournamentReferees>()
+                .HasOne(tr => tr.Referee)
+                .WithMany(u => u.TournamentReferees)
+                .HasForeignKey(tr => tr.RefereeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ Seeder ] =====================

@@ -27,7 +27,9 @@ namespace Database.Model
 
         [MaxLength(10)]
         public string? Gender { get; set; }
+        public string? PhoneNumber { get; set; }
         public bool Status { get; set; }
+        public string? Reason { get; set; }
         public int RoleId { get; set; } // Admin, Organizer, Player, Spectator
         public string RefreshToken { get; set; } = null!;
         public DateTime? CreateAt { get; set; }

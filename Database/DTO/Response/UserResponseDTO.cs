@@ -19,6 +19,7 @@ namespace Database.DTO.Response
 
         [Url]
         public string? AvatarUrl { get; set; }
+        public string PhoneNumber { get; set; }
 
         [MaxLength(10)]
         public string? Gender { get; set; }
