@@ -12,10 +12,11 @@ namespace PickerBall_BE.Controllers
     public class TouramentController : ControllerBase
     {
         private readonly ITouramentServices _touramentServices;
-
-        public TouramentController(ITouramentServices touramentServices)
+        private readonly ITournamentTeamRequestServices _tournamentTeamRequestServices;
+        public TouramentController(ITouramentServices touramentServices, ITournamentTeamRequestServices tournamentTeamRequestServices)
         {
             _touramentServices = touramentServices;
+            _tournamentTeamRequestServices = tournamentTeamRequestServices;
         }
 
         [HttpPost("Create")]

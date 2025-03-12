@@ -12,10 +12,11 @@ namespace PickerBall_BE.Controllers
     public class PlayerRegistrationController : ControllerBase
     {
         private readonly ITouramentRegistrationServices _playerRegistrationServices;
-
-        public PlayerRegistrationController(ITouramentRegistrationServices playerRegistrationServices)
+        private readonly ITournamentTeamRequestServices _tournamentTeamRequestServices;
+        public PlayerRegistrationController(ITouramentRegistrationServices playerRegistrationServices, ITournamentTeamRequestServices tournamentTeamRequestServices)
         {
             _playerRegistrationServices = playerRegistrationServices;
+            _tournamentTeamRequestServices = tournamentTeamRequestServices;
         }
 
         [HttpPut("ChangeStatus")]
@@ -29,6 +30,16 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> CreateRegistration([FromBody] TouramentRegistrationDTO touramentRegistrationDTO)
         {
             var response = await _playerRegistrationServices.CreateRegistration(touramentRegistrationDTO);
+            if (touramentRegistrationDTO.PartnerId.HasValue)
+            {
+                var request = new TournamentTeamRequestDTO
+                {
+                    RegistrationId = response.Data.Id,
+                    RequesterId = touramentRegistrationDTO.PlayerId,
+                    RecevierId = touramentRegistrationDTO.PartnerId.Value
+                };
+                await _tournamentTeamRequestServices.SendTeamRequest(request);
+            }
             return StatusCode((int)response.statusCode, response);
         } 
         [HttpGet("GetAll")]

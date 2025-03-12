@@ -16,9 +16,14 @@ namespace Database.DTO.Request
         public string Description { get; set; }
         public string Banner { get; set; }
         public string Note { get; set; }
+        public int? IsMinRanking { get; set; }
+        public int? IsMaxRanking { get; set; }
+        public string? Social { get; set; }
         public decimal TotalPrize { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public bool IsFree { get; set; }
+        public decimal? EntryFee { get; set; }
         public TournamentType Type { get; set; } // Singles, Doubles, Mixed
         public int OrganizerId { get; set; }
     }

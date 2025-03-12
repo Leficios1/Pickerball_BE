@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace Database.DTO.Response
         public int PaymentId { get; set; }
         public DateTime RegisteredAt { get; set; }
         public int? PartnerId { get; set; }
-        public bool isApproved { get; set; }
+        public TouramentregistrationStatus isApproved { get; set; }
         public PlayerRegistrationDetails PlayerDetails { get; set; }
         public PlayerRegistrationDetails? PartnerDetails { get; set; }
 

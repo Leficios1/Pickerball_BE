@@ -31,6 +31,62 @@ namespace Services.Services
             _tournamentRegistrationRepository = tournamentRegistrationRepository;
         }
 
+        public async Task<StatusResponse<List<TournamentTeamRequestResponseDTO>>> GetTeamRequestByRequestUser(int PlayerId)
+        {
+            var response = new StatusResponse<List<TournamentTeamRequestResponseDTO>>();
+            try
+            {
+                var data = await _tournamentTeamRequestRepository.Get()
+                    .Where(tr => tr.RequesterId == PlayerId)
+                    .Select(tr => new TournamentTeamRequestResponseDTO
+                    {
+                        Id = tr.Id,
+                        RegistrationId = tr.RegistrationId,
+                        RequesterId = tr.RequesterId,
+                        PartnerId = tr.PartnerId,
+                        Status = tr.Status
+                    })
+                    .ToListAsync();
+                response.Data = data;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get team request successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<TournamentTeamRequestResponseDTO>>> GetTeamRequestByResponseUser(int PlayerId)
+        {
+            var response = new StatusResponse<List<TournamentTeamRequestResponseDTO>>();
+            try
+            {
+                var data = await _tournamentTeamRequestRepository.Get()
+                    .Where(tr => tr.PartnerId == PlayerId)
+                    .Select(tr => new TournamentTeamRequestResponseDTO
+                    {
+                        Id = tr.Id,
+                        RegistrationId = tr.RegistrationId,
+                        RequesterId = tr.RequesterId,
+                        PartnerId = tr.PartnerId,
+                        Status = tr.Status
+                    })
+                    .ToListAsync();
+                response.Data = data;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get team request successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public async Task<StatusResponse<bool>> RespondToTeamRequest(int requestId, bool isAccept)
         {
             var response = new StatusResponse<bool>();
@@ -46,15 +102,29 @@ namespace Services.Services
                         return response;
                     }
 
+                    var registration = await _tournamentRegistrationRepository.GetById(request.RegistrationId);
+                    if (registration == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Registration not found!";
+                        return response;
+                    }
                     if (isAccept)
                     {
                         request.Status = TournamentRequestStatus.Accepted;
 
                         // ✅ Cập nhật TournamentRegistration
-                        var registration = await _tournamentRegistrationRepository.GetById(request.RegistrationId);
                         registration.PartnerId = request.PartnerId;
                         registration.IsApproved = TouramentregistrationStatus.Pending;
                         _tournamentRegistrationRepository.Update(registration);
+                        var notification = new Notification
+                        {
+                            UserId = request.RequesterId,
+                            Message = "Your team invitation was accepted.",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _notificationRepository.AddAsync(notification);
+                        await _notificationRepository.SaveChangesAsync();
                         await _tournamentRegistrationRepository.SaveChangesAsync();
                     }
                     else
@@ -62,7 +132,6 @@ namespace Services.Services
                         request.Status = TournamentRequestStatus.Rejected;
 
                         // ✅ Xóa Registration nếu cần
-                        var registration = await _tournamentRegistrationRepository.GetById(request.RegistrationId);
                         _tournamentRegistrationRepository.Delete(registration);
                         await _tournamentRegistrationRepository.SaveChangesAsync();
 

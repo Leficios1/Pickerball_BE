@@ -16,17 +16,29 @@ namespace PickerBall_BE.Controllers
             _tournamentTeamRequestServices = tournamentTeamRequestServices;
         }
 
-        [HttpPost("SendTeamRequest")]
-        public async Task<IActionResult> SendTeamRequest([FromBody] TournamentTeamRequestDTO dto)
-        {
-            var response = await _tournamentTeamRequestServices.SendTeamRequest(dto);
-            return StatusCode((int)response.statusCode, response);
-        }
+        //[HttpPost("SendTeamRequest")]
+        //public async Task<IActionResult> SendTeamRequest([FromBody] TournamentTeamRequestDTO dto)
+        //{
+        //    var response = await _tournamentTeamRequestServices.SendTeamRequest(dto);
+        //    return StatusCode((int)response.statusCode, response);
+        //}
 
         [HttpPost("RespondToTeamRequest/{requestId}")]
         public async Task<IActionResult> RespondToTeamRequest([FromRoute] int requestId, [FromBody] bool isAccept)
         {
             var response = await _tournamentTeamRequestServices.RespondToTeamRequest(requestId, isAccept);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("GetTeamRequestByRequestUser/{PlayerId}")]
+        public async Task<IActionResult> GetTeamRequestByRequestUser([FromRoute] int PlayerId)
+        {
+            var response = await _tournamentTeamRequestServices.GetTeamRequestByRequestUser(PlayerId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("GetTeamRequestByReceiverUser/{PlayerId}")]
+        public async Task<IActionResult> GetTeamRequestByReceiverUser([FromRoute] int PlayerId)
+        {
+            var response = await _tournamentTeamRequestServices.GetTeamRequestByResponseUser(PlayerId);
             return StatusCode((int)response.statusCode, response);
         }
     }

@@ -37,6 +37,7 @@ namespace Services.Services
                 var data = await _tournamentRegistrationRepository.getByPlayerIdAndTournamentId(PlayerId, touramentId);
                 if (data == null)
                 {
+                    
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "Player not found!";
                     return response;
@@ -69,7 +70,8 @@ namespace Services.Services
                     : null;
                 if (flag != null || (isPartnerRegistered != null && isPartnerRegistered.Any()) || (isPlayerRegister != null && isPlayerRegister.Any()))
                 {
-                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.Data = _mapper.Map<TouramentRegistraionResponseDTO>(flag);
+                    response.statusCode = HttpStatusCode.OK;
                     response.Message = "Player already registered!";
                     return response;
                 }
@@ -113,8 +115,12 @@ namespace Services.Services
                     TournamentId = dto.TournamentId,
                     RegisteredAt = DateTime.UtcNow,
                     PartnerId = dto.PartnerId,
-                    IsApproved = TouramentregistrationStatus.Waiting,
+                    IsApproved = TouramentregistrationStatus.Pending,
                 };
+                if(dto.PartnerId.HasValue)
+                {
+                    data.IsApproved = TouramentregistrationStatus.Waiting;
+                }
                 await _tournamentRegistrationRepository.AddAsync(data);
                 await _tournamentRegistrationRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<TouramentRegistraionResponseDTO>(data);

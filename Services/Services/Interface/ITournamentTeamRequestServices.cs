@@ -12,5 +12,8 @@ namespace Services.Services.Interface
     {
         Task<StatusResponse<bool>> SendTeamRequest(TournamentTeamRequestDTO dto);
         Task<StatusResponse<bool>> RespondToTeamRequest(int requestId, bool isAccept);
+        Task<StatusResponse<List<TournamentTeamRequestResponseDTO>>> GetTeamRequestByResponseUser(int PlayerId);
+        Task<StatusResponse<List<TournamentTeamRequestResponseDTO>>> GetTeamRequestByRequestUser(int PlayerId);
+
     }
 }

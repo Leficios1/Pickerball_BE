@@ -61,6 +61,25 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.NotFound;
                     return response;
                 }
+                if (dto.IsFree == true)
+                {
+                    if (dto.EntryFee == null)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Fee is required";
+                        return response;
+                    }
+                    if (dto.EntryFee < 0)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Fee must be greater than 0";
+                        return response;
+                    }
+                }
+                else
+                {
+                    dto.EntryFee = 0;
+                }
                 var data = _mapper.Map<Tournaments>(dto);
                 data.Status = "Pending"; // Default status is "Pending"
                 data.IsAccept = false; // Default is not accept
@@ -286,7 +305,7 @@ namespace Services.Services
                                 PlayerId = playerRegistrationDetails.PlayerId,
                                 RegisteredAt = playerRegistrationDetails.RegisteredAt,
                                 PartnerId = playerRegistrationDetails.PartnerId,
-                                //isApproved = playerRegistrationDetails.IsApproved.,
+                                isApproved = playerRegistrationDetails.IsApproved,
                                 PlayerDetails = playerRegistration,
                                 PartnerDetails = partnerDetails
                             };

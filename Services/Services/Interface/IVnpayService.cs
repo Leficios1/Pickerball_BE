@@ -6,7 +6,7 @@ namespace Services.Services.Interface
 {
     public interface IVnpayService
     {
-        Task<StatusResponse<string>> GetVnpayPaymentUrl(VnpayRequestDTO paymentRequest);
-        Task<StatusResponse<string>> CallApiByUserId(int UserId, int linkReturn, int registrationId);
+        Task<StatusResponse<PaymentResponseDTO>> GetVnpayPaymentUrl(VnpayRequestDTO paymentRequest);
+        Task<StatusResponse<string>> CallApiByUserId(int UserId, int linkReturn, int? registrationId, int? TouramentId, int? DonateAmount);
     }
 }

@@ -28,10 +28,10 @@ namespace Database.Model
     }
     public enum TouramentregistrationStatus
     {
-        Pending = 1,// Da payment nhung chua duoc duyet
-        Approved = 2,// Da duoc duyet
+        Pending = 1,// Da accept tu partner cho payment
+        Approved = 2,// Da payment
         Rejected = 3, // Ko dong y cho tham gia giai dau
-        Waiting = 4, // Chua payment
+        Waiting = 4, // Cho accept tu partner
         Eliminated = 5 // Bi loai
     }
 }

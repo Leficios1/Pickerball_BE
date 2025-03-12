@@ -32,6 +32,7 @@ namespace Database.Model.Dbcontext
         public DbSet<SponnerTourament> sponnerTouraments { get; set; }
         public DbSet<TournamentReferees> TournamentReferees { get; set; }
         public DbSet<TournamentTeamRequest> tournamentTeamRequests { get; set; }
+        public DbSet<TransactionPayment> transactionPayments { get; set; }
         public DbSet<Refree> Refree { get; set; }
         public DbSet<Ranking> Rankings { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
