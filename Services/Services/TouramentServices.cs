@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Services.Partial;
 using Repository.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Services.Services
 {
@@ -283,7 +284,7 @@ namespace Services.Services
                     {
                         var playerData = await _playerRepository.GetById(playerRegistrationDetails.PlayerId);
                         var partner = playerRegistrationDetails.PartnerId.HasValue
-                                    ? await _playerRepository.GetById(playerRegistrationDetails.PartnerId.Value): null;
+                                    ? await _playerRepository.GetById(playerRegistrationDetails.PartnerId.Value) : null;
                         if (playerData != null)
                         {
                             var userData = await _userRepository.GetById(playerData.PlayerId);
@@ -432,6 +433,33 @@ namespace Services.Services
                     response.Message = ex.Message;
                     response.statusCode = HttpStatusCode.InternalServerError;
                 }
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<TournamentResponseDTO>>> GetAllTouramentBySponnerId(int sponnerId)
+        {
+            var response = new StatusResponse<List<TournamentResponseDTO>>();
+            try
+            {
+                var organization = await _touramentRepository.Get().Where(x => x.OrganizerId == sponnerId).ToListAsync();
+                var data = await _sponserTouramentRepository.Get().Where(x => x.SponsorId == sponnerId).Select(x => x.Tournament).ToListAsync();
+                var combinedTournaments = organization.Concat(data).Distinct().ToList();
+                if (combinedTournaments == null || !combinedTournaments.Any())
+                {
+                    response.Message = "This sponner doesn't has any tourament";
+                    response.statusCode = HttpStatusCode.OK;
+                    return response;
+                }
+                response.Data = _mapper.Map<List<TournamentResponseDTO>>(combinedTournaments);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get All Tournament Successfully";
+
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
             }
             return response;
         }

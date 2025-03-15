@@ -47,6 +47,7 @@ namespace Services.Services
                 }
                 sponsor.isAccept = true;
                 await _sponsorRepository.SaveChangesAsync();
+                response.Data = true;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Accept sponsor success!";
             }

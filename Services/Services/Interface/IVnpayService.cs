@@ -8,5 +8,8 @@ namespace Services.Services.Interface
     {
         Task<StatusResponse<PaymentResponseDTO>> GetVnpayPaymentUrl(VnpayRequestDTO paymentRequest);
         Task<StatusResponse<string>> CallApiByUserId(int UserId, int linkReturn, int? registrationId, int? TouramentId, int? DonateAmount);
+        Task<StatusResponse<List<BillResponseDTO>>> GetAllBillByTourament(int TouramentId);
+        Task<StatusResponse<BillResponseDTO>> GetBillById(int BillId);
+        Task<StatusResponse<List<BillResponseDTO>>> GetAllBillBySponnerId(int SponnerId);
     }
 }

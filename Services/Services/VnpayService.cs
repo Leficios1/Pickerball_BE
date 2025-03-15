@@ -1,4 +1,5 @@
-﻿using Database.DTO.Request;
+﻿using AutoMapper;
+using Database.DTO.Request;
 using Database.DTO.Response;
 using Database.Helper;
 using Database.Model;
@@ -18,14 +19,16 @@ namespace Services.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly ITouramentRepository _tournamentRepository;
         private readonly ISponserTouramentRepository _sponserTouramentRepository;
+        private readonly IMapper _mapper;
         public VnpayService(IVnpayRepository vnpayRepository, ITournamentRegistrationRepository tournamentRegistrationRepository, IPaymentRepository paymentRepository, ITouramentRepository tournamentRepository,
-            ISponserTouramentRepository sponserTouramentRepository)
+            ISponserTouramentRepository sponserTouramentRepository, IMapper mapper)
         {
             _vnpayRepository = vnpayRepository;
             _tenantRegistrationRepository = tournamentRegistrationRepository;
             _paymentRepository = paymentRepository;
             _tournamentRepository = tournamentRepository;
             _sponserTouramentRepository = sponserTouramentRepository;
+            _mapper = mapper;
         }
         string vnp_TmnCode = "M9ZAZ0EJ";
         string vnp_HashSecret = "YUCRCHXV6RXOJY7G0V0G0F100DK48F6U";
@@ -183,7 +186,7 @@ namespace Services.Services
                             vnpay.AddResponseData(s.Split("=")[0], s.Split("=")[1]);
                         }
                     }
-                    
+
                     string orderId = vnpay.GetResponseData("vnp_OrderInfo").Replace("+", " ").Replace("%3A", ":").Split(":")[1].Trim();
                     string vnpayTranId = vnpay.GetResponseData("vnp_TransactionNo");
                     string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
@@ -342,6 +345,78 @@ namespace Services.Services
                 case "99": return "Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê).";
                 default: return "Mã lỗi không hợp lệ";
             }
+        }
+
+        public async Task<StatusResponse<List<BillResponseDTO>>> GetAllBillByTourament(int TouramentId)
+        {
+            var response = new StatusResponse<List<BillResponseDTO>>();
+            try
+            {
+                var data = await _paymentRepository.Get().Where(x => x.TournamentId == TouramentId).ToListAsync();
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Bill not found!";
+                    return response;
+                }
+                response.Data = _mapper.Map<List<BillResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all bill successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<BillResponseDTO>> GetBillById(int BillId)
+        {
+            var response = new StatusResponse<BillResponseDTO>();
+            try
+            {
+                var data = await _paymentRepository.Get().Where(x => x.Id == BillId).SingleOrDefaultAsync();
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Bill not found!";
+                    return response;
+                }
+                response.Data = _mapper.Map<BillResponseDTO>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get bill successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<BillResponseDTO>>> GetAllBillBySponnerId(int SponnerId)
+        {
+            var response = new StatusResponse<List<BillResponseDTO>>();
+            try
+            {
+                var data = await _paymentRepository.Get().Where(x => x.UserId == SponnerId).ToListAsync();
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Bill not found!";
+                    return response;
+                }
+                response.Data = _mapper.Map<List<BillResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all bill successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
     }
 }

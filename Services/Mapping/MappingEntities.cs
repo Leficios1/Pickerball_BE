@@ -58,6 +58,7 @@ namespace Services.Mapping
             CreateMap<Venues, VenuesResponseDTO>().ReverseMap(); 
 
             CreateMap<NotificationResponseDTO, Notification>().ReverseMap();
+            CreateMap<Payments, BillResponseDTO>().ReverseMap();
 
 
         }

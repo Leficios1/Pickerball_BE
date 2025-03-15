@@ -18,6 +18,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<TournamentResponseDTO>> getById(int id);
         public Task<StatusResponse<List<TournamentResponseDTO>>> getByPlayerId(int PlayerId);
         public Task<StatusResponse<List<SponerDetails>>> GetAllSponnerByTouramentId (int TouramentId);
+        public Task<StatusResponse<List<TournamentResponseDTO>>> GetAllTouramentBySponnerId (int sponnerId);
         public Task<StatusResponse<bool>> DonateForTourament(SponnerTouramentRequestDTO dto);
     }
 }

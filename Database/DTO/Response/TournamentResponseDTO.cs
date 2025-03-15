@@ -17,11 +17,16 @@ namespace Database.DTO.Response
         public string Description { get; set; }
         public string Banner { get; set; }
         public string Note { get; set; }
+        public int? IsMinRanking { get; set; }
+        public int? IsMaxRanking { get; set; }
+        public string? Social { get; set; }
         public decimal TotalPrize { get; set; }
         public string Status { get; set; } // Pending, Complete, Reject
         public bool IsAccept { get; set; } // False if chưa accept
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public bool IsFree { get; set; }
+        public decimal? EntryFee { get; set; }
         public string Type { get; set; }
         public int OrganizerId { get; set; }
         public List<MatcheDetails>? TouramentDetails { get; set; }

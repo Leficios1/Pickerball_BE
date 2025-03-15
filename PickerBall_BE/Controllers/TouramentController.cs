@@ -49,10 +49,17 @@ namespace PickerBall_BE.Controllers
             var response = await _touramentServices.getByPlayerId(PlayerId);
             return StatusCode((int)response.statusCode, response);
         }
-        [HttpGet("GetAllSponnerByTouramentId/{SponnerId}")]
-        public async Task<IActionResult> GetAllSponnerByTouramentId([FromRoute] int SponnerId)
+        [HttpGet("GetAllSponnerByTouramentId/{TouramnetId}")]
+        public async Task<IActionResult> GetAllSponnerByTouramentId([FromRoute] int TouramnetId)
         {
-            var response = await _touramentServices.GetAllSponnerByTouramentId(SponnerId);
+            var response = await _touramentServices.GetAllSponnerByTouramentId(TouramnetId);
+            return StatusCode((int)response.statusCode, response);
+        }
+
+        [HttpGet("GetAllTouramentBySponnerId/{SponnerId}")]
+        public async Task<IActionResult> GetAllTouramentBySponnerId([FromRoute] int SponnerId)
+        {
+            var response = await _touramentServices.GetAllTouramentBySponnerId(SponnerId);
             return StatusCode((int)response.statusCode, response);
         }
         [HttpPatch("UpdateTournament/{id}")]
