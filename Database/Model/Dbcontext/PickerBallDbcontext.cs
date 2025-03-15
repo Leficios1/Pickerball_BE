@@ -41,6 +41,7 @@ namespace Database.Model.Dbcontext
         public DbSet<Payments> Payments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Role> Roles { get; set; }
+ 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

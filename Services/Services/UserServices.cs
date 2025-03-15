@@ -15,6 +15,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Repository.Repository.Interface;
 
 namespace Services.Services
 {
@@ -23,14 +24,16 @@ namespace Services.Services
         private readonly IUserRepository _userRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly ISponsorRepository _sponsorRepository;
+        private readonly IRefreeRepository _refreeRepository;
         private readonly IMapper _mapper;
-
-        public UserServices(IUserRepository userRepository, IMapper mapper, IPlayerRepository playerRepository, ISponsorRepository sponsorRepository)
+        
+        public UserServices(IUserRepository userRepository, IMapper mapper, IPlayerRepository playerRepository,IRefreeRepository refreeRepository, ISponsorRepository sponsorRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
             _playerRepository = playerRepository;
             _sponsorRepository = sponsorRepository;
+            _refreeRepository = refreeRepository;
         }
 
         public async Task<StatusResponse<bool>> AcceptUser(int sponserId)
@@ -232,10 +235,10 @@ namespace Services.Services
                 }
             return response;
         }
-
-        public async Task<StatusResponse<UserResponseDTO>> CreateReferee(RefereeCreateRequestDTO dto)
+        
+        public async Task<StatusResponse<Refree>> CreateReferee(RefereeCreateRequestDTO dto)
         {
-            var response = new StatusResponse<UserResponseDTO>();
+            var response = new StatusResponse<Refree>();
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 try
                 {
@@ -243,12 +246,32 @@ namespace Services.Services
                     user.PasswordHash = new PasswordHasher<User>().HashPassword(user, dto.Password);
                     user.RefreshToken = GenerateRefreshToken();
                     user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                    response.Data = _mapper.Map<UserResponseDTO>(user);
 
                     await _userRepository.AddAsync(user);
                     await _userRepository.SaveChangesAsync();
+
+                    var createdUser = await _userRepository.GetByEmailAsync(user.Email);
+                    if (createdUser == null)
+                    {
+                        throw new Exception("User not found after creation.");
+                    }
+
+                    var referee = new Refree
+                    {
+                        RefreeId = createdUser.Id,
+                        RefreeCode = dto.refereeCode,
+                        CreatedAt = DateTime.UtcNow,
+                        LastUpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _refreeRepository.AddAsync(referee);
+                    await _refreeRepository.SaveChangesAsync();
+
+                    var createdReferee = await _refreeRepository.GetById(createdUser.Id);
+
+                    response.Data = createdReferee;
                     response.statusCode = HttpStatusCode.OK;
-                    response.Message = "Update user success!";
+                    response.Message = "Create referee success!";
                     transaction.Complete();
                 }
                 catch (Exception e)
@@ -259,7 +282,6 @@ namespace Services.Services
                 }
             return response;
         }
-
         private string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));

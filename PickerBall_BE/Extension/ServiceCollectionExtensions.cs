@@ -61,7 +61,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<ITournamentTeamRequestServices, TournamentTeamRequestServices>();
             services.AddScoped<INotificationServices, NotificationServices>();
             services.AddScoped<IVnpayService, VnpayService>();
-
+            services.AddScoped<IReFeeSevice, ReFeeSevice>();
             return services;
         }
     }

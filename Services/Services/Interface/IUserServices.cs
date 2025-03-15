@@ -16,7 +16,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto);
         public Task<StatusResponse<bool>> DeletedUser(int UserId);
         public Task<StatusResponse<bool>> AcceptUser(int sponserId);
-        public Task<StatusResponse<UserResponseDTO>> CreateReferee(RefereeCreateRequestDTO dto);
+        public Task<StatusResponse<Refree>> CreateReferee(RefereeCreateRequestDTO dto);
         public Task<StatusResponse<List<UserResponseDTO>>> getAllRefeeUser();
     }
 }

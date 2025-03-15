@@ -10,6 +10,7 @@ using Database.Helper;
 using Microsoft.Extensions.Configuration;
 using Repository.Repository.Interfeace;
 using Repository.Repository;
+using Repository.Repository.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
       };
   });
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IRefreeRepository, RefreeRepository>();
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "PickerBall", Version = "v1" });
