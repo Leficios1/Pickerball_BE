@@ -14,6 +14,8 @@ namespace Database.DTO.Request
         public DateTime? DateOfBirth { get; set; }
         public string? AvatarUrl { get; set; } = "https://inkythuatso.com/uploads/thumbnails/800/2023/03/9-anh-dai-dien-trang-inkythuatso-03-15-27-03.jpg";
         public string? Gender { get; set; }
+        public string? phoneNumber { get; set; }
+        public string? refereeCode { get; set; }
         [JsonIgnore]
         public bool Status
         {
