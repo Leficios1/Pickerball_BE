@@ -33,7 +33,7 @@ namespace PickerBall_BE.Controllers
             return Ok(referees);
         }
 
-        [HttpGet]
+        [HttpGet("getAll")]
         public async Task<IActionResult> GetAll()
         {
             var referees = await _refreeService.GetAll();
