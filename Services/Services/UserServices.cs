@@ -206,13 +206,13 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto)
+        public async Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto, int id)
         {
             var response = new StatusResponse<UserResponseDTO>();
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 try
                 {
-                    var existingUser = await _userRepository.GetUserByIdAsync(dto.UserId);
+                    var existingUser = await _userRepository.GetUserByIdAsync(id);
                     if (existingUser == null)
                     {
                         response.statusCode = HttpStatusCode.NotFound;
