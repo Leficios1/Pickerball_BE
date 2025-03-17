@@ -13,10 +13,12 @@ namespace PickerBall_BE.Controllers
     {
         private readonly ITouramentServices _touramentServices;
         private readonly ITournamentTeamRequestServices _tournamentTeamRequestServices;
-        public TouramentController(ITouramentServices touramentServices, ITournamentTeamRequestServices tournamentTeamRequestServices)
+        private readonly IVnpayService _vpnpayService;
+        public TouramentController(ITouramentServices touramentServices, ITournamentTeamRequestServices tournamentTeamRequestServices, IVnpayService vnpayService)
         {
             _touramentServices = touramentServices;
             _tournamentTeamRequestServices = tournamentTeamRequestServices;
+            _vpnpayService = vnpayService;
         }
 
         [HttpPost("Create")]
@@ -28,7 +30,7 @@ namespace PickerBall_BE.Controllers
         [HttpPost("DonateForTourament")]
         public async Task<IActionResult> DonateForTourament([FromBody] SponnerTouramentRequestDTO dto)
         {
-            var response = await _touramentServices.DonateForTourament(dto);
+            var response = await _vpnpayService.CallApiByUserId(dto.SponnerId, dto.ReturnUrl, null, dto.TouramentId, dto.Amount);
             return StatusCode((int)response.statusCode, response);
         }
         [HttpGet("GetAllTournament")]
@@ -41,6 +43,18 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> GetTournamentById([FromRoute] int TournamentId)
         {
             var response = await _touramentServices.getById(TournamentId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("CheckJoinTouramentOrNot/{UserId}")]
+        public async Task<IActionResult> CheckJoinTouramentOrNot([FromRoute] int UserId)
+        {
+            var response = await _touramentServices.checkAllJoinTourament(UserId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("CheckJoinTouramentOrNot/{UserId}/{TouramentId}")]
+        public async Task<IActionResult> CheckJoinTouramentOrNot([FromRoute] int UserId, [FromRoute] int TouramentId)
+        {
+            var response = await _touramentServices.checkJoinTounramentorNot(UserId, TouramentId);
             return StatusCode((int)response.statusCode, response);
         }
         [HttpGet("GetTouramentByPlayerId/{PlayerId}")]

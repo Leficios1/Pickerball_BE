@@ -485,7 +485,7 @@ namespace Services.Services
                 var matches = await _touramentMatchesRepository.getMatchByTouramentId(TouramentId);
                 if (matches == null || !matches.Any())
                 {
-                    response.statusCode = HttpStatusCode.NotFound;
+                    response.statusCode = HttpStatusCode.OK;
                     response.Message = "No matches found for this tournament.";
                     return response;
                 }
@@ -581,7 +581,7 @@ namespace Services.Services
                         response.statusCode = HttpStatusCode.NotFound;
                         return response;
                     }
-                    if(!match.IsPublic)
+                    if (!match.IsPublic)
                     {
                         response.Message = "Match is not public";
                         response.statusCode = HttpStatusCode.BadRequest;
@@ -596,7 +596,7 @@ namespace Services.Services
                     }
                     int totalPlayers = teams.Sum(t => t.Members.Count);
                     //Sửa lại
-                    int maxPlayers = match.MatchFormat == MatchFormat.DoubleMix || match.MatchFormat == MatchFormat.DoubleFemale || 
+                    int maxPlayers = match.MatchFormat == MatchFormat.DoubleMix || match.MatchFormat == MatchFormat.DoubleFemale ||
                         match.MatchFormat == MatchFormat.DoubleMale ? 4 : 2;
                     if (totalPlayers >= maxPlayers)
                     {
@@ -690,5 +690,32 @@ namespace Services.Services
             };
         }
 
+        public async Task<StatusResponse<bool>> endMatch(int MatchId, int Team1Score, int Team2Score)
+        {
+            var response = new StatusResponse<bool>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var data = await _matchesRepo.GetById(MatchId);
+                    if (data == null)
+                    {
+                        response.Message = "Match not found";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    data.Team1Score = Team1Score;
+                    data.Team2Score = Team2Score;
+                    data.Status = MatchStatus.Completed;
+
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
+                return response;
+            }
+        }
     }
 }

@@ -133,7 +133,6 @@ namespace Services.Services
                         TournamentId = dto.TouramentId,
                         SponsorId = dto.SponnerId,
                         SponsorAmount = dto.Amount,
-                        SponsorNote = dto.Note,
                         CreatedAt = DateTime.UtcNow
                     };
 
@@ -360,7 +359,7 @@ namespace Services.Services
                 if (registrations == null || !registrations.Any())
                 {
                     response.Message = "This player hasn't joined any tournaments";
-                    response.statusCode = HttpStatusCode.NotFound;
+                    response.statusCode = HttpStatusCode.OK;
                     return response;
                 }
                 var tournamentIds = registrations.Select(r => r.TournamentId).Distinct().ToList();
@@ -455,6 +454,93 @@ namespace Services.Services
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get All Tournament Successfully";
 
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<AllTouramentResponseDTO>>> checkAllJoinTourament(int userId)
+        {
+            var response = new StatusResponse<List<AllTouramentResponseDTO>>();
+            try
+            {
+                var data = await _touramentRepository.GetAll();
+                var dataRegis = await _tournamentRegistrationRepository.Get().Where(x => x.PlayerId == userId || x.PartnerId == userId).ToListAsync();
+                var regisStatus = dataRegis.ToDictionary(x => x.TournamentId, x => x.IsApproved);
+                foreach (var check in data)
+                {
+                    int status;
+                    if (regisStatus.TryGetValue(check.Id, out var regisStatus1))
+                    {
+                        switch (regisStatus1)
+                        {
+                            case TouramentregistrationStatus.Approved:
+                                status = 1;
+                                break;
+                            case TouramentregistrationStatus.Pending:
+                                status = 2;
+                                break;
+                            case TouramentregistrationStatus.Rejected:
+                                status = 3;
+                                break;
+                            case TouramentregistrationStatus.Waiting:
+                                status = 4;
+                                break;
+                            case TouramentregistrationStatus.Eliminated:
+                                status = 5;
+                                break;
+                            default:
+                                status = 7;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        status = 6;
+                    }
+                    var responseData = new AllTouramentResponseDTO
+                    {
+                        TouramentId = check.Id,
+                        Status = status
+                    };
+                    if (response.Data == null)
+                    {
+                        response.Data = new List<AllTouramentResponseDTO>();
+                    }
+                    response.Data.Add(responseData);
+                }
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get All Tournament Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<AllTouramentResponseDTO>> checkJoinTounramentorNot(int userId, int TournamentId)
+        {
+            var response = new StatusResponse<AllTouramentResponseDTO>();
+            try
+            {
+                var regisData = await _tournamentRegistrationRepository.Get().Where(x => x.PlayerId == userId && x.TournamentId == TournamentId).SingleOrDefaultAsync();
+                if (regisData == null)
+                {
+                    response.Message = "Not Found";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                response.Data = new AllTouramentResponseDTO
+                {
+                    TouramentId = TournamentId,
+                    Status = (int)regisData.IsApproved
+                };
             }
             catch (Exception ex)
             {

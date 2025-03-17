@@ -25,8 +25,8 @@ namespace Database.Model
         public WinScore WinScore { get; set; } // 11, 15, 21
         [Url]
         public string? UrlVideoMatch { get; set; }
-        public int? Team1Score { get; set; }//2
-        public int? Team2Score { get; set; }//1
+        public int? Team1Score { get; set; }
+        public int? Team2Score { get; set; }
         public bool IsPublic { get; set; }
         [ForeignKey("Owner")]
         public int RoomOwner { get; set; }

@@ -10,7 +10,7 @@ namespace Database.DTO.Request
     {
         public int SponnerId { get; set; }
         public int TouramentId { get; set; }
+        public int ReturnUrl { get; set; }
         public int Amount { get; set; }
-        public string? Note { get; set; }
     }
 }
