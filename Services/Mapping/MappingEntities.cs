@@ -60,7 +60,7 @@ namespace Services.Mapping
             CreateMap<NotificationResponseDTO, Notification>().ReverseMap();
             CreateMap<Payments, BillResponseDTO>().ReverseMap();
 
-
+            CreateMap<Player, PlayerResponseDTO>();
         }
     }
 }

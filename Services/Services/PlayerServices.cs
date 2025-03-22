@@ -141,5 +141,43 @@ namespace Services.Services
             }
             return response;
         }
+
+        public async Task<StatusResponse<List<PlayerResponseDTO>>> PagingPlayers(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
+        {
+            var response = new StatusResponse<List<PlayerResponseDTO>>();
+            try
+            {
+                var data = await _playerRepository.GetAllPlayer();
+                int TotalItems = data.Count;
+
+                if (isOrderbyCreateAt == true)
+                {
+                    data = data.OrderByDescending(x => x.JoinedAt).ToList();
+                }
+                if (PageNumber.HasValue && Pagesize.HasValue)
+                {
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                else
+                {
+                    Pagesize = 10;
+                    PageNumber = 1;
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItems / (double)Pagesize.Value) : 1;
+
+                response.Data = _mapper.Map<List<PlayerResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all player success!";
+                response.TotalItems = TotalItems;
+                response.TotalPages = TotalPage;
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
     }
 }

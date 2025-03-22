@@ -16,5 +16,7 @@ namespace Repository.Repository.Interfeace
         Task<User> UpdateUserAsync(User user);
         Task<User> GetUserByRefershToken(string RefershToken);
         Task<List<User>> GetAllRefeeUserAsync();
+        Task<List<User>> GetAllOrganizerUserAsync();
+        Task<List<User>> GetAllStaffUserAsync();
     }
 }

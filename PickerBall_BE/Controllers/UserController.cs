@@ -59,5 +59,17 @@ namespace PickerBall_BE.Controllers
             var response = await _userServices.CreateReferee(dto);
             return StatusCode((int)response.statusCode, response);
         }
+        [HttpGet("GetAllOrganizer")]
+        public async Task<IActionResult> GetAllOrganizer(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
+        {
+            var response = await _userServices.GetAllOrganizer(PageNumber, Pagesize, isOrderbyCreateAt);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("GetAllStaff")]
+        public async Task<IActionResult> GetAllStaff(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
+        {
+            var response = await _userServices.GetAllStaff(PageNumber, Pagesize, isOrderbyCreateAt);
+            return StatusCode((int)response.statusCode, response);
+        }
     }
 }

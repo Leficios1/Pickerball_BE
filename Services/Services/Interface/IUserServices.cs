@@ -18,5 +18,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<bool>> AcceptUser(int sponserId);
         public Task<StatusResponse<Refree>> CreateReferee(RefereeCreateRequestDTO dto);
         public Task<StatusResponse<List<UserResponseDTO>>> getAllRefeeUser();
+        public Task<StatusResponse<List<UserResponseDTO>>> GetAllOrganizer(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt);
+        public Task<StatusResponse<List<UserResponseDTO>>> GetAllStaff(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt);
     }
 }

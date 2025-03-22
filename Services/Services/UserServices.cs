@@ -286,5 +286,81 @@ namespace Services.Services
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
+
+        public async Task<StatusResponse<List<UserResponseDTO>>> GetAllOrganizer(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var data = await _userRepository.GetAllOrganizerUserAsync();
+                int TotalItems = data.Count;
+
+                if (isOrderbyCreateAt == true)
+                {
+                    data = data.OrderByDescending(x => x.CreateAt).ToList();
+                }
+                if (PageNumber.HasValue && Pagesize.HasValue)
+                {
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                else
+                {
+                    Pagesize = 10;
+                    PageNumber = 1;
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItems / (double)Pagesize.Value) : 1;
+
+                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all organizer success!";
+                response.TotalItems = TotalItems;
+                response.TotalPages = TotalPage;
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<UserResponseDTO>>> GetAllStaff(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt)
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var data = await _userRepository.GetAllStaffUserAsync();
+                int TotalItems = data.Count;
+
+                if (isOrderbyCreateAt == true)
+                {
+                    data = data.OrderByDescending(x => x.CreateAt).ToList();
+                }
+                if (PageNumber.HasValue && Pagesize.HasValue)
+                {
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                else
+                {
+                    Pagesize = 10;
+                    PageNumber = 1;
+                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                }
+                int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItems / (double)Pagesize.Value) : 1;
+
+                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all staff success!";
+                response.TotalItems = TotalItems;
+                response.TotalPages = TotalPage;
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
     }
 }

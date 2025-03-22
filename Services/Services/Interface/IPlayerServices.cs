@@ -14,5 +14,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<PlayerDetails>> GetPlayerById(int PlayerId);
         Task<StatusResponse<List<PlayerDetails>>> GetAllPlayers();
         Task<StatusResponse<PlayerDetails>> UpdatePlayer(PlayerDetailsRequest player);
+        Task<StatusResponse<List<PlayerResponseDTO>>> PagingPlayers(int? PageNumber, int? Pagesize, bool isOrderbyCreateAt);
     }
 }

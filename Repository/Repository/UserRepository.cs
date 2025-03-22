@@ -57,5 +57,15 @@ namespace Repository.Repository
             await _context.SaveChangesAsync();
             return existingUser;
         }
+
+        public async Task<List<User>> GetAllOrganizerUserAsync()
+        {
+            return await _context.Users.Where(x => x.RoleId == 7).ToListAsync();
+        }
+
+        public async Task<List<User>> GetAllStaffUserAsync()
+        {
+            return await _context.Users.Where(x => x.RoleId == 6).ToListAsync();
+        }
     }
 }
