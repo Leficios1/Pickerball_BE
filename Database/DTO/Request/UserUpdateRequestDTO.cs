@@ -13,11 +13,9 @@ namespace Database.DTO.Request
         public string? FirstName { get; set; } = null!;
         public string? LastName { get; set; } = null!;
         public string? SecondName { get; set; }
-        //public string Email { get; set; } = null!;
-        //public string? PasswordHash { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? Gender { get; set; } = null!;
         public string? AvatarUrl { get; set; }
-        public string? Status { get; set; }
+        public bool? Status { get; set; } 
     }
 }

@@ -11,5 +11,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<List<BillResponseDTO>>> GetAllBillByTourament(int TouramentId);
         Task<StatusResponse<BillResponseDTO>> GetBillById(int BillId);
         Task<StatusResponse<List<BillResponseDTO>>> GetAllBillBySponnerId(int SponnerId);
+        Task<StatusResponse<List<BillResponseDTO>>> GetAll();
     }
 }

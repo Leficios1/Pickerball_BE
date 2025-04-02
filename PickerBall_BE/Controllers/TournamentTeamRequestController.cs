@@ -35,6 +35,12 @@ namespace PickerBall_BE.Controllers
             var response = await _tournamentTeamRequestServices.GetTeamRequestByRequestUser(PlayerId);
             return StatusCode((int)response.statusCode, response);
         }
+        [HttpGet("GetTeamRequestByUserId/{UserId}/{TouramentId}")]
+        public async Task<IActionResult> GetTeamRequestByRequestUser([FromRoute] int UserId, [FromRoute] int TouramentId)
+        {
+            var response = await _tournamentTeamRequestServices.CheckAccept(UserId, TouramentId);
+            return StatusCode((int)response.statusCode, response);
+        }
         [HttpGet("GetTeamRequestByReceiverUser/{PlayerId}")]
         public async Task<IActionResult> GetTeamRequestByReceiverUser([FromRoute] int PlayerId)
         {

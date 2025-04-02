@@ -20,7 +20,8 @@ namespace Services.Services.Interface
 
         Task<StatusResponse<List<RoomResponseDTO>>> GetRoomsByUserIdAsync(int userId);
         Task<StatusResponse<bool>> joinMatch(JoinMatchRequestDTO dto);
-        Task<StatusResponse<bool>> endMatch(int MatchId, int Team1Score, int Team2Score);
-
+        Task<StatusResponse<bool>> endMatchTourament(EndMatchTouramentRequestDTO dto);
+        Task<StatusResponse<EndMatchResponseDTO>> GetEndMatchDetailsOfBO3(int MatchId);
+        Task<StatusResponse<bool>> UpdateURLEndMatch(int matchId, string url);
     }
 }

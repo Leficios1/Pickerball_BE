@@ -19,14 +19,10 @@ namespace Database.Model
         public Matches Match { get; set; }
         public int? Round { get; set; }
         public string? Note { get; set; }
-        public int? CurrentHaft { get; set; }// Trận thứ mấy ở BO3 hoặc BO5
+        public int? CurrentHaft { get; set; }// Trận thứ mấy ở BO3
 
-        [ForeignKey("Team1")]
         public int Team1Score { get; set; }
-        public Team Team1 { get; set; }
 
-        [ForeignKey("Team2")]
         public int Team2Score { get; set; }
-        public Team Team2 { get; set; }
     }
 }

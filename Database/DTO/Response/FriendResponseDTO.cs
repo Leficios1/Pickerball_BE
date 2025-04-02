@@ -17,5 +17,7 @@ namespace Database.DTO.Response
         public string? UserFriendAvatar { get; set; }
         public FriendStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Gender { get; set; }
+        public int? ExeprienceLevel { get; set; }
     }
 }

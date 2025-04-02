@@ -29,7 +29,7 @@ namespace Services.Services
             _mapper = mapper;
         }
 
-        public async Task<StatusResponse<TouramentRegistraionResponseDTO>> AcceptPlayer(int PlayerId, bool isAccept, int touramentId)
+        public async Task<StatusResponse<TouramentRegistraionResponseDTO>> AcceptPlayer(int PlayerId, TouramentregistrationStatus isAccept, int touramentId)
         {
             var response = new StatusResponse<TouramentRegistraionResponseDTO>();
             try
@@ -37,16 +37,35 @@ namespace Services.Services
                 var data = await _tournamentRegistrationRepository.getByPlayerIdAndTournamentId(PlayerId, touramentId);
                 if (data == null)
                 {
-                    
+
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "Player not found!";
                     return response;
                 }
-                data.IsApproved = TouramentregistrationStatus.Approved;
+                data.IsApproved = isAccept;
+                _tournamentRegistrationRepository.Update(data);
                 await _tournamentRegistrationRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<TouramentRegistraionResponseDTO>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Change status player successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<int>> CountTeamJoin(int TouramentId)
+        {
+            var response = new StatusResponse<int>();
+            try
+            {
+                var data = await _tournamentRegistrationRepository.Get().Where(tr => tr.TournamentId == TouramentId && tr.IsApproved == TouramentregistrationStatus.Approved).CountAsync();
+                response.Data = data;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Count team join successfully!";
             }
             catch (Exception ex)
             {
@@ -92,34 +111,62 @@ namespace Services.Services
                 }
 
                 var playerData = await _playerRepository.GetById(dto.PlayerId);
-                var partnerData = dto.PartnerId.HasValue ? await _playerRepository.GetById(dto.PartnerId) : null;
-                if (playerData == null || partnerData == null)
+                TournamentRegistration data;
+                if (touramentData.Type == TournamentType.DoublesFemale || touramentData.Type == TournamentType.DoublesMale || touramentData.Type == TournamentType.DoublesMix)
                 {
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.Message = "Player or Partner not found!";
-                    return response;
+                    var partnerData = dto.PartnerId.HasValue ? await _playerRepository.GetById(dto.PartnerId.Value) : null;
+                    if (playerData == null || partnerData == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Player or Partner not found!";
+                        return response;
+                    }
+                    else if (playerData.ExperienceLevel < touramentData.IsMinRanking ||
+                             playerData.ExperienceLevel > touramentData.IsMaxRanking ||
+                             partnerData.ExperienceLevel < touramentData.IsMinRanking ||
+                             partnerData.ExperienceLevel > touramentData.IsMaxRanking)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Player or Partner does not meet the experience requirements for the tournament!";
+                        return response;
+                    }
+
+                    data = new TournamentRegistration()
+                    {
+                        PlayerId = dto.PlayerId,
+                        TournamentId = dto.TournamentId,
+                        RegisteredAt = DateTime.UtcNow,
+                        PartnerId = dto.PartnerId,
+                        IsApproved = TouramentregistrationStatus.Waiting,
+                    };
                 }
-                else if (playerData.ExperienceLevel < touramentData.IsMinRanking ||
-                         playerData.ExperienceLevel > touramentData.IsMaxRanking ||
-                         partnerData.ExperienceLevel < touramentData.IsMinRanking ||
-                         partnerData.ExperienceLevel > touramentData.IsMaxRanking)
+                else
                 {
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.Message = "Player or Partner does not meet the experience requirements for the tournament!";
-                    return response;
-                }
-                
-                var data = new TournamentRegistration()
-                {
-                    PlayerId = dto.PlayerId,
-                    TournamentId = dto.TournamentId,
-                    RegisteredAt = DateTime.UtcNow,
-                    PartnerId = dto.PartnerId,
-                    IsApproved = TouramentregistrationStatus.Pending,
-                };
-                if(dto.PartnerId.HasValue)
-                {
-                    data.IsApproved = TouramentregistrationStatus.Waiting;
+                    if (playerData == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Player not found!";
+                        return response;
+                    }
+                    else if (playerData.ExperienceLevel < touramentData.IsMinRanking ||
+                             playerData.ExperienceLevel > touramentData.IsMaxRanking)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Player does not meet the experience requirements for the tournament!";
+                        return response;
+                    }
+                    
+                    data = new TournamentRegistration()
+                    {
+                        PlayerId = dto.PlayerId,
+                        TournamentId = dto.TournamentId,
+                        RegisteredAt = DateTime.UtcNow,
+                        IsApproved = TouramentregistrationStatus.Pending,
+                    };
+                    if(touramentData.IsFree == false)
+                    {
+                        data.IsApproved = TouramentregistrationStatus.Approved;
+                    }
                 }
                 await _tournamentRegistrationRepository.AddAsync(data);
                 await _tournamentRegistrationRepository.SaveChangesAsync();

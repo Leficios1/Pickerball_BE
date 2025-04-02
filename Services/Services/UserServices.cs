@@ -124,28 +124,29 @@ namespace Services.Services
             try
             {
                 var data = await _userRepository.GetAllUser();
-                int TotalItems = data.Count;
+                var TotalItem = data.Count();
 
                 if (isOrderbyCreateAt == true)
                 {
                     data = data.OrderByDescending(x => x.CreateAt).ToList();
                 }
-                if (PageNumber.HasValue && Pagesize.HasValue)
-                {
-                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
-                }
-                else
-                {
-                    Pagesize = 10;
-                    PageNumber = 1;
-                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
-                }
-                int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItems / (double)Pagesize.Value) : 1;
+                int? TotalPage = null;
 
+                if (PageNumber.HasValue || Pagesize.HasValue)
+                {
+                    Pagesize ??= 10;
+                    PageNumber ??= 1;
+                    data = data
+                        .Skip((PageNumber.Value - 1) * Pagesize.Value)
+                        .Take(Pagesize.Value)
+                        .ToList();
+
+                    TotalPage = (int)Math.Ceiling((double)TotalItem / Pagesize.Value);
+                }
                 response.Data = _mapper.Map<List<UserResponseDTO>>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all user success!";
-                response.TotalItems = TotalItems;
+                response.TotalItems = TotalItem;
                 response.TotalPages = TotalPage;
             }
             catch (Exception e)
@@ -206,13 +207,13 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto)
+        public async Task<StatusResponse<UserResponseDTO>> UpdateUser(UserUpdateRequestDTO dto, int id)
         {
             var response = new StatusResponse<UserResponseDTO>();
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 try
                 {
-                    var existingUser = await _userRepository.GetUserByIdAsync(dto.UserId);
+                    var existingUser = await _userRepository.GetUserByIdAsync(id);
                     if (existingUser == null)
                     {
                         response.statusCode = HttpStatusCode.NotFound;
@@ -285,6 +286,23 @@ namespace Services.Services
         private string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        }
+
+        public async Task<StatusResponse<List<UserResponseDTO>>> getAllPlayerUser()
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var data = await _userRepository.Get().Include(x => x.Player).Where(x => x.RoleId == 1).ToListAsync();
+                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all player user success!";
+            }catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
         }
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Database.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDbV1 : Migration
+    public partial class UpdateDBSeeder : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,6 +58,29 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "transactionPayments",
+                columns: table => new
+                {
+                    TransactionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BankTranNo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PayDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OrderInfo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ResponseCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TransactionStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CardType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TxnRef = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Amount = table.Column<long>(type: "bigint", nullable: false),
+                    BankCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_transactionPayments", x => x.TransactionId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Rules",
                 columns: table => new
                 {
@@ -65,6 +88,8 @@ namespace Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image1 = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Image2 = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BlogCategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -263,8 +288,8 @@ namespace Database.Migrations
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MaxPlayer = table.Column<int>(type: "int", nullable: false),
                     Descreption = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsMinRanking = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsMaxRanking = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsMinRanking = table.Column<int>(type: "int", nullable: true),
+                    IsMaxRanking = table.Column<int>(type: "int", nullable: true),
                     Banner = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Social = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -475,6 +500,7 @@ namespace Database.Migrations
                     Team1Score = table.Column<int>(type: "int", nullable: true),
                     Team2Score = table.Column<int>(type: "int", nullable: true),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
+                    Log = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RoomOwner = table.Column<int>(type: "int", nullable: false),
                     RefereeId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -523,6 +549,29 @@ namespace Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tournamentTeamRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RegistrationId = table.Column<int>(type: "int", nullable: false),
+                    RequesterId = table.Column<int>(type: "int", nullable: false),
+                    PartnerId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tournamentTeamRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_tournamentTeamRequests_TournamentRegistrations_RegistrationId",
+                        column: x => x.RegistrationId,
+                        principalTable: "TournamentRegistrations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MatchesSendRequest",
                 columns: table => new
                 {
@@ -554,6 +603,29 @@ namespace Database.Migrations
                         column: x => x.PlayerRequestId,
                         principalTable: "Player",
                         principalColumn: "PlayerId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MatchScore",
+                columns: table => new
+                {
+                    MatchScoreId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MatchId = table.Column<int>(type: "int", nullable: false),
+                    Round = table.Column<int>(type: "int", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CurrentHaft = table.Column<int>(type: "int", nullable: true),
+                    Team1Score = table.Column<int>(type: "int", nullable: false),
+                    Team2Score = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MatchScore", x => x.MatchScoreId);
+                    table.ForeignKey(
+                        name: "FK_MatchScore_Matches_MatchId",
+                        column: x => x.MatchId,
+                        principalTable: "Matches",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -604,39 +676,6 @@ namespace Database.Migrations
                         name: "FK_TouramentMatches_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MatchScore",
-                columns: table => new
-                {
-                    MatchScoreId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MatchId = table.Column<int>(type: "int", nullable: false),
-                    Round = table.Column<int>(type: "int", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CurrentHaft = table.Column<int>(type: "int", nullable: true),
-                    Team1Score = table.Column<int>(type: "int", nullable: false),
-                    Team2Score = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MatchScore", x => x.MatchScoreId);
-                    table.ForeignKey(
-                        name: "FK_MatchScore_Matches_MatchId",
-                        column: x => x.MatchId,
-                        principalTable: "Matches",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_MatchScore_Teams_Team1Score",
-                        column: x => x.Team1Score,
-                        principalTable: "Teams",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_MatchScore_Teams_Team2Score",
-                        column: x => x.Team2Score,
-                        principalTable: "Teams",
                         principalColumn: "Id");
                 });
 
@@ -728,16 +767,6 @@ namespace Database.Migrations
                 name: "IX_MatchScore_MatchId",
                 table: "MatchScore",
                 column: "MatchId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MatchScore_Team1Score",
-                table: "MatchScore",
-                column: "Team1Score");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MatchScore_Team2Score",
-                table: "MatchScore",
-                column: "Team2Score");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notifications_UserId",
@@ -845,6 +874,11 @@ namespace Database.Migrations
                 column: "OrganizerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_tournamentTeamRequests_RegistrationId",
+                table: "tournamentTeamRequests",
+                column: "RegistrationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -901,6 +935,12 @@ namespace Database.Migrations
                 name: "TournamentReferees");
 
             migrationBuilder.DropTable(
+                name: "tournamentTeamRequests");
+
+            migrationBuilder.DropTable(
+                name: "transactionPayments");
+
+            migrationBuilder.DropTable(
                 name: "BlogCategories");
 
             migrationBuilder.DropTable(
@@ -910,10 +950,10 @@ namespace Database.Migrations
                 name: "Teams");
 
             migrationBuilder.DropTable(
-                name: "TournamentRegistrations");
+                name: "Refree");
 
             migrationBuilder.DropTable(
-                name: "Refree");
+                name: "TournamentRegistrations");
 
             migrationBuilder.DropTable(
                 name: "Matches");

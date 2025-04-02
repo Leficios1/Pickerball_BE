@@ -32,6 +32,7 @@ namespace Database.Model
         Approved = 2,// Da payment
         Rejected = 3, // Ko dong y cho tham gia giai dau
         Waiting = 4, // Cho accept tu partner
-        Eliminated = 5 // Bi loai
+        Eliminated = 5, // Bi loai
+        Request = 6, // Nhan duoc loi moi tham gia
     }
 }

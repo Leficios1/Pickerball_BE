@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Database.DTO.Request
     {
         public int TournamentId { get; set; }
         public int PlayerId { get; set; }
-        public bool isAccept { get; set; } = false;
+        public TouramentregistrationStatus isAccept { get; set; }
         public int? PartnerId { get; set; }
     }
 }

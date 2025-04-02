@@ -15,5 +15,6 @@ namespace Database.DTO.Response
         public DateTime RegisteredAt { get; set; }
         public TouramentregistrationStatus IsApproved { get; set; }
         public int? PartnerId { get; set; }
+        public int? RequestId { get; set; }
     }
 }

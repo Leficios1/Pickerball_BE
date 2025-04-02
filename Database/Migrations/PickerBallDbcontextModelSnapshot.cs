@@ -127,10 +127,6 @@ namespace Database.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.HasIndex("Team1Score");
-
-                    b.HasIndex("Team2Score");
-
                     b.ToTable("MatchScore");
                 });
 
@@ -151,6 +147,9 @@ namespace Database.Migrations
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Log")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MatchCategory")
                         .HasColumnType("int");
@@ -466,6 +465,12 @@ namespace Database.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image2")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -1048,23 +1053,7 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Database.Model.Team", "Team1")
-                        .WithMany()
-                        .HasForeignKey("Team1Score")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Database.Model.Team", "Team2")
-                        .WithMany()
-                        .HasForeignKey("Team2Score")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Match");
-
-                    b.Navigation("Team1");
-
-                    b.Navigation("Team2");
                 });
 
             modelBuilder.Entity("Database.Model.Matches", b =>

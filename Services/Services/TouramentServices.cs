@@ -32,10 +32,12 @@ namespace Services.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly ISponserTouramentRepository _sponserTouramentRepository;
+        private readonly ITournamentTeamRequestRepository _tournamentTeamRequestRepository;
 
         public TouramentServices(ITouramentRepository touramentRepository, IMapper mapper, ISponsorRepository sponsorRepository, IPlayerRepository playerRepository,
             IMatchesRepository matchRepository, ITournamentRegistrationRepository tournamentRegistrationRepository, ITouramentMatchesRepository touramentMatchesRepository
-            , ITeamRepository teamRepository, IUserRepository userRepository, IPaymentRepository paymentRepository, ISponserTouramentRepository sponserTouramentRepository)
+            , ITeamRepository teamRepository, IUserRepository userRepository, IPaymentRepository paymentRepository, ISponserTouramentRepository sponserTouramentRepository,
+            ITournamentTeamRequestRepository tournamentTeamRequestRepository)
         {
             _touramentRepository = touramentRepository;
             _mapper = mapper;
@@ -48,6 +50,7 @@ namespace Services.Services
             _userRepository = userRepository;
             _paymentRepository = paymentRepository;
             _sponserTouramentRepository = sponserTouramentRepository;
+            _tournamentTeamRequestRepository = tournamentTeamRequestRepository;
         }
 
         public async Task<StatusResponse<TournamentResponseDTO>> CreateTournament(TournamentRequestDTO dto)
@@ -77,13 +80,14 @@ namespace Services.Services
                         return response;
                     }
                 }
-                else
+                else 
                 {
                     dto.EntryFee = 0;
                 }
                 var data = _mapper.Map<Tournaments>(dto);
                 data.Status = "Pending"; // Default status is "Pending"
                 data.IsAccept = false; // Default is not accept
+                data.Descreption = dto.Description;
                 await _touramentRepository.AddAsync(data);
                 await _touramentRepository.SaveChangesAsync();
                 response.Data = _mapper.Map<TournamentResponseDTO>(data);
@@ -172,13 +176,17 @@ namespace Services.Services
                     response.statusCode = HttpStatusCode.NotFound;
                     return response;
                 }
-                var sponnerList = data.Select(dataItem => new SponerDetails
-                {
-                    Id = dataItem.Sponsor.SponsorId,
-                    Name = dataItem.Sponsor.CompanyName,
-                    Logo = dataItem.Sponsor.LogoUrl,
-                    Website = dataItem.Sponsor.UrlSocial
-                }).ToList();
+                var sponnerList = data
+                            .GroupBy(x => x.SponsorId)
+                            .Select(group => new SponerDetails
+                            {
+                                Id = group.Key,
+                                Name = group.First().Sponsor.CompanyName,
+                                Logo = group.First().Sponsor.LogoUrl,
+                                Website = group.First().Sponsor.UrlSocial,
+                                Donate = group.Sum(x => x.SponsorAmount)
+                            })
+                            .ToList();
                 response.Data = sponnerList;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get All Sponner Successfully";
@@ -196,6 +204,7 @@ namespace Services.Services
             var response = new StatusResponse<List<TournamentResponseDTO>>();
             try
             {
+
                 var data = await _touramentRepository.GetAllTournament();
                 var TotalItem = data.Count();
 
@@ -203,17 +212,19 @@ namespace Services.Services
                 {
                     data = data.OrderByDescending(x => x.CreateAt).ToList();
                 }
-                if (PageNumber.HasValue && Pagesize.HasValue)
+                int? TotalPage = null;
+
+                if (PageNumber.HasValue || Pagesize.HasValue)
                 {
-                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
+                    Pagesize ??= 10;
+                    PageNumber ??= 1;
+                    data = data
+                        .Skip((PageNumber.Value - 1) * Pagesize.Value)
+                        .Take(Pagesize.Value)
+                        .ToList();
+
+                    TotalPage = (int)Math.Ceiling((double)TotalItem / Pagesize.Value);
                 }
-                else
-                {
-                    Pagesize = 10;
-                    PageNumber = 1;
-                    data = data.Skip((PageNumber.Value - 1) * Pagesize.Value).Take(Pagesize.Value).ToList();
-                }
-                int TotalPage = (Pagesize.HasValue && Pagesize > 0) ? (int)Math.Ceiling(TotalItem / (double)Pagesize.Value) : 1;
                 response.Data = _mapper.Map<List<TournamentResponseDTO>>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get All Tournament Successfully";
@@ -287,7 +298,7 @@ namespace Services.Services
                         if (playerData != null)
                         {
                             var userData = await _userRepository.GetById(playerData.PlayerId);
-                            var paymentData = await _paymentRepository.GetPaymentByUserId(playerData.PlayerId);
+                            var paymentData = await _paymentRepository.Get().Where(x => x.UserId == playerData.PlayerId && x.TournamentId == id).SingleOrDefaultAsync();
                             var playerRegistration = new PlayerRegistrationDetails
                             {
                                 FirstName = userData.FirstName,
@@ -529,7 +540,7 @@ namespace Services.Services
             var response = new StatusResponse<AllTouramentResponseDTO>();
             try
             {
-                var regisData = await _tournamentRegistrationRepository.Get().Where(x => x.PlayerId == userId && x.TournamentId == TournamentId).SingleOrDefaultAsync();
+                var regisData = await _tournamentRegistrationRepository.Get().Where(x => x.PlayerId == userId && x.TournamentId == TournamentId || x.PartnerId == userId && x.TournamentId == TournamentId).SingleOrDefaultAsync();
                 if (regisData == null)
                 {
                     response.Message = "Not Found";
@@ -541,6 +552,13 @@ namespace Services.Services
                     TouramentId = TournamentId,
                     Status = (int)regisData.IsApproved
                 };
+                var flag = await _tournamentTeamRequestRepository.Get().Where(x => x.RegistrationId == regisData.Id && x.PartnerId == userId && x.Status == TournamentRequestStatus.Pending).SingleOrDefaultAsync();
+                if (flag != null)
+                {
+                    response.Data.Status = 6;
+                }
+                response.statusCode=HttpStatusCode.OK;
+                response.Message = "Check Join Tournament Successfully";
             }
             catch (Exception ex)
             {

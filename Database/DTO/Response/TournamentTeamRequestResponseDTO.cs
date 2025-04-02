@@ -19,6 +19,7 @@ namespace Database.DTO.Response
         public int PartnerId { get; set; }  // Người nhận lời mời
 
         public TournamentRequestStatus Status { get; set; } // Pending, Accepted, Rejected
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -12,7 +12,7 @@ namespace Services.Services.Interface
     {
         Task<StatusResponse<FriendResponseDTO>> AddFriend(FriendRequestDTO dto);
         Task<StatusResponse<bool>> RemoveFriend(FriendRequestDTO dto);
-        Task<StatusResponse<List<FriendResponseDTO>>> GetFriends(int userId);
+        Task<StatusResponse<List<FriendResponseDTO>>> GetFriends(int userId, string? Gender, int? MinLevel, int? MaxLevel);
         Task<StatusResponse<List<FriendResponseDTO>>> GetFriendRequests(int userId);
         Task<StatusResponse<bool>> AcceptFriendRequest(FriendRequestDTO dto);
     }

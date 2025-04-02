@@ -30,34 +30,43 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> CreateRegistration([FromBody] TouramentRegistrationDTO touramentRegistrationDTO)
         {
             var response = await _playerRegistrationServices.CreateRegistration(touramentRegistrationDTO);
-            if (touramentRegistrationDTO.PartnerId.HasValue)
+            if (response.Data != null)
             {
-                var request = new TournamentTeamRequestDTO
+                if (touramentRegistrationDTO.PartnerId.HasValue)
                 {
-                    RegistrationId = response.Data.Id,
-                    RequesterId = touramentRegistrationDTO.PlayerId,
-                    RecevierId = touramentRegistrationDTO.PartnerId.Value
-                };
-                await _tournamentTeamRequestServices.SendTeamRequest(request);
+                    var request = new TournamentTeamRequestDTO
+                    {
+                        RegistrationId = response.Data.Id,
+                        RequesterId = touramentRegistrationDTO.PlayerId,
+                        RecevierId = (int)touramentRegistrationDTO.PartnerId
+                    };
+                    await _tournamentTeamRequestServices.SendTeamRequest(request);
+                }
             }
             return StatusCode((int)response.statusCode, response);
-        } 
+        }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var response = await _playerRegistrationServices.GetAll();
             return StatusCode((int)response.statusCode, response);
-        } 
+        }
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await _playerRegistrationServices.GetById(id);
             return StatusCode((int)response.statusCode, response);
-        } 
+        }
         [HttpGet("GetByTouramentId/{tourId}")]
         public async Task<IActionResult> GetByTouramentId([FromRoute] int tourId)
         {
             var response = await _playerRegistrationServices.GetByTouramentId(tourId);
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("CountJoinTourament/{tourId}")]
+        public async Task<IActionResult> CountJoinTourament([FromRoute] int tourId)
+        {
+            var response = await _playerRegistrationServices.CountTeamJoin(tourId);
             return StatusCode((int)response.statusCode, response);
         }
     }

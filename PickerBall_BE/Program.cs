@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Repository.Repository.Interfeace;
 using Repository.Repository;
 using Repository.Repository.Interface;
+using Database.Model;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +101,13 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.Configure<VnpayConfig>(builder.Configuration.GetSection("VNPAY"));
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbSeeder.SeedAsync(services);
+}
+
 app.UseCors("AllowAll");
 app.UseDeveloperExceptionPage();
 app.UseSwagger();

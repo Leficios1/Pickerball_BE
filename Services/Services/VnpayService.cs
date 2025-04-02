@@ -149,7 +149,7 @@ namespace Services.Services
                 vnpay.AddRequestData("vnp_OrderType", "order");
                 vnpay.AddRequestData("vnp_ReturnUrl", return_URL);
                 vnpay.AddRequestData("vnp_TxnRef", vnp_TxnRef);
-                vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddHours(3).ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddMinutes(30).ToString("yyyyMMddHHmmss"));
                 //vnpay.AddRequestData("vnp_TypePayment", typePayment);
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
@@ -258,50 +258,55 @@ namespace Services.Services
                             response.statusCode = HttpStatusCode.OK;
                             transaction.Complete();
                         }
-                    }
-                    else if (typePayment.ToLower() == "Donate".ToLower())
-                    {
-                        var order = await _tenantRegistrationRepository.Get().Where(x => x.Id == Int32.Parse(orderId)).SingleOrDefaultAsync();
-                        if (order == null) throw new Exception("Error to payment: Can not find order to payment");
-                        var tournament = await _tournamentRepository.Get().Where(x => x.Id == order.TournamentId).SingleOrDefaultAsync();
-                        if (tournament == null)
-                            throw new Exception("Error: Tournament not found for donation");
+                        else if (typePayment.ToLower() == "Donate".ToLower())
+                        {
+                            //var order = await _tenantRegistrationRepository.Get().Where(x => x.Id == Int32.Parse(orderId)).SingleOrDefaultAsync();
+                            //if (order == null) throw new Exception("Error to payment: Can not find order to payment");
+                            var tournament = await _tournamentRepository.Get().Where(x => x.Id == Int32.Parse(orderId)).SingleOrDefaultAsync();
+                            if (tournament == null)
+                                throw new Exception("Error: Tournament not found for donation");
 
-                        SponnerTourament sponsorDonation = new SponnerTourament()
+                            SponnerTourament sponsorDonation = new SponnerTourament()
+                            {
+                                SponsorId = dto.userId, // 🔥 Ai donate?
+                                TournamentId = tournament.Id,
+                                SponsorAmount = vnp_Amount,
+                                SponsorNote = "Donation for Tournament: " + orderId,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            tournament.TotalPrize += vnp_Amount;
+                            Payments payment = new Payments()
+                            {
+                                UserId = dto.userId,
+                                TournamentId = tournament.Id,
+                                Amount = vnp_Amount,
+                                Note = "Donate for Tourament: " + tournament.Id,
+                                PaymentMethod = "VNPAY",
+                                Status = PaymentStatus.Completed,
+                                Type = TypePayment.Donate,
+                                PaymentDate = DateTime.UtcNow
+                            };
+                            _tournamentRepository.Update(tournament);
+                            await _sponserTouramentRepository.AddAsync(sponsorDonation);
+                            await _paymentRepository.AddAsync(payment);
+                            await _sponserTouramentRepository.SaveChangesAsync();
+                            await _tournamentRepository.SaveChangesAsync();
+                            await _paymentRepository.SaveChangesAsync();
+                            PaymentResponseDTO paymentResponse = new PaymentResponseDTO()
+                            {
+                                ResponseCodeMessage = responseCodeMessage,
+                                TransactionStatusMessage = transactionStatusMessage,
+                                VnPayResponse = responsePayment
+                            };
+                            response.Data = paymentResponse;
+                            response.statusCode = HttpStatusCode.OK;
+                            transaction.Complete();
+                        }
+                        else
                         {
-                            SponsorId = Int32.Parse(vnpay.GetResponseData("vnp_UserId")), // 🔥 Ai donate?
-                            TournamentId = tournament.Id,
-                            SponsorAmount = vnp_Amount,
-                            SponsorNote = "Donation for Tournament: " + orderId,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        tournament.TotalPrize += vnp_Amount;
-                        Payments payment = new Payments()
-                        {
-                            UserId = Int32.Parse(vnpay.GetResponseData("vnp_UserId")),
-                            TournamentId = tournament.Id,
-                            Amount = vnp_Amount,
-                            Note = "Donate for Tourament: " + tournament.Id,
-                            PaymentMethod = "VNPAY",
-                            Status = PaymentStatus.Completed,
-                            Type = TypePayment.Donate,
-                            PaymentDate = DateTime.UtcNow
-                        };
-                        _tournamentRepository.Update(tournament);
-                        await _sponserTouramentRepository.AddAsync(sponsorDonation);
-                        await _paymentRepository.AddAsync(payment);
-                        await _sponserTouramentRepository.SaveChangesAsync();
-                        await _tournamentRepository.SaveChangesAsync();
-                        await _paymentRepository.SaveChangesAsync();
-                        PaymentResponseDTO paymentResponse = new PaymentResponseDTO()
-                        {
-                            ResponseCodeMessage = responseCodeMessage,
-                            TransactionStatusMessage = transactionStatusMessage,
-                            VnPayResponse = responsePayment
-                        };
-                        response.Data = paymentResponse;
-                        response.statusCode = HttpStatusCode.OK;
-                        transaction.Complete();
+                            response.statusCode = HttpStatusCode.BadRequest;
+                            response.Message = "Payment failed!";
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -407,6 +412,24 @@ namespace Services.Services
                     response.Message = "Bill not found!";
                     return response;
                 }
+                response.Data = _mapper.Map<List<BillResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get all bill successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<BillResponseDTO>>> GetAll()
+        {
+            var response = new StatusResponse<List<BillResponseDTO>>();
+            try
+            {
+                var data = await _paymentRepository.GetAll();
                 response.Data = _mapper.Map<List<BillResponseDTO>>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all bill successfully!";

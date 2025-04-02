@@ -92,10 +92,29 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
 
         }
+        [HttpGet("GetMatchDetails/{MatchId}")]
+        public async Task<IActionResult> GetMatchDetails([FromRoute] int MatchId)
+        {
+            var response = await _matchService.GetEndMatchDetailsOfBO3(MatchId);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+
+        }
         [HttpPost("JoinMatch")]
         public async Task<IActionResult> JoinMatch([FromBody] JoinMatchRequestDTO dto)
         {
             var response = await _matchService.joinMatch(dto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
+        [HttpPost("EndMatchTourament")]
+        public async Task<IActionResult> EndMatchTourament([FromBody] EndMatchTouramentRequestDTO dto)
+        {
+            var response = await _matchService.endMatchTourament(dto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
+        [HttpPut("UpdateURLEndMatch")]
+        public async Task<IActionResult> UpdateURLEndMatch([FromBody] UpdateURLEndMatchRequestDTO dto)
+        {
+            var response = await _matchService.UpdateURLEndMatch(dto.MatchId, dto.Url);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
     }

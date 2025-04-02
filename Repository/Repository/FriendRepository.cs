@@ -32,8 +32,8 @@ namespace Repository.Repository
         {
             return await _context.Friends
                 .Where(f => f.Status == FriendStatus.Accepted && (f.User1Id == userId || f.User2Id == userId))
-                .Include(f => f.User2)
-                .Include(f => f.User1)
+                .Include(f => f.User2).ThenInclude(u => u.Player)
+                .Include(f => f.User1).ThenInclude(u => u.Player)
                 .ToListAsync();
         }
     }

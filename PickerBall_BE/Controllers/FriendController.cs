@@ -18,9 +18,9 @@ namespace PickerBall_BE.Controllers
         }
 
         [HttpGet("GetFriend/{userId}")]
-        public async Task<IActionResult> getFriend([FromRoute] int userId)
+        public async Task<IActionResult> getFriend([FromRoute] int userId, string? Gender, int? MinLevel, int? Maxlevel)
         {
-            var response = await _friendService.GetFriends(userId);
+            var response = await _friendService.GetFriends(userId, Gender, MinLevel, Maxlevel);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpGet("GetFriendRequest/{userId}")]

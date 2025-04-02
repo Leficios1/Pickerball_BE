@@ -59,6 +59,15 @@ namespace Services.Mapping
 
             CreateMap<NotificationResponseDTO, Notification>().ReverseMap();
             CreateMap<Payments, BillResponseDTO>().ReverseMap();
+            CreateMap<RankingResponseDTO, User>().ReverseMap();
+            CreateMap<User, RankingResponseDTO>()
+                    .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Player.PlayerId))
+                    .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FirstName + " " + src.LastName))
+                    .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.AvatarUrl))
+                    .ForMember(dest => dest.RankingPoint, opt => opt.MapFrom(src => src.Player.RankingPoint))
+                    .ForMember(dest => dest.ExeprienceLevel, opt => opt.MapFrom(src => src.Player.ExperienceLevel))
+                    .ForMember(dest => dest.TotalWins, opt => opt.MapFrom(src => src.Player.TotalWins))
+                    .ForMember(dest => dest.TotalMatch, opt => opt.MapFrom(src => src.Player.TotalMatch));
 
 
         }

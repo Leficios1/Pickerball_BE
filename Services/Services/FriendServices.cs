@@ -115,8 +115,13 @@ namespace Services.Services
                     User1Id = f.User1Id,
                     User2Id = f.User2Id,
                     UserFriendId = f.User1Id == userId ? f.User2Id : f.User1Id,
-                    UserFriendName = f.User1Id == userId ? f.User2.FirstName + " " + f.User2.LastName : f.User1.FirstName + " " + f.User1.LastName,
-                    UserFriendAvatar = f.User1Id == userId ? f.User2.AvatarUrl : f.User1.AvatarUrl,
+                    UserFriendName = f.User1Id == userId
+    ? (f.User2 != null ? f.User2.FirstName + " " + f.User2.LastName : "Unknown")
+    : (f.User1 != null ? f.User1.FirstName + " " + f.User1.LastName : "Unknown"),
+
+                    UserFriendAvatar = f.User1Id == userId
+    ? (f.User2?.AvatarUrl ?? "")
+    : (f.User1?.AvatarUrl ?? ""),
                     Status = f.Status,
                     CreatedAt = f.CreatedAt
                 }).ToList();
@@ -134,29 +139,54 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<List<FriendResponseDTO>>> GetFriends(int userId)
+        public async Task<StatusResponse<List<FriendResponseDTO>>> GetFriends(int userId, string? Gender, int? MinLevel, int? MaxLevel)
         {
             var response = new StatusResponse<List<FriendResponseDTO>>();
             try
             {
                 var friendships = await _friendRepository.GetFriendsAsync(userId);
+                
                 if (friendships == null || !friendships.Any())
                 {
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "No friends found.";
                     return response;
                 }
-
-                var result = friendships.Select(f => new FriendResponseDTO
+                if (!string.IsNullOrEmpty(Gender))
                 {
-                    Id = f.Id,
-                    User1Id = f.User1Id,
-                    User2Id = f.User2Id,
-                    UserFriendId = f.User1Id == userId ? f.User2Id : f.User1Id,
-                    UserFriendName = f.User1Id == userId ? f.User2.FirstName + " " + f.User2.LastName : f.User1.FirstName + " " + f.User1.LastName,
-                    UserFriendAvatar = f.User1Id == userId ? f.User2.AvatarUrl : f.User1.AvatarUrl,
-                    Status = f.Status,
-                    CreatedAt = f.CreatedAt
+                    friendships = friendships.Where(f => (f.User1Id == userId ? f.User2.Gender : f.User1.Gender) == Gender).ToList();
+                }
+
+                var filteredFriends = friendships.Where(f =>
+                {
+
+                    var friendUser = f.User1Id == userId ? f.User2 : f.User1;
+                    if (Gender != null && friendUser.Gender?.ToLower() != Gender.ToLower())
+                        return false;
+                    if (MinLevel.HasValue && friendUser.Player.ExperienceLevel < MinLevel.Value)
+                        return false;
+                    if (MaxLevel.HasValue && friendUser.Player.ExperienceLevel > MaxLevel.Value)
+                        return false;
+                    return true;
+                });
+
+                var result = friendships.Select(f =>
+                {
+                    var friendUser = f.User1Id == userId ? f.User2 : f.User1;
+
+                    return new FriendResponseDTO
+                    {
+                        Id = f.Id,
+                        User1Id = f.User1Id,
+                        User2Id = f.User2Id,
+                        UserFriendId = f.User1Id == userId ? f.User2Id : f.User1Id,
+                        UserFriendName = f.User1Id == userId ? f.User2.FirstName + " " + f.User2.LastName : f.User1.FirstName + " " + f.User1.LastName,
+                        UserFriendAvatar = f.User1Id == userId ? f.User2.AvatarUrl : f.User1.AvatarUrl,
+                        Status = f.Status,
+                        CreatedAt = f.CreatedAt,
+                        Gender = friendUser.Gender,
+                        ExeprienceLevel = friendUser.Player.ExperienceLevel
+                    };
                 }).ToList();
                 response.Data = result;
                 response.Message = "Friends fetched successfully";

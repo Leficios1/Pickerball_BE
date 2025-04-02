@@ -21,14 +21,51 @@ namespace Services.Services
         private readonly ITournamentTeamRequestRepository _tournamentTeamRequestRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly ITournamentRegistrationRepository _tournamentRegistrationRepository;
+        private readonly ITouramentRepository _touramentRepository;
         private readonly IMapper _mapper;
 
-        public TournamentTeamRequestServices(ITournamentTeamRequestRepository tournamentTeamRequestRepository, IMapper mapper, INotificationRepository notificationRepository, ITournamentRegistrationRepository tournamentRegistrationRepository)
+        public TournamentTeamRequestServices(ITournamentTeamRequestRepository tournamentTeamRequestRepository, IMapper mapper, INotificationRepository notificationRepository, ITournamentRegistrationRepository tournamentRegistrationRepository,
+            ITouramentRepository touramentRepository)
         {
             _tournamentTeamRequestRepository = tournamentTeamRequestRepository;
             _mapper = mapper;
             _notificationRepository = notificationRepository;
             _tournamentRegistrationRepository = tournamentRegistrationRepository;
+            _touramentRepository = touramentRepository;
+        }
+
+        public async Task<StatusResponse<TouramentRegistraionResponseDTO>> CheckAccept(int userId, int touramentId)
+        {
+            var response = new StatusResponse<TouramentRegistraionResponseDTO>();
+            try
+            {
+                var data = await _tournamentTeamRequestRepository.Get().Include(t => t.TournamentRegistration).
+                    Where(x => x.RequesterId == userId && x.TournamentRegistration.TournamentId == touramentId || x.PartnerId == userId && x.TournamentRegistration.TournamentId == touramentId).SingleOrDefaultAsync();
+                if(data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Request not found!";
+                    return response;
+                }
+                var responseData = new TouramentRegistraionResponseDTO
+                {
+                    Id = data.RegistrationId,
+                    PlayerId = data.RequesterId,
+                    TournamentId = data.TournamentRegistration.TournamentId,
+                    PartnerId = data.PartnerId,
+                    IsApproved = data.TournamentRegistration.IsApproved,
+                    RegisteredAt = data.TournamentRegistration.RegisteredAt,
+                    RequestId = data.Id
+                };
+                response.Data = responseData;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get team request successfully!";
+            }catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
         public async Task<StatusResponse<List<TournamentTeamRequestResponseDTO>>> GetTeamRequestByRequestUser(int PlayerId)
@@ -123,6 +160,11 @@ namespace Services.Services
                             Message = "Your team invitation was accepted.",
                             CreatedAt = DateTime.UtcNow
                         };
+                        var dataTourament = await _touramentRepository.GetById(registration.TournamentId);
+                        if(dataTourament.IsFree == false)
+                        {
+                            registration.IsApproved = TouramentregistrationStatus.Approved;
+                        }
                         await _notificationRepository.AddAsync(notification);
                         await _notificationRepository.SaveChangesAsync();
                         await _tournamentRegistrationRepository.SaveChangesAsync();

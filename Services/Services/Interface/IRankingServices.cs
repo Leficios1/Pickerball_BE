@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.DTO.Response;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace Services.Services.Interface
 {
     public interface IRankingServices
     {
+        Task<StatusResponse<List<RankingResponseDTO>>> LeaderBoard();
     }
 }

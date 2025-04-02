@@ -29,9 +29,15 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, response);
         }
         [HttpGet("GetAllRefee")]
-        public async Task<IActionResult> GetRefeeUserById()
+        public async Task<IActionResult> GetRefeeUser()
         {
             var response = await _userServices.getAllRefeeUser();
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("GetAllPlayer")]
+        public async Task<IActionResult> GetAllPlayer()
+        {
+            var response = await _userServices.getAllPlayerUser();
             return StatusCode((int)response.statusCode, response);
         }
         [HttpPost("AcceptUser/{sponserId}")]
@@ -41,10 +47,10 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, response);
         }
 
-        [HttpPatch("UpdateUser")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateRequestDTO dto)
+        [HttpPatch("UpdateUser/{id}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] int id, [FromBody] UserUpdateRequestDTO dto)
         {
-            var response = await _userServices.UpdateUser(dto);
+            var response = await _userServices.UpdateUser(dto, id);
             return StatusCode((int)response.statusCode, response);
         }
         [HttpDelete("DeletedUser/{UserId}")]

@@ -157,17 +157,17 @@ namespace Database.Model.Dbcontext
                 .HasForeignKey(ms => ms.MatchId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MatchScore>()
-                .HasOne(ms => ms.Team1)
-                .WithMany()
-                .HasForeignKey(ms => ms.Team1Score)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<MatchScore>()
+            //    .HasOne(ms => ms.Team1)
+            //    .WithMany()
+            //    .HasForeignKey(ms => ms.Team1Score)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<MatchScore>()
-                .HasOne(ms => ms.Team2)
-                .WithMany()
-                .HasForeignKey(ms => ms.Team2Score)
-                .OnDelete(DeleteBehavior.NoAction);
+            //modelBuilder.Entity<MatchScore>()
+            //    .HasOne(ms => ms.Team2)
+            //    .WithMany()
+            //    .HasForeignKey(ms => ms.Team2Score)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
             // ===================== [ MatchesSendRequest Relationships ] =====================
             modelBuilder.Entity<MatchesSendRequest>()
