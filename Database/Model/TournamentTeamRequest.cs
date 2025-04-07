@@ -18,11 +18,13 @@ namespace Database.Model
         public int RegistrationId { get; set; }
         public TournamentRegistration TournamentRegistration { get; set; }
 
-        [ForeignKey("Player")]
-        public int RequesterId { get; set; }  // Người gửi lời mời
+        [ForeignKey("Requester")]
+        public int RequesterId { get; set; }
+        public Player Requester { get; set; }  // Người gửi lời mời
 
-        [ForeignKey("Player")]
-        public int PartnerId { get; set; }  // Người nhận lời mời
+        [ForeignKey("Partner")]
+        public int PartnerId { get; set; }
+        public Player Partner { get; set; }    // Người nhận lời mời
 
         public TournamentRequestStatus Status { get; set; } // Pending, Accepted, Rejected
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

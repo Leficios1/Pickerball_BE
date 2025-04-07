@@ -31,12 +31,12 @@ namespace Services.Services
         private readonly IMatchScoreRepository _matchScoreRepository;
         private readonly ITournamentRegistrationRepository _touramentRegistrationRepository;
         private readonly IRankingRepository _rankingRepository;
-
+        private readonly IPlayerRepository _playerRepository;
 
         public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
             ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository,
             ITouramentRepository touramentRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository, IMatchScoreRepository matchScoreRepository,
-            ITournamentRegistrationRepository tournamentRegistrationRepository, IRankingRepository rankingRepository)
+            ITournamentRegistrationRepository tournamentRegistrationRepository, IRankingRepository rankingRepository, IPlayerRepository playerRepository)
         {
             _matchesRepo = matchesRepo;
             _mapper = mapper;
@@ -49,6 +49,7 @@ namespace Services.Services
             _matchScoreRepository = matchScoreRepository;
             _touramentRegistrationRepository = tournamentRegistrationRepository;
             _rankingRepository = rankingRepository;
+            _playerRepository = playerRepository;
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
@@ -723,12 +724,13 @@ namespace Services.Services
                             Team1Score = dto.Team1Score,
                             Team2Score = dto.Team2Score
                         };
+                        if (dto.Log != null)
+                        {
+                            matchDetails.Log = dto.Log;
+                        }
                         await _matchScoreRepository.AddAsync(matchDetails);
                         data.Status = MatchStatus.Completed;
-                        if(dto.Log != null)
-                        {
-                            data.Log = dto.Log;
-                        }
+
                         bool team1Win = false;
                         bool team2Win = false;
 
@@ -859,7 +861,8 @@ namespace Services.Services
                 response.Data = responseData;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Match details retrieved successfully";
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
@@ -892,6 +895,122 @@ namespace Services.Services
                 response.statusCode = HttpStatusCode.InternalServerError;
             }
             return response;
+        }
+
+        public async Task<StatusResponse<bool>> endMatchCustomOrChallenge(EndMatchNormalRequestDTO dto)
+        {
+            var response = new StatusResponse<bool>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    var data = await _matchesRepo.GetById(dto.MatchId);
+                    var teamData = await _teamRepository.GetTeamsWithMatchingIdAsync(dto.MatchId);
+                    if (data == null)
+                    {
+                        response.Message = "Match not found";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    if (data.Status != MatchStatus.Completed)
+                    {
+                        data.Status = MatchStatus.Completed;
+                        if (dto.Log != null)
+                        {
+                            data.Log = dto.Log;
+                        }
+                        bool team1Win = false;
+                        bool team2Win = false;
+
+                        if (dto.Team1Score >= (int)data.WinScore && (dto.Team1Score - dto.Team2Score) >= 2)
+                        {
+                            data.Team1Score = dto.Team1Score;
+                            team1Win = true;
+                        }
+                        else if (dto.Team2Score >= (int)data.WinScore && (dto.Team2Score - dto.Team1Score) >= 2)
+                        {
+                            data.Team2Score = dto.Team2Score;
+                            team2Win = true;
+                        }
+                        if (teamData != null && teamData.Count == 2)
+                        {
+                            var team1 = teamData[0];
+                            var team2 = teamData[1];
+                            if (data.MatchCategory == MatchCategory.Competitive)
+                            {
+                                if (team1Win == true)
+                                {
+                                    await UpdateMatchScoreNormal(team1.Id, team2.Id, team1.Id);
+                                }
+                                else if (team2Win == true)
+                                {
+                                    await UpdateMatchScoreNormal(team2.Id, team1.Id, team2.Id);
+                                }
+                                else
+                                {
+                                    response.Message = "Bug in BackEnd";
+                                    response.statusCode = HttpStatusCode.InternalServerError;
+                                    return response;
+                                }
+                            }
+                        }
+                    }
+                    await _matchesRepo.SaveChangesAsync();
+                    response.Data = true;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Match ended successfully";
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
+            return response;
+        }
+        private async Task UpdateMatchScoreNormal(int Team1Id, int team2Id, int WinnerId)
+        {
+            var team1 = await _teamRepository.GetTeamWithMembersAsync(Team1Id);
+            var team2 = await _teamRepository.GetTeamWithMembersAsync(team2Id);
+
+            var allPlayers = team1.Members.Concat(team2.Members).ToList();
+            foreach (var member in allPlayers)
+            {
+                var player = await _playerRepository.GetById(member.PlayerId);
+                if (player == null) continue;
+                player.TotalMatch++;
+                bool isWinner = (WinnerId == Team1Id && team1.Members.Any(m => m.PlayerId == player.PlayerId)) ||
+                (WinnerId == team2Id && team2.Members.Any(m => m.PlayerId == player.PlayerId));
+                if (isWinner) player.TotalWins++;
+                int currentPoint = player.RankingPoint;
+                int gain = 0, lose = 0;
+
+                if (currentPoint <= 200) { gain = 20; lose = 10; }
+                else if (currentPoint <= 250) { gain = 19; lose = 11; }
+                else if (currentPoint <= 300) { gain = 18; lose = 12; }
+                else if (currentPoint <= 350) { gain = 17; lose = 13; }
+                else if (currentPoint <= 400) { gain = 16; lose = 14; }
+                else if (currentPoint <= 450) { gain = 15; lose = 15; }
+                else if (currentPoint <= 500) { gain = 14; lose = 16; }
+                else if (currentPoint <= 550) { gain = 13; lose = 17; }
+                else
+                    player.RankingPoint += isWinner ? gain : -lose;
+                player.RankingPoint = Math.Max(player.RankingPoint, 0); // Không cho âm điểm
+                // Cập nhật Level nếu cần (có thể gán bằng lại dựa trên điểm)
+                player.ExperienceLevel = player.RankingPoint switch
+                {
+                    <= 200 => 1,
+                    <= 250 => 2,
+                    <= 300 => 3,
+                    <= 350 => 4,
+                    <= 400 => 5,
+                    <= 450 => 6,
+                    <= 500 => 7,
+                    <= 550 => 8,
+                    _ => 9,
+                };
+                _playerRepository.Update(player);
+            }
+            await _playerRepository.SaveChangesAsync();
         }
     }
 }

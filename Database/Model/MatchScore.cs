@@ -24,5 +24,6 @@ namespace Database.Model
         public int Team1Score { get; set; }
 
         public int Team2Score { get; set; }
+        public string? Log { get; set; } // Log của trận đấu
     }
 }

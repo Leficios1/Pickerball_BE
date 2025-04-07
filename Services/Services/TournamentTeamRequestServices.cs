@@ -103,16 +103,25 @@ namespace Services.Services
             {
                 var data = await _tournamentTeamRequestRepository.Get()
                     .Where(tr => tr.PartnerId == PlayerId)
-                    .Select(tr => new TournamentTeamRequestResponseDTO
-                    {
-                        Id = tr.Id,
-                        RegistrationId = tr.RegistrationId,
-                        RequesterId = tr.RequesterId,
-                        PartnerId = tr.PartnerId,
-                        Status = tr.Status
-                    })
+                    .Include(tr => tr.Requester)
+                        .ThenInclude(p => p.User)
+                    .Include(tr => tr.TournamentRegistration)
+                        .ThenInclude(trr => trr.Tournament)
                     .ToListAsync();
-                response.Data = data;
+
+                var result = data.Select(tr => new TournamentTeamRequestResponseDTO
+                {
+                    Id = tr.Id,
+                    RegistrationId = tr.RegistrationId,
+                    RequesterId = tr.RequesterId,
+                    PartnerId = tr.PartnerId,
+                    TournamentId = tr.TournamentRegistration?.Tournament?.Id,
+                    TournamentName = tr.TournamentRegistration?.Tournament?.Name,
+                    RequesterName = tr.Requester?.User?.FirstName + " " + tr.Requester?.User?.LastName,
+                    Status = tr.Status,
+                    CreatedAt = tr.CreatedAt
+                }).ToList();
+                response.Data = result;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get team request successfully!";
             }
@@ -188,7 +197,7 @@ namespace Services.Services
                         await _notificationRepository.SaveChangesAsync();
                     }
 
-                    _tournamentTeamRequestRepository.Update(request);
+                    //_tournamentTeamRequestRepository.Update(request);
                     await _tournamentTeamRequestRepository.SaveChangesAsync();
 
                     response.Data = true;

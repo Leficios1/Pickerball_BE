@@ -101,6 +101,20 @@ namespace Database.Model.Dbcontext
                 .HasForeignKey(tm => tm.MatchesId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // ===================== [ TournamentTeamRequest System ] =====================
+            modelBuilder.Entity<TournamentTeamRequest>()
+                .HasOne(t => t.Requester)
+                .WithMany()
+                .HasForeignKey(t => t.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TournamentTeamRequest>()
+                .HasOne(t => t.Partner)
+                .WithMany()
+                .HasForeignKey(t => t.PartnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             // ===================== [ Ranking & Achievements ] =====================
             modelBuilder.Entity<Ranking>()
                 .HasOne(r => r.Tournament)

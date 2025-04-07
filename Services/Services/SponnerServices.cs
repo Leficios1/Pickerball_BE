@@ -17,12 +17,14 @@ namespace Services.Services
     {
         private readonly ISponsorRepository _sponsorRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IPlayerRepository _playerRepository;
         private readonly IMapper _mapper;
-        public SponnerServices(ISponsorRepository sponsorRepository, IMapper mapper, IUserRepository userRepository)
+        public SponnerServices(ISponsorRepository sponsorRepository, IMapper mapper, IUserRepository userRepository, IPlayerRepository playerRepository)
         {
             _sponsorRepository = sponsorRepository;
             _mapper = mapper;
             _userRepository = userRepository;
+            _playerRepository = playerRepository;
         }
 
         public async Task<StatusResponse<bool>> AccpetSponner(int SponnerId, bool isAccept)
@@ -75,6 +77,19 @@ namespace Services.Services
             var response = new StatusResponse<SponnerResponseDTO>();
             try
             {
+                if (dto == null || dto.Id == null)
+                {
+                    response.Message = "Invalid Sponner data";
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    return response;
+                }
+                var flag = await _playerRepository.GetPlayerById((int)dto.Id);
+                if(flag != null)
+                {
+                    response.Message = "User is already a player";
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    return response;
+                }
                 var data = _mapper.Map<Sponsor>(dto);
                 data.SponsorId = (int)dto.Id;
                 data.isAccept = false;

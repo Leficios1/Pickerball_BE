@@ -110,6 +110,13 @@ namespace PickerBall_BE.Controllers
         {
             var response = await _matchService.endMatchTourament(dto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+
+        }
+        [HttpPost("EndMatchNormalAndCompetitive")]
+        public async Task<IActionResult> EndMatchNormalAndCompetitive([FromBody] EndMatchNormalRequestDTO dto)
+        {
+            var response = await _matchService.endMatchCustomOrChallenge(dto);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpPut("UpdateURLEndMatch")]
         public async Task<IActionResult> UpdateURLEndMatch([FromBody] UpdateURLEndMatchRequestDTO dto)

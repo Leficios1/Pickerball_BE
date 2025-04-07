@@ -15,8 +15,11 @@ namespace Database.DTO.Response
         public int RegistrationId { get; set; }
 
         public int RequesterId { get; set; }  // Người gửi lời mời
+        public string? RequesterName { get; set; } // Tên người gửi lời mời
 
         public int PartnerId { get; set; }  // Người nhận lời mời
+        public int? TournamentId { get; set; } // ID giải đấu
+        public string? TournamentName { get; set; } // Tên giải đấu
 
         public TournamentRequestStatus Status { get; set; } // Pending, Accepted, Rejected
 
