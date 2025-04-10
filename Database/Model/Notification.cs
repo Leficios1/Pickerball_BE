@@ -19,6 +19,16 @@ namespace Database.Model
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
+        public NotificationType? Type { get; set; } // Type of notification
+        public int? ReferenceId { get; set; } // Id tham chiếu đến bảng tương ứng
+
+    }
+    public enum NotificationType
+    {
+        FriendRequest = 1,
+        MatchRequest = 2,
+        TournamentTeamRequest = 3,
+        Other = 4
     }
 
 }

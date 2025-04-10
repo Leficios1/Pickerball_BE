@@ -35,6 +35,8 @@ namespace Services.Mapping
             CreateMap<SponnerRequestDTO, Sponsor>().ReverseMap();
             CreateMap<Sponsor, SponnerResponseDTO>().ReverseMap();
             CreateMap<TouramentRegistraionResponseDTO, TournamentRegistration>().ReverseMap();    
+            CreateMap<MatchUpdateRequestDTO, Matches>().ReverseMap();
+            CreateMap<MatchUpdateRequestForNormalMatchRequestDTO, Matches>().ReverseMap();
             CreateMap<RefereeCreateRequestDTO, User>().ReverseMap();
 
             //Mapping for Blog Category

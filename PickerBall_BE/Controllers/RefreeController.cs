@@ -5,6 +5,7 @@ using Database.DTO.Response;
 using Services.Services.Interface;
 using System.Collections.Generic;
 using Database.Model;
+using Azure;
 
 namespace PickerBall_BE.Controllers
 {
@@ -38,6 +39,19 @@ namespace PickerBall_BE.Controllers
         {
             var referees = await _refreeService.GetAll();
             return Ok(referees);
+        }
+        [HttpGet("GetMatchByRefeeId/{id}")]
+        public async Task<IActionResult> GetMatchByRefeeId([FromRoute] int id)
+        {
+            var response = await _refreeService.GetMatchByRefreeCode(id);
+            return StatusCode((int)response.statusCode, response);
+        }
+
+        [HttpGet("GetTournamentByRefeeId/{id}")]
+        public async Task<IActionResult> GetTournamentByRefeeId([FromRoute] int id)
+        {
+            var response = await _refreeService.GetTouramentByRefreeId(id);
+            return StatusCode((int)response.statusCode, response);
         }
     }
 }

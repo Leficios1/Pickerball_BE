@@ -16,6 +16,8 @@ namespace Database.DTO.Response
         public MatchFormat MatchFormat { get; set; }
         public WinScore WinScore { get; set; }
         public int? RoomOwner { get; set; }
+        public int? Team1Score { get; set; }
+        public int? Team2Score { get; set; }
         public bool IsPublic { get; set; }
         public int? RefereeId { get; set; }
         public List<TeamResponseDTO> Teams { get; set; }

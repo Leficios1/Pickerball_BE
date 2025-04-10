@@ -160,6 +160,7 @@ namespace Services.Services
             var idClaim = principals.FindFirst(ClaimTypes.NameIdentifier);
             if (idClaim == null) throw new Exception("Token is invalid. There is no indentity of name");
 
+
             var id = idClaim.Value;
             var user = await _userRepo.Get().Select(x => new UserResponseDTO()
             {
@@ -177,8 +178,17 @@ namespace Services.Services
                 RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
                 CreateAt = x.CreateAt,
                 RoleId = x.RoleId,
-
-            }).FirstOrDefaultAsync(x => x.Id.ToString().Equals(id));
+                userDetails = new PlayerDetails
+                {
+                    CCCD = x.Player.CCCD,
+                    Province = x.Player.Province,
+                    City = x.Player.City,
+                    ExperienceLevel = x.Player.ExperienceLevel,
+                    RankingPoint = x.Player.RankingPoint,
+                    TotalMatch = x.Player.TotalMatch,
+                    TotalWins = x.Player.TotalWins,
+                }
+            }).SingleOrDefaultAsync(x => x.Id.ToString().Equals(id));
 
             if (user == null) throw new Exception("There is no user has by id:");
 

@@ -43,7 +43,7 @@ namespace Services.Services
                 switch (linkReturn)
                 {
                     case 1:
-                        return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";
+                        return_URL = "http://localhost:5173/payment-return";
                         break;
                     case 2:
                         return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,11 @@ namespace Database.DTO.Response
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
+        public NotificationType Type { get; set; }
+        public int? ReferenceId { get; set; }
+
+        // Thông tin gợi ý chuyển hướng
+        public string? RedirectUrl { get; set; } // FE dùng để route
+        public string? ExtraInfo { get; set; } // VD: Tên người gửi, tên giải đấu,...
     }
 }

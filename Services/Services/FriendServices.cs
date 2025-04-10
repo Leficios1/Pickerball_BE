@@ -17,11 +17,15 @@ namespace Services.Services
     public class FriendServices : IFriendServices
     {
         private readonly IFriendRepository _friendRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public FriendServices(IFriendRepository friendRepository, IMapper mapper)
+        public FriendServices(IFriendRepository friendRepository, IMapper mapper, INotificationRepository notificationRepository, IUserRepository userRepository)
         {
             _friendRepository = friendRepository;
+            _notificationRepository = notificationRepository;
+            _userRepository = userRepository;
             _mapper = mapper;
         }
 
@@ -39,9 +43,21 @@ namespace Services.Services
                     response.statusCode = System.Net.HttpStatusCode.NotFound;
                     return response;
                 }
+                var dataUser = await _userRepository.GetById(dto.User2Id);
+                var notification = new Notification
+                {
+                    UserId = dto.User1Id,
+                    Message = $"{dataUser.LastName} accepted your friend request",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false,
+                    Type = NotificationType.FriendRequest,
+                    ReferenceId = dto.User1Id // Assuming ReferenceId is the ID of the user who sent the request
+                };
+                await _notificationRepository.AddAsync(notification);
                 friend.Status = FriendStatus.Accepted;
                 _friendRepository.Update(friend);
                 await _friendRepository.SaveChangesAsync();
+                await _notificationRepository.SaveChangesAsync();
                 response.Data = true;
                 response.Message = "Friend request accepted successfully";
                 response.statusCode = System.Net.HttpStatusCode.OK;
@@ -87,8 +103,25 @@ namespace Services.Services
                             return response;
                         }
                     }
+                    var dataUser = await _userRepository.GetById(friend.User1Id);
+                    if (dataUser == null)
+                    {
+                        response.Message = "User not found";
+                        response.statusCode = System.Net.HttpStatusCode.NotFound;
+                        return response;
+                    }
+
                     await _friendRepository.AddAsync(friend);
                     await _friendRepository.SaveChangesAsync();
+                    var notification = new Notification
+                    {
+                        UserId = friend.User2Id,
+                        Message = $"{dataUser.LastName} sent you a friend request",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false,
+                        Type = NotificationType.FriendRequest,
+                        ReferenceId = friend.User1Id // Assuming ReferenceId is the ID of the user who sent the request
+                    };
                     transaction.Complete();
                     response.Data = _mapper.Map<FriendResponseDTO>(friend);
                     response.Message = "Friend added successfully";
@@ -145,32 +178,35 @@ namespace Services.Services
             try
             {
                 var friendships = await _friendRepository.GetFriendsAsync(userId);
-                
+
                 if (friendships == null || !friendships.Any())
                 {
-                    response.statusCode = HttpStatusCode.NotFound;
-                    response.Message = "No friends found.";
-                    return response;
-                }
-                if (!string.IsNullOrEmpty(Gender))
-                {
-                    friendships = friendships.Where(f => (f.User1Id == userId ? f.User2.Gender : f.User1.Gender) == Gender).ToList();
+                    return new StatusResponse<List<FriendResponseDTO>>
+                    {
+                        statusCode = HttpStatusCode.NotFound,
+                        Message = "No friends found.",
+                        Data = new List<FriendResponseDTO>()
+                    };
                 }
 
+                // Áp dụng filter nếu có
                 var filteredFriends = friendships.Where(f =>
                 {
-
                     var friendUser = f.User1Id == userId ? f.User2 : f.User1;
-                    if (Gender != null && friendUser.Gender?.ToLower() != Gender.ToLower())
+
+                    if (!string.IsNullOrEmpty(Gender) && !string.Equals(friendUser.Gender, Gender, StringComparison.OrdinalIgnoreCase))
                         return false;
+
                     if (MinLevel.HasValue && friendUser.Player.ExperienceLevel < MinLevel.Value)
                         return false;
+
                     if (MaxLevel.HasValue && friendUser.Player.ExperienceLevel > MaxLevel.Value)
                         return false;
-                    return true;
-                });
 
-                var result = friendships.Select(f =>
+                    return true;
+                }).ToList();
+
+                var result = filteredFriends.Select(f =>
                 {
                     var friendUser = f.User1Id == userId ? f.User2 : f.User1;
 
@@ -179,23 +215,24 @@ namespace Services.Services
                         Id = f.Id,
                         User1Id = f.User1Id,
                         User2Id = f.User2Id,
-                        UserFriendId = f.User1Id == userId ? f.User2Id : f.User1Id,
-                        UserFriendName = f.User1Id == userId ? f.User2.FirstName + " " + f.User2.LastName : f.User1.FirstName + " " + f.User1.LastName,
-                        UserFriendAvatar = f.User1Id == userId ? f.User2.AvatarUrl : f.User1.AvatarUrl,
+                        UserFriendId = friendUser.Id,
+                        UserFriendName = $"{friendUser.FirstName} {friendUser.LastName}",
+                        UserFriendAvatar = friendUser.AvatarUrl,
                         Status = f.Status,
                         CreatedAt = f.CreatedAt,
                         Gender = friendUser.Gender,
                         ExeprienceLevel = friendUser.Player.ExperienceLevel
                     };
                 }).ToList();
+
                 response.Data = result;
                 response.Message = "Friends fetched successfully";
-                response.statusCode = System.Net.HttpStatusCode.OK;
+                response.statusCode = HttpStatusCode.OK;
             }
             catch (Exception e)
             {
                 response.Message = e.Message;
-                response.statusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.statusCode = HttpStatusCode.InternalServerError;
             }
             return response;
         }

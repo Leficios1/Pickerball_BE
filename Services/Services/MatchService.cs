@@ -251,6 +251,8 @@ namespace Services.Services
                 }
 
                 var matchResponse = _mapper.Map<RoomResponseDTO>(match);
+                matchResponse.Team1Score = match.Team1Score;
+                matchResponse.Team2Score = match.Team2Score;
                 await PopulateTeamsForMatchResponse(matchResponse);
 
                 response.Data = matchResponse;
@@ -457,7 +459,10 @@ namespace Services.Services
                 {
                     return CreateErrorResponse<MatchResponseDTO>(HttpStatusCode.NotFound, "Room not found!");
                 }
-
+                if (match.Status == MatchStatus.Ongoing || match.Status == MatchStatus.Completed)
+                {
+                    return CreateErrorResponse<MatchResponseDTO>(HttpStatusCode.BadRequest, "Room is ongoing or completed, cannot update!");
+                }
                 // Apply the values from MatchUpdateRequestDTO
                 foreach (var property in typeof(MatchUpdateRequestDTO).GetProperties())
                 {
@@ -729,7 +734,6 @@ namespace Services.Services
                             matchDetails.Log = dto.Log;
                         }
                         await _matchScoreRepository.AddAsync(matchDetails);
-                        data.Status = MatchStatus.Completed;
 
                         bool team1Win = false;
                         bool team2Win = false;
@@ -911,6 +915,12 @@ namespace Services.Services
                         response.statusCode = HttpStatusCode.NotFound;
                         return response;
                     }
+                    if (data.MatchCategory == MatchCategory.Tournament)
+                    {
+                        response.Message = "This match is tournament match, please use endMatchTourament";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response;
+                    }
                     if (data.Status != MatchStatus.Completed)
                     {
                         data.Status = MatchStatus.Completed;
@@ -924,10 +934,12 @@ namespace Services.Services
                         if (dto.Team1Score >= (int)data.WinScore && (dto.Team1Score - dto.Team2Score) >= 2)
                         {
                             data.Team1Score = dto.Team1Score;
+                            data.Team2Score = dto.Team2Score;
                             team1Win = true;
                         }
                         else if (dto.Team2Score >= (int)data.WinScore && (dto.Team2Score - dto.Team1Score) >= 2)
                         {
+                            data.Team1Score = dto.Team1Score;
                             data.Team2Score = dto.Team2Score;
                             team2Win = true;
                         }
@@ -1011,6 +1023,66 @@ namespace Services.Services
                 _playerRepository.Update(player);
             }
             await _playerRepository.SaveChangesAsync();
+        }
+
+        public async Task<StatusResponse<MatchResponseDTO>> UpdateMatch(int MatchId, MatchUpdateRequestForNormalMatchRequestDTO dto)
+        {
+            var response = new StatusResponse<MatchResponseDTO>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    var match = await _matchesRepo.Get().Where(x => x.Id == MatchId).SingleOrDefaultAsync();
+                    if (match == null)
+                    {
+                        response.Message = "Match not found";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    if (match.Status == MatchStatus.Ongoing || match.Status == MatchStatus.Completed)
+                    {
+                        response.Message = "Match is ongoing or completed, cannot update!";
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        return response;
+                    }
+                    // Apply the values from MatchUpdateRequestDTO
+                    if (!string.IsNullOrEmpty(dto.Title))
+                        match.Title = dto.Title;
+
+                    if (!string.IsNullOrEmpty(dto.Description))
+                        match.Description = dto.Description;
+
+                    if (dto.MatchDate.HasValue)
+                        match.MatchDate = dto.MatchDate.Value;
+
+                    if (dto.VenueId.HasValue)
+                        match.VenueId = dto.VenueId.Value;
+
+                    if (dto.Status.HasValue)
+                        match.Status = dto.Status.Value;
+
+                    if (dto.MatchCategory.HasValue)
+                        match.MatchCategory = dto.MatchCategory.Value;
+                    if(dto.MatchFormat.HasValue)
+                        match.MatchFormat = dto.MatchFormat.Value;
+                    if (dto.WinScore.HasValue)
+                        match.WinScore = dto.WinScore.Value;
+                    if (dto.IsPublic.HasValue)
+                        match.IsPublic = dto.IsPublic.Value;
+                    if (dto.RefereeId.HasValue)
+                        match.RefereeId = dto.RefereeId.Value;
+
+                    await _matchesRepo.SaveChangesAsync();
+                    response.Data = _mapper.Map<MatchResponseDTO>(match);
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Match updated successfully!";
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
+            return response;
         }
     }
 }

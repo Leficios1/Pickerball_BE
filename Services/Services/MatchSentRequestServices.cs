@@ -27,9 +27,12 @@ namespace Services.Services
         private readonly ITeamMembersRepository _membersRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly ITeamMembersRepository _teamMembersRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly INotificationRepository _notificationRepository;
 
         public MatchSentRequestServices(IMatchSentRequestRepository matchSentRequestRepository, IPlayerRepository playerRepository, IMatchesRepository matchRepository,
-            IMapper mapper, ITeamMembersRepository membersRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository)
+            IMapper mapper, ITeamMembersRepository membersRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository, IUserRepository userRepository,
+            INotificationRepository notificationRepository)
         {
             _matchSentRequestRepository = matchSentRequestRepository;
             _playerRepository = playerRepository;
@@ -38,6 +41,8 @@ namespace Services.Services
             _membersRepository = membersRepository;
             _teamRepository = teamRepository;
             _teamMembersRepository = teamMembersRepository;
+            _userRepository = userRepository;
+            _notificationRepository = notificationRepository;
         }
 
 
@@ -291,8 +296,26 @@ namespace Services.Services
                     CreateAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow
                 };
+                var dataUser = await _userRepository.GetById(dto.PlayerRequestId);
+                if (dataUser == null)
+                {
+                    response.Message = "User not found!";
+                    response.statusCode = HttpStatusCode.NotFound;
+                    return response;
+                }
+                var notification = new Notification()
+                {
+                    UserId = dto.PlayerRecieveId,
+                    Message = $"{dataUser.LastName} sent you a match request",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false,
+                    Type = NotificationType.MatchRequest,
+                    ReferenceId = dto.MatchingId
+                };
+                await _notificationRepository.AddAsync(notification);
                 await _matchSentRequestRepository.AddAsync(data);
                 await _matchSentRequestRepository.SaveChangesAsync();
+                await _notificationRepository.SaveChangesAsync();
                 var responseData = _mapper.Map<MatchSentRequestResponseDTO>(data);
                 response.Data = responseData;
                 response.statusCode = HttpStatusCode.OK;

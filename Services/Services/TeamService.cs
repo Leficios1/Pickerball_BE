@@ -148,6 +148,7 @@ namespace Services.Services
                 {
                     Id = team.Id,
                     Name = team.Name,
+                    MatchingId = team.MatchingId,
                     Members = team.Members.Select(m => new TeamMemberDTO
                     {
                         Id = m.Id,

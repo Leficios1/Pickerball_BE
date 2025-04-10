@@ -72,6 +72,11 @@ namespace PickerBall_BE.Controllers
         {
             return await _matchService.UpdateRoomAsync(id, dto);
         }
+        [HttpPatch("user/UpdateMatch/{id}")]
+        public async Task<StatusResponse<MatchResponseDTO>> UpdateMatch([FromRoute]int id, [FromBody] MatchUpdateRequestForNormalMatchRequestDTO dto)
+        {
+            return await _matchService.UpdateMatch(id, dto);
+        }
 
         [HttpPatch("admin/team/{id}")]
         public async Task<StatusResponse<TeamResponseDTO>> PatchTeamAsync(int id, [FromBody] TeamRequestDTO dto)

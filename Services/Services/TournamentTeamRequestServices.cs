@@ -41,7 +41,7 @@ namespace Services.Services
             {
                 var data = await _tournamentTeamRequestRepository.Get().Include(t => t.TournamentRegistration).
                     Where(x => x.RequesterId == userId && x.TournamentRegistration.TournamentId == touramentId || x.PartnerId == userId && x.TournamentRegistration.TournamentId == touramentId).SingleOrDefaultAsync();
-                if(data == null)
+                if (data == null)
                 {
                     response.statusCode = HttpStatusCode.NotFound;
                     response.Message = "Request not found!";
@@ -60,7 +60,8 @@ namespace Services.Services
                 response.Data = responseData;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get team request successfully!";
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.Message = ex.Message;
@@ -75,16 +76,24 @@ namespace Services.Services
             {
                 var data = await _tournamentTeamRequestRepository.Get()
                     .Where(tr => tr.RequesterId == PlayerId)
-                    .Select(tr => new TournamentTeamRequestResponseDTO
-                    {
-                        Id = tr.Id,
-                        RegistrationId = tr.RegistrationId,
-                        RequesterId = tr.RequesterId,
-                        PartnerId = tr.PartnerId,
-                        Status = tr.Status
-                    })
+                    .Include(tr => tr.Requester)
+                    .ThenInclude(p => p.User)
+                    .Include(tr => tr.TournamentRegistration)
+                    .ThenInclude(trr => trr.Tournament)
                     .ToListAsync();
-                response.Data = data;
+                var result = data.Select(tr => new TournamentTeamRequestResponseDTO
+                {
+                    Id = tr.Id,
+                    RegistrationId = tr.RegistrationId,
+                    RequesterId = tr.RequesterId,
+                    PartnerId = tr.PartnerId,
+                    Status = tr.Status,
+                    TournamentId = tr.TournamentRegistration.TournamentId,
+                    TournamentName = tr.TournamentRegistration?.Tournament?.Name,
+                    RequesterName = tr.Requester?.User?.FirstName + " " + tr.Requester?.User?.LastName,
+                    CreatedAt = tr.CreatedAt
+                }).ToList();
+                response.Data = result;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get team request successfully!";
             }
@@ -155,6 +164,13 @@ namespace Services.Services
                         response.Message = "Registration not found!";
                         return response;
                     }
+                    var tournament = await _touramentRepository.GetById(registration.TournamentId);
+                    if (tournament == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Tournament not found!";
+                        return response;
+                    }
                     if (isAccept)
                     {
                         request.Status = TournamentRequestStatus.Accepted;
@@ -167,10 +183,13 @@ namespace Services.Services
                         {
                             UserId = request.RequesterId,
                             Message = "Your team invitation was accepted.",
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = DateTime.UtcNow,
+                            IsRead = false,
+                            Type = NotificationType.TournamentTeamRequest,
+                            ReferenceId = tournament.Id // Tham chiếu đến Tournament
                         };
                         var dataTourament = await _touramentRepository.GetById(registration.TournamentId);
-                        if(dataTourament.IsFree == false)
+                        if (dataTourament.IsFree == false)
                         {
                             registration.IsApproved = TouramentregistrationStatus.Approved;
                         }
@@ -191,7 +210,10 @@ namespace Services.Services
                         {
                             UserId = request.RequesterId,
                             Message = "Your team invitation was rejected.",
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = DateTime.UtcNow,
+                            IsRead = false,
+                            Type = NotificationType.TournamentTeamRequest,
+                            ReferenceId = tournament.Id // Tham chiếu đến Tournament
                         };
                         await _notificationRepository.AddAsync(notification);
                         await _notificationRepository.SaveChangesAsync();
@@ -239,6 +261,21 @@ namespace Services.Services
                         PartnerId = dto.RecevierId,
                         Status = TournamentRequestStatus.Pending
                     };
+                    var registration = await _tournamentRegistrationRepository.GetById(dto.RegistrationId);
+                    if (registration == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Registration not found!";
+                        return response;
+                    }
+
+                    var tourament = await _touramentRepository.GetById(registration.TournamentId);
+                    if (tourament == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "Tournament not found!";
+                        return response;
+                    }
 
                     await _tournamentTeamRequestRepository.AddAsync(request);
                     await _tournamentTeamRequestRepository.SaveChangesAsync();
@@ -249,7 +286,9 @@ namespace Services.Services
                         UserId = dto.RecevierId,
                         Message = $"You have received a tournament invitation from {dto.RequesterId}.",
                         CreatedAt = DateTime.UtcNow,
-                        IsRead = false
+                        IsRead = false,
+                        Type = NotificationType.TournamentTeamRequest,
+                        ReferenceId = tourament.Id // Tham chiếu đến Tournament
                     };
                     await _notificationRepository.AddAsync(notification);
                     await _notificationRepository.SaveChangesAsync();

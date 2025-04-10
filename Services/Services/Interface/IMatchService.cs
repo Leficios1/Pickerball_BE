@@ -24,5 +24,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<EndMatchResponseDTO>> GetEndMatchDetailsOfBO3(int MatchId);
         Task<StatusResponse<bool>> UpdateURLEndMatch(int matchId, string url);
         Task<StatusResponse<bool>> endMatchCustomOrChallenge(EndMatchNormalRequestDTO dto);
+        Task<StatusResponse<MatchResponseDTO>> UpdateMatch(int MatchId, MatchUpdateRequestForNormalMatchRequestDTO dto);
     }
 }

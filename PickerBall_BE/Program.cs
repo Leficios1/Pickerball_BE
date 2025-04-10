@@ -13,6 +13,9 @@ using Repository.Repository;
 using Repository.Repository.Interface;
 using Database.Model;
 using Microsoft.AspNetCore.Identity;
+using Services.Real_Time;
+using Microsoft.Azure.SignalR;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +29,21 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
+    //options.AddPolicy("AllowAll",
+    //    builder =>
+    //    {
+    //        builder
+    //            .AllowAnyOrigin()
+    //            .AllowAnyMethod()
+    //            .AllowAnyHeader();
+    //    });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://192.168.56.1:5500", "https://pickleball-admin-dlby.vercel.app", "http://localhost:5173", "http://localhost:52124/", "https://score-pickle.vercel.app") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); 
+    });
 });
 
 builder.Services.AddDbContext<PickerBallDbcontext>(options =>
@@ -96,6 +106,7 @@ builder.Services.AddSwaggerGen(opt =>
         }
     });
 });
+builder.Services.AddSignalR().AddAzureSignalR(builder.Configuration["Azure:SignalRConnectionString"]);
 
 
 builder.Services.Configure<VnpayConfig>(builder.Configuration.GetSection("VNPAY"));
@@ -108,7 +119,7 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(services);
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
 
@@ -127,6 +138,8 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
+    endpoints.MapHub<MatchHub>("/matchHub");
+
 });
 
 

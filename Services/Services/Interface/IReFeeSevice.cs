@@ -11,7 +11,8 @@ namespace Services.Services.Interface
         Task<StatusResponse<Refree>> UpdateRefree(UpdateRefreeDTO dto, int id);
         Task<List<Refree>> GetByRefreeCode(string id);
         Task<List<Refree>> GetAll();
-       
+        Task<StatusResponse<List<MatchResponseDTO>>> GetMatchByRefreeCode(int UserId);
+        Task<StatusResponse<List<TournamentResponseDTO>>> GetTouramentByRefreeId(int userId);
         // Task<List<Refree>> GetAllRefreesAsync();
         // Task<Refree> UpdateRefreeAsync(Refree refree);
         // Task DeleteRefreeAsync(int refreeId);
