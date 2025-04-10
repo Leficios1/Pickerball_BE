@@ -97,6 +97,14 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
 
         }
+
+        [HttpGet("GetAllMatchCompetitiveAndCustom")]
+        public async Task<IActionResult> GetAllMatchCompetitiveAndCustom()
+        {
+            var response = await _matchService.GetAllMatchCompetitiveAndCustom();
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+
+        }
         [HttpGet("GetMatchDetails/{MatchId}")]
         public async Task<IActionResult> GetMatchDetails([FromRoute] int MatchId)
         {

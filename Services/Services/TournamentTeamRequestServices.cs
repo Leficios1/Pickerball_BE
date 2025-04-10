@@ -21,17 +21,19 @@ namespace Services.Services
         private readonly ITournamentTeamRequestRepository _tournamentTeamRequestRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly ITournamentRegistrationRepository _tournamentRegistrationRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ITouramentRepository _touramentRepository;
         private readonly IMapper _mapper;
 
         public TournamentTeamRequestServices(ITournamentTeamRequestRepository tournamentTeamRequestRepository, IMapper mapper, INotificationRepository notificationRepository, ITournamentRegistrationRepository tournamentRegistrationRepository,
-            ITouramentRepository touramentRepository)
+            ITouramentRepository touramentRepository, IUserRepository userRepository)
         {
             _tournamentTeamRequestRepository = tournamentTeamRequestRepository;
             _mapper = mapper;
             _notificationRepository = notificationRepository;
             _tournamentRegistrationRepository = tournamentRegistrationRepository;
             _touramentRepository = touramentRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<StatusResponse<TouramentRegistraionResponseDTO>> CheckAccept(int userId, int touramentId)
@@ -185,7 +187,7 @@ namespace Services.Services
                             Message = "Your team invitation was accepted.",
                             CreatedAt = DateTime.UtcNow,
                             IsRead = false,
-                            Type = NotificationType.TournamentTeamRequest,
+                            Type = NotificationType.AccpetTournamentTeamRequest,
                             ReferenceId = tournament.Id // Tham chiếu đến Tournament
                         };
                         var dataTourament = await _touramentRepository.GetById(registration.TournamentId);
@@ -212,7 +214,7 @@ namespace Services.Services
                             Message = "Your team invitation was rejected.",
                             CreatedAt = DateTime.UtcNow,
                             IsRead = false,
-                            Type = NotificationType.TournamentTeamRequest,
+                            Type = NotificationType.AccpetTournamentTeamRequest,
                             ReferenceId = tournament.Id // Tham chiếu đến Tournament
                         };
                         await _notificationRepository.AddAsync(notification);
@@ -280,15 +282,18 @@ namespace Services.Services
                     await _tournamentTeamRequestRepository.AddAsync(request);
                     await _tournamentTeamRequestRepository.SaveChangesAsync();
 
+                    var dataRequester = await _userRepository.GetById(dto.RequesterId);
+
                     // Gửi thông báo đến Partner
                     var notification = new Notification
                     {
                         UserId = dto.RecevierId,
-                        Message = $"You have received a tournament invitation from {dto.RequesterId}.",
+                        Message = $"You have received a tournament invitation from {dataRequester.LastName}.",
                         CreatedAt = DateTime.UtcNow,
                         IsRead = false,
                         Type = NotificationType.TournamentTeamRequest,
-                        ReferenceId = tourament.Id // Tham chiếu đến Tournament
+                        ReferenceId = request.Id, // Tham chiếu đến TournamentTeamRequest
+                        BonusId = tourament.Id // Tham chiếu đến Tournament
                     };
                     await _notificationRepository.AddAsync(notification);
                     await _notificationRepository.SaveChangesAsync();

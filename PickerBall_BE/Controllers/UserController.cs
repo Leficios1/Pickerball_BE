@@ -10,10 +10,12 @@ namespace PickerBall_BE.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserServices _userServices;
+        private readonly IReFeeSevice _refreeService;
 
-        public UserController(IUserServices userServices)
+        public UserController(IUserServices userServices, IReFeeSevice refreeService)
         {
             _userServices = userServices;
+            _refreeService = refreeService;
         }
 
         [HttpGet("GetAllUser")]
@@ -32,6 +34,12 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> GetRefeeUser()
         {
             var response = await _userServices.getAllRefeeUser();
+            return StatusCode((int)response.statusCode, response);
+        }
+        [HttpGet("getAllRefeeForMobile")]
+        public async Task<IActionResult> getAllRefeeForMobile()
+        {
+            var response = await _refreeService.GetAllForMobile();
             return StatusCode((int)response.statusCode, response);
         }
         [HttpGet("GetAllPlayer")]

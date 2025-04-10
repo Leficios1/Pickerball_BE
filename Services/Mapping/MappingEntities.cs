@@ -38,6 +38,8 @@ namespace Services.Mapping
             CreateMap<MatchUpdateRequestDTO, Matches>().ReverseMap();
             CreateMap<MatchUpdateRequestForNormalMatchRequestDTO, Matches>().ReverseMap();
             CreateMap<RefereeCreateRequestDTO, User>().ReverseMap();
+            CreateMap<RefereeResponse, User>().ReverseMap();
+            CreateMap<RefereeResponse, Refree>().ReverseMap();
 
             //Mapping for Blog Category
             CreateMap<BlogCategoryCreateDTO, BlogCategory>().ReverseMap();

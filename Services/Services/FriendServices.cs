@@ -51,7 +51,7 @@ namespace Services.Services
                     CreatedAt = DateTime.UtcNow,
                     IsRead = false,
                     Type = NotificationType.FriendRequest,
-                    ReferenceId = dto.User1Id // Assuming ReferenceId is the ID of the user who sent the request
+                    ReferenceId = dto.User2Id // Assuming ReferenceId is the ID of the user who sent the request
                 };
                 await _notificationRepository.AddAsync(notification);
                 friend.Status = FriendStatus.Accepted;
@@ -120,8 +120,10 @@ namespace Services.Services
                         CreatedAt = DateTime.UtcNow,
                         IsRead = false,
                         Type = NotificationType.FriendRequest,
-                        ReferenceId = friend.User1Id // Assuming ReferenceId is the ID of the user who sent the request
+                        ReferenceId = friend.User1Id,
                     };
+                    await _notificationRepository.AddAsync(notification);
+                    await _notificationRepository.SaveChangesAsync();
                     transaction.Complete();
                     response.Data = _mapper.Map<FriendResponseDTO>(friend);
                     response.Message = "Friend added successfully";

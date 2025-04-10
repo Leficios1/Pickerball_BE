@@ -13,8 +13,9 @@ namespace Database.DTO.Response
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
-        public NotificationType Type { get; set; }
+        public NotificationType? Type { get; set; }
         public int? ReferenceId { get; set; }
+        public int? BonusId { get; set; } // Id tham chiếu đến bảng tương ứng
 
         // Thông tin gợi ý chuyển hướng
         public string? RedirectUrl { get; set; } // FE dùng để route

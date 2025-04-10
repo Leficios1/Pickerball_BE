@@ -567,5 +567,33 @@ namespace Services.Services
             }
             return response;
         }
+
+        public async Task<StatusResponse<List<TournamentResponseDTO>>> GetTournamentHaveRequest(int userId)
+        {
+            var response = new StatusResponse<List<TournamentResponseDTO>>();
+            try
+            {
+                var data = await _tournamentTeamRequestRepository.Get()
+                    .Where(x => x.PartnerId == userId && x.Status == TournamentRequestStatus.Pending).Include(x => x.TournamentRegistration).ThenInclude(x => x.Tournament)
+                    .Select(x => x.TournamentRegistration.Tournament)
+                    .ToListAsync();
+                if (data == null || !data.Any())
+                {
+                    response.Message = "This player doesn't have any tournament";
+                    response.statusCode = HttpStatusCode.OK;
+                    return response;
+                }
+                var tournamentList = _mapper.Map<List<TournamentResponseDTO>>(data);
+                response.Data = tournamentList;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get Tournament Successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
     }
 }

@@ -178,17 +178,32 @@ namespace Services.Services
                 RefreshTokenExpiryTime = x.RefreshTokenExpiryTime,
                 CreateAt = x.CreateAt,
                 RoleId = x.RoleId,
-                userDetails = new PlayerDetails
-                {
-                    CCCD = x.Player.CCCD,
-                    Province = x.Player.Province,
-                    City = x.Player.City,
-                    ExperienceLevel = x.Player.ExperienceLevel,
-                    RankingPoint = x.Player.RankingPoint,
-                    TotalMatch = x.Player.TotalMatch,
-                    TotalWins = x.Player.TotalWins,
-                }
+                //userDetails = new PlayerDetails
+                //{
+                //    CCCD = x.Player.CCCD,
+                //    Province = x.Player.Province,
+                //    City = x.Player.City,
+                //    ExperienceLevel = x.Player.ExperienceLevel,
+                //    RankingPoint = x.Player.RankingPoint,
+                //    TotalMatch = x.Player.TotalMatch,
+                //    TotalWins = x.Player.TotalWins,
+                //}
             }).SingleOrDefaultAsync(x => x.Id.ToString().Equals(id));
+            if(user.RoleId == 1)
+            {
+                var userDetails = await _userRepo.Get().Where(x => x.Id == user.Id).Include(x => x.Player).SingleOrDefaultAsync();
+                if (userDetails == null) throw new Exception("There is no user has by id:");
+                user.userDetails = new PlayerDetails
+                {
+                    CCCD = userDetails.Player.CCCD,
+                    Province = userDetails.Player.Province,
+                    City = userDetails.Player.City,
+                    ExperienceLevel = userDetails.Player.ExperienceLevel,
+                    RankingPoint = userDetails.Player.RankingPoint,
+                    TotalMatch = userDetails.Player.TotalMatch,
+                    TotalWins = userDetails.Player.TotalWins,
+                };
+            }
 
             if (user == null) throw new Exception("There is no user has by id:");
 

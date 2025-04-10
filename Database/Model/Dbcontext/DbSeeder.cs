@@ -59,7 +59,9 @@ namespace Database.Model.Dbcontext
                         City = u.Id % 2 == 0 ? "HCM" : "HN",
                         CCCD = $"12345678900{u.Id:D2}",
                         ExperienceLevel = u.Id % 10,
-                        RankingPoint = u.Id * 10
+                        RankingPoint = u.Id * 50,
+                        TotalWins = u.Id,
+                        TotalMatch = u.Id * 2
                     });
                 }
 

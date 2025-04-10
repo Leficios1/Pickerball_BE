@@ -83,7 +83,7 @@ namespace Services.Services
                     // 🔥 Kiểm tra số lượng thành viên hiện tại
                     int totalPlayers = teams.Sum(t => t.Members.Count);
                     var maxPlayers = 2;
-                    if(match.MatchFormat == MatchFormat.DoubleFemale || match.MatchFormat == MatchFormat.DoubleMale || match.MatchFormat == MatchFormat.DoubleMix)
+                    if (match.MatchFormat == MatchFormat.DoubleFemale || match.MatchFormat == MatchFormat.DoubleMale || match.MatchFormat == MatchFormat.DoubleMix)
                     {
                         maxPlayers = 4;
                     }
@@ -114,7 +114,8 @@ namespace Services.Services
                         await _matchSentRequestRepository.SaveChangesAsync();
                         _matchSentRequestRepository.Update(data);
                         await _matchSentRequestRepository.SaveChangesAsync();
-                    }else if(Accpet == SendRequestStatus.Reject)
+                    }
+                    else if (Accpet == SendRequestStatus.Reject)
                     {
                         data.status = Accpet;
                         data.LastUpdatedAt = DateTime.UtcNow;
@@ -132,6 +133,17 @@ namespace Services.Services
                         status = data.status,
                         LastUpdatedAt = data.LastUpdatedAt
                     };
+                    var notification = new Notification()
+                    {
+                        UserId = data.PlayerRequestId,
+                        Message = $"{data.PlayerRecieveId} accepted your match request",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false,
+                        Type = NotificationType.MatchRequest,
+                        ReferenceId = data.MatchingId
+                    };
+                    await _notificationRepository.AddAsync(notification);
+                    await _notificationRepository.SaveChangesAsync();
 
                     response.Message = "Request accepted and team created successfully!";
                     response.statusCode = HttpStatusCode.OK;
@@ -285,47 +297,50 @@ namespace Services.Services
         public async Task<StatusResponse<MatchSentRequestResponseDTO>> SentRequest(MatchSentRequestRequestDTO dto)
         {
             var response = new StatusResponse<MatchSentRequestResponseDTO>();
-            try
-            {
-                var data = new MatchesSendRequest()
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
                 {
-                    MatchingId = dto.MatchingId,
-                    PlayerRequestId = dto.PlayerRequestId,
-                    PlayerRecieveId = dto.PlayerRecieveId,
-                    status = SendRequestStatus.Pending,
-                    CreateAt = DateTime.UtcNow,
-                    LastUpdatedAt = DateTime.UtcNow
-                };
-                var dataUser = await _userRepository.GetById(dto.PlayerRequestId);
-                if (dataUser == null)
-                {
-                    response.Message = "User not found!";
-                    response.statusCode = HttpStatusCode.NotFound;
-                    return response;
+                    var data = new MatchesSendRequest()
+                    {
+                        MatchingId = dto.MatchingId,
+                        PlayerRequestId = dto.PlayerRequestId,
+                        PlayerRecieveId = dto.PlayerRecieveId,
+                        status = SendRequestStatus.Pending,
+                        CreateAt = DateTime.UtcNow,
+                        LastUpdatedAt = DateTime.UtcNow
+                    };
+                    await _matchSentRequestRepository.AddAsync(data);
+                    await _matchSentRequestRepository.SaveChangesAsync();
+                    var dataUser = await _userRepository.GetById(dto.PlayerRequestId);
+                    if (dataUser == null)
+                    {
+                        response.Message = "User not found!";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    var notification = new Notification()
+                    {
+                        UserId = dto.PlayerRecieveId,
+                        Message = $"{dataUser.LastName} sent you a match request",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false,
+                        Type = NotificationType.MatchRequest,
+                        ReferenceId = data.Id
+                    };
+                    await _notificationRepository.AddAsync(notification);
+
+                    await _notificationRepository.SaveChangesAsync();
+                    var responseData = _mapper.Map<MatchSentRequestResponseDTO>(data);
+                    response.Data = responseData;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Sent request successfully!";
+                    transaction.Complete();
                 }
-                var notification = new Notification()
+                catch (Exception ex)
                 {
-                    UserId = dto.PlayerRecieveId,
-                    Message = $"{dataUser.LastName} sent you a match request",
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false,
-                    Type = NotificationType.MatchRequest,
-                    ReferenceId = dto.MatchingId
-                };
-                await _notificationRepository.AddAsync(notification);
-                await _matchSentRequestRepository.AddAsync(data);
-                await _matchSentRequestRepository.SaveChangesAsync();
-                await _notificationRepository.SaveChangesAsync();
-                var responseData = _mapper.Map<MatchSentRequestResponseDTO>(data);
-                response.Data = responseData;
-                response.statusCode = HttpStatusCode.OK;
-                response.Message = "Sent request successfully!";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-                response.statusCode = System.Net.HttpStatusCode.InternalServerError;
-            }
+                    response.Message = ex.Message;
+                    response.statusCode = System.Net.HttpStatusCode.InternalServerError;
+                }
             return response;
         }
     }

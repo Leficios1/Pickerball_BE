@@ -100,13 +100,13 @@ namespace Services.Services
             return response;
         }
 
-        public async Task<StatusResponse<List<UserResponseDTO>>> getAllRefeeUser()
+        public async Task<StatusResponse<List<Refree>>> getAllRefeeUser()
         {
-            var response = new StatusResponse<List<UserResponseDTO>>();
+            var response = new StatusResponse<List<Refree>>();
             try
             {
                 var data = await _userRepository.GetAllRefeeUserAsync();
-                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.Data = data;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all refee user success!";
             }
@@ -190,6 +190,9 @@ namespace Services.Services
                 {
                     response.Data = _mapper.Map<UserResponseDTO>(data);
                     response.Data.sponsorDetails = _mapper.Map<SponsorDetails>(dataSponsorDetails);
+                    response.Data.sponsorDetails.UrlSocial1 = dataSponsorDetails.UrlSocial1;
+                    response.Data.sponsorDetails.UrlSocial = dataSponsorDetails.UrlSocial;
+                    response.Data.sponsorDetails.isAccept = dataSponsorDetails.isAccept;
                 }
                 else
                 {

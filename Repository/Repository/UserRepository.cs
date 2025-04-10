@@ -20,9 +20,9 @@ namespace Repository.Repository
             _context = context;
         }
 
-        public async Task<List<User>> GetAllRefeeUserAsync()
+        public async Task<List<Refree>> GetAllRefeeUserAsync()
         {
-            return await _context.Users.Where(x => x.RoleId == 4).ToListAsync();
+            return await _context.Refree.Include(x => x.User).ToListAsync();
         }
 
         public async Task<List<User>> GetAllUser()

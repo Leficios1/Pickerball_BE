@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Database.DTO.Response;
+using Database.Model;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
@@ -40,28 +41,86 @@ namespace Services.Services
             var response = new StatusResponse<List<NotificationResponseDTO>>();
             try
             {
-                var notifications = await _notificationRepository.Get().Where(x => x.UserId == userId).ToListAsync();
-                if (notifications == null)
+                var notifications = await _notificationRepository.Get()
+                    .Where(n => n.UserId == userId)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .ToListAsync();
+
+                var result = new List<NotificationResponseDTO>();
+
+                foreach (var item in notifications)
                 {
-                    response.statusCode = HttpStatusCode.OK;
-                    response.Message = "Don't have notification";
-                    return response;
+                    var dto = new NotificationResponseDTO
+                    {
+                        Id = item.Id,
+                        Message = item.Message,
+                        CreatedAt = item.CreatedAt,
+                        IsRead = item.IsRead,
+                        Type = item.Type,
+                        ReferenceId = item.ReferenceId,
+                        BonusId = item.BonusId
+                    };
+
+                    switch (item.Type)
+                    {
+                        case NotificationType.FriendRequest:
+                            dto.RedirectUrl = $"https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/api/Friend/AcceptFriend";
+                            dto.ExtraInfo = "Xem lời mời kết bạn";
+                            break;
+
+                        case NotificationType.MatchRequest:
+                            dto.RedirectUrl = $"https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/api/MatcheSendRequest/GetByReceviedId/{item.ReferenceId}";
+                            dto.ExtraInfo = "Xem lời mời ghép trận";
+                            break;
+
+                        case NotificationType.AccpetTournamentTeamRequest:
+                            dto.RedirectUrl = $"https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/api/TournamentTeamRequest/GetTeamRequestByReceiverUser/{item.ReferenceId}";
+                            dto.ExtraInfo = "Xem lời mời tham gia đội";
+                            break;
+                        case NotificationType.TournamentTeamRequest:
+                            dto.RedirectUrl = $"https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/api/Tourament/GetTournamentById/{item.ReferenceId}";
+                            dto.ExtraInfo = "Xem lời mời tham gia đội";
+                            break;
+                    }
+                    result.Add(dto);
                 }
-                response.Data = _mapper.Map<List<NotificationResponseDTO>>(notifications);
+
+                response.Data = result;
                 response.statusCode = HttpStatusCode.OK;
-                response.Message = "Get notification successfully!";
+                response.Message = "Fetched notifications successfully.";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                response.Message = e.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
             }
             return response;
         }
-
-        public Task<StatusResponse<bool>> MarkAsRead(int notificationId)
+        public async Task<StatusResponse<bool>> MarkAsRead(int notificationId)
         {
-            throw new NotImplementedException();
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var data = await _notificationRepository.GetById(notificationId);
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Notification not found.";
+                    return response;
+                }
+                data.IsRead = true;
+                _notificationRepository.Update(data);
+                await _notificationRepository.SaveChangesAsync();
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Notification marked as read successfully.";
+                response.Data = true;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
         public Task<StatusResponse<bool>> MarkAsReadAll(int userId)

@@ -20,5 +20,11 @@ namespace PickerBall_BE.Controllers
             var response = await _notificationServices.GetNotificationByUserId(userId);
             return StatusCode((int)response.statusCode, response);
         }
+        [HttpGet("MarkAsRead/{NotificationId}")]
+        public async Task<IActionResult> MarkAsRead([FromRoute] int NotificationId)
+        {
+            var response = await _notificationServices.MarkAsRead(NotificationId);
+            return StatusCode((int)response.statusCode, response);
+        }
     }
 }

@@ -48,7 +48,12 @@ namespace Database.DTO.Response
         public string? LogoUrl { get; set; }
         public string ContactEmail { get; set; } = null!;
         public string? Descreption { get; set; }
-        //public bool isAccept { get; set; }
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+        [Url]
+        public string UrlSocial { get; set; } = null!;
+        [Url]
+        public string? UrlSocial1 { get; set; } = null!;
+        public bool isAccept { get; set; }
+
     }
 }

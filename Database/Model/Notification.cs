@@ -21,6 +21,7 @@ namespace Database.Model
         public bool IsRead { get; set; }
         public NotificationType? Type { get; set; } // Type of notification
         public int? ReferenceId { get; set; } // Id tham chiếu đến bảng tương ứng
+        public int? BonusId { get; set; } // Id tham chiếu đến bảng tương ứng
 
     }
     public enum NotificationType
@@ -28,7 +29,9 @@ namespace Database.Model
         FriendRequest = 1,
         MatchRequest = 2,
         TournamentTeamRequest = 3,
-        Other = 4
+        AccpetTournamentTeamRequest = 4,
+        AcceptMatchRequest = 5,
+        Other = 6
     }
 
 }

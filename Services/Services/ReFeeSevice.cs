@@ -19,13 +19,15 @@ namespace Services.Services
         private readonly ITouramentRepository _touramentRepository;
         private readonly IMatchesRepository _matchRepository;
         private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepository;
 
-        public ReFeeSevice(IRefreeRepository refreeRepository, ITouramentRepository touramentRepository, IMatchesRepository matchesRepository, IMapper mapper)
+        public ReFeeSevice(IRefreeRepository refreeRepository, ITouramentRepository touramentRepository, IMatchesRepository matchesRepository, IMapper mapper, IUserRepository userRepository)
         {
             _refreeRepository = refreeRepository;
             _touramentRepository = touramentRepository;
             _matchRepository = matchesRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<Refree> CreateRefreeAsync(CreateRefreeDTO refreeDto)
@@ -141,7 +143,7 @@ namespace Services.Services
                         StartDate = t.StartDate,
                         EndDate = t.EndDate,
                         Location = t.Location,
-                        Description = t.Descreption,
+                        Descreption = t.Descreption,
                         Status = t.Status,
                         Banner = t.Banner,
                         MaxPlayer = t.MaxPlayer,
@@ -153,6 +155,34 @@ namespace Services.Services
                         Note = t.Note,
                         OrganizerId = t.OrganizerId,
                     }).ToList();
+                response.Data = tournaments;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get tournament successfully!";
+            }
+            catch (Exception e)
+            {
+                response.Message = e.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<UserResponseDTO>>> GetAllForMobile()
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var data = await _userRepository.Get().Where(x => x.RoleId == 4).ToListAsync();
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Don't have refree";
+                    return response;
+                }
+                response.Data = _mapper.Map<List<UserResponseDTO>>(data);
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get refree successfully!";
+
             }
             catch (Exception e)
             {

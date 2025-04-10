@@ -814,6 +814,11 @@ namespace Services.Services
 
                         }
                     }
+                    else
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Can't not update match score because this match is end";
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1082,6 +1087,31 @@ namespace Services.Services
                     response.Message = ex.Message;
                     response.statusCode = HttpStatusCode.InternalServerError;
                 }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<RoomResponseDTO>>> GetAllMatchCompetitiveAndCustom()
+        {
+            var response = new StatusResponse<List<RoomResponseDTO>>();
+            try
+            {
+                var data = await _matchesRepo.Get().Where(x => x.MatchCategory == MatchCategory.Competitive || x.MatchCategory == MatchCategory.Custom).ToArrayAsync();
+                if(data == null || data.Length == 0)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "No matches found";
+                    return response;
+                }
+                var matchResponses = _mapper.Map<List<RoomResponseDTO>>(data);
+                response.Data = matchResponses;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Matches retrieved successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
             return response;
         }
     }
