@@ -15,5 +15,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<bool>> MarkAsReadAll(int userId);
         Task<StatusResponse<bool>> DeleteNotification(int notificationId);
         Task<StatusResponse<bool>> DeleteAllNotification(int userId);
+        Task<StatusResponse<int>> CountNotiOfUser(int userId);
     }
 }

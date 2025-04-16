@@ -149,7 +149,7 @@ namespace Services.Services
                 vnpay.AddRequestData("vnp_OrderType", "order");
                 vnpay.AddRequestData("vnp_ReturnUrl", return_URL);
                 vnpay.AddRequestData("vnp_TxnRef", vnp_TxnRef);
-                vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddMinutes(30).ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddDays(1).ToString("yyyyMMddHHmmss"));
                 //vnpay.AddRequestData("vnp_TypePayment", typePayment);
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);

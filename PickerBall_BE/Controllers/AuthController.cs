@@ -50,5 +50,17 @@ namespace PickerBall_BE.Controllers
             var response = await _authServices.RegisterAsync(registerDto);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
+        [HttpPost("UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePassword dto)
+        {
+            var response = await _authServices.UpdatePassword(dto.UserId, dto.NewPassword);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
+        [HttpGet("GetIdByEmail/{email}")]
+        public async Task<IActionResult> GetIdByEmail([FromRoute] string email)
+        {
+            var response = await _authServices.ForgotPassword(email);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
     }
 }

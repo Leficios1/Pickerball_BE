@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
     //    });
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://192.168.56.1:5500", "https://pickleball-admin-dlby.vercel.app", "http://localhost:5173", "http://localhost:52124", "https://score-pickle.vercel.app", "https://pickleball-admin-brfb.vercel.app") 
+        policy.WithOrigins("http://192.168.56.1:5500", "https://pickleball-admin-dlby.vercel.app", "http://localhost:5173", "http://localhost:52124", "https://score-pickle.vercel.app", "https://pickleball-admin-brfb.vercel.app", "http://pickleball-admin.vercel.app") 
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); 

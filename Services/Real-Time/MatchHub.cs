@@ -28,6 +28,8 @@ namespace Services.Real_Time
             var existing = WaitingUsers.FirstOrDefault(u =>
                 u.UserId != request.UserId &&
                 u.Gender == request.Gender &&
+                u.City == request.City &&
+                u.MatchFormat == request.MatchFormat &&
 
                 Math.Abs(u.Ranking - request.Ranking) <= 50);
 
@@ -43,18 +45,19 @@ namespace Services.Real_Time
                 await Clients.Client(targetConnection).SendAsync("MatchFound", new { MatchId = matchId, Rival = request });
 
                 // 👉 Lưu vào DB ở đây nếu cần
-                //    using (var scope = _serviceProvider.CreateScope())
-                //        try
-                //        {
-                //            var matchRepo = scope.ServiceProvider.GetRequiredService<IMatchesRepository>();
-                //            var teamRepo = scope.ServiceProvider.GetRequiredService<ITeamRepository>();
-                //            var db = scope.ServiceProvider.GetRequiredService<PickerBallDbcontext>();
+                using (var scope = _serviceProvider.CreateScope())
+                    try
+                    {
+                        var matchRepo = scope.ServiceProvider.GetRequiredService<IMatchesRepository>();
+                        var teamRepo = scope.ServiceProvider.GetRequiredService<ITeamRepository>();
+                        var db = scope.ServiceProvider.GetRequiredService<PickerBallDbcontext>();
 
-                //            // Giả lập tạo 2 team (bạn cần xử lý chuẩn theo project của bạn)
-                //            var team1 = new Team { CreatedAt = DateTime.UtcNow };
-                //            var team2 = new Team { CreatedAt = DateTime.UtcNow };
-                //        }
-                //}
+                        // Giả lập tạo 2 team (bạn cần xử lý chuẩn theo project của bạn)
+                        
+                    }catch(Exception ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
             }
             else
             {

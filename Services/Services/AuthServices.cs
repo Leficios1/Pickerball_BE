@@ -388,5 +388,57 @@ namespace Services.Services
                 return response;
             }
         }
+
+        public async Task<StatusResponse<bool>> UpdatePassword(int userId, string newPassword)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var checkUser = await _userRepo.Get()
+                    .Include(x => x.Role)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                if (checkUser == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Not found user";
+                    return response;
+                }
+                checkUser.PasswordHash = _passwordHasher.HashPassword(checkUser, newPassword);
+                _userRepo.Update(checkUser);
+                await _userRepo.SaveChangesAsync();
+                response.Data = true;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Update Password Succesfull";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<int>> ForgotPassword(string email)
+        {
+            var response = new StatusResponse<int>();
+            try
+            {
+                var data = await _userRepo.GetByEmailAsync(email);
+                if (data == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "Not Found User";
+                    return response;
+                }
+                response.Data = data.Id;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Ok";
+            }catch(Exception ex)
+            {
+                response.Message=ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
     }
 }

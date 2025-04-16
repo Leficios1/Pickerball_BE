@@ -26,6 +26,25 @@ namespace Services.Services
             _mapper = mapper;
         }
 
+        public async Task<StatusResponse<int>> CountNotiOfUser(int userId)
+        {
+            var response = new StatusResponse<int>();
+            try
+            {
+                var data = await _notificationRepository.Get().Where(x => x.UserId == userId).ToListAsync();
+                var result = data.Count();
+                response.Data = result;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Count all Notification of User Succesfully";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
         public Task<StatusResponse<bool>> DeleteAllNotification(int userId)
         {
             throw new NotImplementedException();
@@ -42,7 +61,7 @@ namespace Services.Services
             try
             {
                 var notifications = await _notificationRepository.Get()
-                    .Where(n => n.UserId == userId)
+                    .Where(n => n.UserId == userId && n.IsRead == false)
                     .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
 

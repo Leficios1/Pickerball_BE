@@ -595,5 +595,21 @@ namespace Services.Services
             }
             return response;
         }
+
+        public async Task<StatusResponse<bool>> EndTournament(int TourId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var data = await _teamRepository.GetById(TourId);
+                
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
     }
 }

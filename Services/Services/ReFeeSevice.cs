@@ -10,6 +10,7 @@ using Database.DTO.Request;
 using Database.DTO.Response;
 using Repository.Repository.Interfeace;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Services.Services
 {
@@ -20,14 +21,17 @@ namespace Services.Services
         private readonly IMatchesRepository _matchRepository;
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly ITeamRepository _teamRepository;
 
-        public ReFeeSevice(IRefreeRepository refreeRepository, ITouramentRepository touramentRepository, IMatchesRepository matchesRepository, IMapper mapper, IUserRepository userRepository)
+        public ReFeeSevice(IRefreeRepository refreeRepository, ITouramentRepository touramentRepository, IMatchesRepository matchesRepository, IMapper mapper, IUserRepository userRepository,
+            ITeamRepository teamRepository)
         {
             _refreeRepository = refreeRepository;
             _touramentRepository = touramentRepository;
             _matchRepository = matchesRepository;
             _mapper = mapper;
             _userRepository = userRepository;
+            _teamRepository = teamRepository;
         }
 
         public async Task<Refree> CreateRefreeAsync(CreateRefreeDTO refreeDto)
@@ -107,7 +111,47 @@ namespace Services.Services
                     response.Message = "Don't have match";
                     return response;
                 }
-                response.Data = _mapper.Map<List<MatchResponseDTO>>(data);
+                var matchResponseList = new List<MatchResponseDTO>();
+                foreach (var match in data)
+                {
+                    var teamData = await _teamRepository.GetTeamsWithMatchingIdAsync(match.Id);
+                    var teamResponses = teamData.Select(team => new TeamResponseDTO
+                    {
+                        Id = team.Id,
+                        CaptainId = team.CaptainId,
+                        MatchingId = team.MatchingId,
+                        Name = team.Name,
+                        Members = team.Members.Select(m => new TeamMemberDTO
+                        {
+                            Id = m.Id,
+                            PlayerId = m.PlayerId,
+                            JoinedAt = m.JoinedAt
+                        }).ToList()
+                    }).ToList();
+
+                    var matchDto = new MatchResponseDTO
+                    {
+                        Id = match.Id,
+                        Title = match.Title,
+                        Description = match.Description,
+                        MatchDate = match.MatchDate,
+                        CreateAt = match.CreateAt,
+                        VenueId = match.VenueId,
+                        Status = match.Status,
+                        MatchCategory = match.MatchCategory,
+                        MatchFormat = match.MatchFormat,
+                        WinScore = match.WinScore,
+                        RoomOwner = match.RoomOwner,
+                        Team1Score = match.Team1Score,
+                        Team2Score = match.Team2Score,
+                        IsPublic = match.IsPublic,
+                        RefereeId = match.RefereeId,
+                        TeamResponse = teamResponses
+                    };
+
+                    matchResponseList.Add(matchDto);
+                }
+                response.Data = matchResponseList;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get match successfully!";
             }

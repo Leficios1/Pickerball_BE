@@ -307,5 +307,32 @@ namespace Services.Services
             }
             return response;
         }
+
+        public async Task<StatusResponse<bool>> UpdatePointPlayer(int userId, int point, int level)
+        { 
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var data = await _playerRepository.GetById(userId);
+                if(data == null)
+                {
+                    response.statusCode=HttpStatusCode.BadRequest;
+                    response.Message = "Not Found Player";
+                    return response;
+                }
+                data.ExperienceLevel = level;
+                data.RankingPoint = point;
+                _playerRepository.Update(data);
+                await _playerRepository.SaveChangesAsync();
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Update Successfull";
+            }
+            catch (Exception e)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = e.Message;
+            }
+            return response;
+        }
     }
 }

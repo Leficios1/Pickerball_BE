@@ -133,13 +133,14 @@ namespace Services.Services
                         status = data.status,
                         LastUpdatedAt = data.LastUpdatedAt
                     };
+                    var dataUser = await _userRepository.GetById(data.PlayerRecieveId);
                     var notification = new Notification()
                     {
                         UserId = data.PlayerRequestId,
-                        Message = $"{data.PlayerRecieveId} accepted your match request",
+                        Message = $"{dataUser.LastName} accepted your match request",
                         CreatedAt = DateTime.UtcNow,
                         IsRead = false,
-                        Type = NotificationType.MatchRequest,
+                        Type = NotificationType.AcceptMatchRequest,
                         ReferenceId = data.MatchingId
                     };
                     await _notificationRepository.AddAsync(notification);

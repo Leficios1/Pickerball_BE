@@ -40,6 +40,9 @@ namespace Services.Mapping
             CreateMap<RefereeCreateRequestDTO, User>().ReverseMap();
             CreateMap<RefereeResponse, User>().ReverseMap();
             CreateMap<RefereeResponse, Refree>().ReverseMap();
+            CreateMap<TeamResponseDTO, Team>().ReverseMap();
+            CreateMap<TeamMemberDTO, TeamMembers>().ReverseMap();
+            CreateMap<Matches, MatchResponseDTO>().ReverseMap();
 
             //Mapping for Blog Category
             CreateMap<BlogCategoryCreateDTO, BlogCategory>().ReverseMap();

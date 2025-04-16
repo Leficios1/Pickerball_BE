@@ -775,16 +775,23 @@ namespace Services.Services
 
                                 foreach (var playerId in loserPlayerIds)
                                 {
+                                    var dataTourmanetMatche = await _touramentMatchesRepository.Get().Where(x => x.MatchesId == data.Id).SingleOrDefaultAsync();
+                                    if (dataTourmanetMatche == null)
+                                    {
+                                        response.statusCode = HttpStatusCode.BadRequest;
+                                        response.Message = "Tournament match not found";
+                                        return response;
+                                    }
                                     var registration = await _touramentRegistrationRepository
                                         .Get()
-                                        .Where(x => x.PlayerId == playerId && x.TournamentId == data.TournamentMatches.FirstOrDefault().TournamentId)
+                                        .Where(x => x.PlayerId == playerId && x.TournamentId == dataTourmanetMatche.TournamentId)
                                         .FirstOrDefaultAsync();
 
                                     if (registration != null)
                                     {
                                         registration.IsApproved = TouramentregistrationStatus.Eliminated;
                                         var existingRankings = await _rankingRepository.Get()
-                                                            .Where(r => r.TournamentId == data.TournamentMatches.FirstOrDefault().TournamentId)
+                                                            .Where(r => r.TournamentId == dataTourmanetMatche.TournamentId)
                                                             .OrderByDescending(r => r.Position)
                                                             .ToListAsync();
                                         int nextPosition = (existingRankings.FirstOrDefault()?.Position ?? 0) + 1;
@@ -792,7 +799,7 @@ namespace Services.Services
                                         var rankingData = new Ranking
                                         {
                                             PlayerId = playerId,
-                                            TournamentId = data.TournamentMatches.FirstOrDefault().TournamentId,
+                                            TournamentId = dataTourmanetMatche.TournamentId,
                                             Points = nextPonits,
                                             Position = nextPosition
                                         };
