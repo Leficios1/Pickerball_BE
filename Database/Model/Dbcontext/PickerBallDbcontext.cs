@@ -41,7 +41,7 @@ namespace Database.Model.Dbcontext
         public DbSet<Payments> Payments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Role> Roles { get; set; }
- 
+        public DbSet<RuleOfAward> RuleOfAwards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -170,6 +170,10 @@ namespace Database.Model.Dbcontext
                 .WithMany(m => m.MatchScores)
                 .HasForeignKey(ms => ms.MatchId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Team>()
+    .HasOne(t => t.Matches)
+    .WithMany(m => m.Teams)
+    .HasForeignKey(t => t.MatchingId);
 
             //modelBuilder.Entity<MatchScore>()
             //    .HasOne(ms => ms.Team1)

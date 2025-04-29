@@ -8,23 +8,12 @@ using System.Threading.Tasks;
 
 namespace Database.Model
 {
-    public class Ranking
+    public class RuleOfAward
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [ForeignKey("Player")]
-        public int PlayerId { get; set; } 
-        public Player Player { get; set; }
-
-        public int TournamentId { get; set; }
-        public Tournaments Tournament { get; set; }
-
-        public int Points { get; set; }
         public int Position { get; set; }
-        public int? PercentOfPrize {  get; set; }
-        public decimal? Prize {  get; set; }
-
+        public int PercentOfPrize {  get; set; }
     }
 }

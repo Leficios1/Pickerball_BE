@@ -102,7 +102,7 @@ namespace Services.Services
                     return response;
                 }
                 var acceptedCount = await _tournamentRegistrationRepository.Get()
-                    .Where(tr => tr.TournamentId == dto.TournamentId && tr.IsApproved == TouramentregistrationStatus.Pending).CountAsync();
+                    .Where(tr => tr.TournamentId == dto.TournamentId && (tr.IsApproved == TouramentregistrationStatus.Pending || tr.IsApproved == TouramentregistrationStatus.Approved)).CountAsync();
                 if (acceptedCount >= touramentData.MaxPlayer)
                 {
                     response.statusCode = HttpStatusCode.BadRequest;

@@ -15,5 +15,9 @@ namespace Database.DTO.Response
         public int? ExeprienceLevel { get; set; }
         public int? TotalMatch { get; set; }
         public int? TotalWins { get; set; }
+        public int? Point {  get; set; }
+        public int? Position { get; set; }
+        public int? PercentOfPrize { get; set; }
+        public int? Prize { get; set; }
     }
 }

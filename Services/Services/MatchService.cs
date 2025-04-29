@@ -32,11 +32,13 @@ namespace Services.Services
         private readonly ITournamentRegistrationRepository _touramentRegistrationRepository;
         private readonly IRankingRepository _rankingRepository;
         private readonly IPlayerRepository _playerRepository;
-
+        private readonly IAchivementRepository _achivementRepository;
+        private readonly IRuleOfAwardRepository _ruleOfAwardRepository;
         public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
             ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository,
             ITouramentRepository touramentRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository, IMatchScoreRepository matchScoreRepository,
-            ITournamentRegistrationRepository tournamentRegistrationRepository, IRankingRepository rankingRepository, IPlayerRepository playerRepository)
+            ITournamentRegistrationRepository tournamentRegistrationRepository, IRankingRepository rankingRepository, IPlayerRepository playerRepository, IAchivementRepository achivementRepository,
+            IRuleOfAwardRepository ruleOfAwardRepository)
         {
             _matchesRepo = matchesRepo;
             _mapper = mapper;
@@ -50,58 +52,63 @@ namespace Services.Services
             _touramentRegistrationRepository = tournamentRegistrationRepository;
             _rankingRepository = rankingRepository;
             _playerRepository = playerRepository;
+            _achivementRepository = achivementRepository;
+            _ruleOfAwardRepository = ruleOfAwardRepository;
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
         {
-            var room = new MatchRequestDTO
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                Title = dto.Title,
-                Description = dto.Description,
-                MatchDate = dto.MatchDate,
-                VenueId = dto.VenueId ?? 0,
-                Status = dto.Status,
-                MatchCategory = dto.MatchCategory,
-                MatchFormat = dto.MatchFormat,
-                WinScore = dto.WinScore,
-                IsPublic = dto.IsPublic,
-                RefereeId = dto.RefereeId,
-                TouramentId = dto.TournamentId,
-                RoomOnwerId = dto.RoomOnwer
-            };
-
-            var response = await CreateRoomAsync(room);
-            if (response.statusCode == HttpStatusCode.OK)
-            {
-                var createRoomResponse = _mapper.Map<RoomResponseDTO>(response.Data);
-                createRoomResponse.Teams = new List<TeamResponseDTO>();
-
-                var team1Response = await CreateTeamForRoom(response.Data.Id, "Team 1", dto.Player1Id);
-                var team2Response = await CreateTeamForRoom(response.Data.Id, "Team 2", dto.Player2Id);
-
-                if (team1Response.statusCode == HttpStatusCode.OK && team2Response.statusCode == HttpStatusCode.OK)
+                var room = new MatchRequestDTO
                 {
-                    var teamMembers = CreateTeamMembers(dto, team1Response.Data.Id, team2Response.Data.Id);
-                    await AddTeamMembers(teamMembers);
+                    Title = dto.Title,
+                    Description = dto.Description,
+                    MatchDate = dto.MatchDate,
+                    VenueId = dto.VenueId ?? 0,
+                    Status = dto.Status,
+                    MatchCategory = dto.MatchCategory,
+                    MatchFormat = dto.MatchFormat,
+                    WinScore = dto.WinScore,
+                    IsPublic = dto.IsPublic,
+                    RefereeId = dto.RefereeId,
+                    TouramentId = dto.TournamentId,
+                    RoomOnwerId = dto.RoomOnwer
+                };
 
-                    createRoomResponse.Teams.Add(await CreateTeamResponse(team1Response.Data.Id, teamMembers));
-                    createRoomResponse.Teams.Add(await CreateTeamResponse(team2Response.Data.Id, teamMembers));
+                var response = await CreateRoomAsync(room);
+                if (response.statusCode == HttpStatusCode.OK)
+                {
+                    var createRoomResponse = _mapper.Map<RoomResponseDTO>(response.Data);
+                    createRoomResponse.Teams = new List<TeamResponseDTO>();
+
+                    var team1Response = await CreateTeamForRoom(response.Data.Id, "Team 1", dto.Player1Id);
+                    var team2Response = await CreateTeamForRoom(response.Data.Id, "Team 2", dto.Player2Id);
+
+                    if (team1Response.statusCode == HttpStatusCode.OK && team2Response.statusCode == HttpStatusCode.OK)
+                    {
+                        var teamMembers = CreateTeamMembers(dto, team1Response.Data.Id, team2Response.Data.Id);
+                        await AddTeamMembers(teamMembers);
+
+                        createRoomResponse.Teams.Add(await CreateTeamResponse(team1Response.Data.Id, teamMembers));
+                        createRoomResponse.Teams.Add(await CreateTeamResponse(team2Response.Data.Id, teamMembers));
+                    }
+                    transaction.Complete();
+                    return new StatusResponse<RoomResponseDTO>
+                    {
+                        statusCode = HttpStatusCode.OK,
+                        Data = createRoomResponse,
+                        Message = "Room created successfully"
+                    };
                 }
 
                 return new StatusResponse<RoomResponseDTO>
                 {
-                    statusCode = HttpStatusCode.OK,
-                    Data = createRoomResponse,
-                    Message = "Room created successfully"
+                    statusCode = response.statusCode,
+                    Data = null,
+                    Message = response.Message
                 };
             }
-
-            return new StatusResponse<RoomResponseDTO>
-            {
-                statusCode = response.statusCode,
-                Data = null,
-                Message = response.Message
-            };
         }
 
         private async Task<StatusResponse<TeamResponseDTO>> CreateTeamForRoom(int roomId, string teamName, int? CaptainId)
@@ -767,21 +774,27 @@ namespace Services.Services
                             {
                                 loserTeam = team1;
                             }
+                            var dataTourmanetMatche = await _touramentMatchesRepository.Get().Where(x => x.MatchesId == data.Id).SingleOrDefaultAsync();
+                            if (dataTourmanetMatche == null)
+                            {
+                                response.statusCode = HttpStatusCode.BadRequest;
+                                response.Message = "Tournament match not found";
+                                return response;
+                            }
                             if (loserTeam != null)
                             {
                                 var loserPlayerIds = loserTeam.Members
                                     .Select(m => m.PlayerId)
                                     .ToList();
+                                var existingRankings = await _rankingRepository.Get()
+                                                .Where(r => r.TournamentId == dataTourmanetMatche.TournamentId)
+                                                .OrderByDescending(r => r.Position)
+                                                .ToListAsync();
 
+                                int nextPosition = (existingRankings.FirstOrDefault()?.Position ?? 0) + 1;
+                                int nextPoints = (existingRankings.FirstOrDefault()?.Points ?? 0) + 2;
                                 foreach (var playerId in loserPlayerIds)
                                 {
-                                    var dataTourmanetMatche = await _touramentMatchesRepository.Get().Where(x => x.MatchesId == data.Id).SingleOrDefaultAsync();
-                                    if (dataTourmanetMatche == null)
-                                    {
-                                        response.statusCode = HttpStatusCode.BadRequest;
-                                        response.Message = "Tournament match not found";
-                                        return response;
-                                    }
                                     var registration = await _touramentRegistrationRepository
                                         .Get()
                                         .Where(x => x.PlayerId == playerId && x.TournamentId == dataTourmanetMatche.TournamentId)
@@ -790,25 +803,73 @@ namespace Services.Services
                                     if (registration != null)
                                     {
                                         registration.IsApproved = TouramentregistrationStatus.Eliminated;
-                                        var existingRankings = await _rankingRepository.Get()
-                                                            .Where(r => r.TournamentId == dataTourmanetMatche.TournamentId)
-                                                            .OrderByDescending(r => r.Position)
-                                                            .ToListAsync();
-                                        int nextPosition = (existingRankings.FirstOrDefault()?.Position ?? 0) + 1;
-                                        int nextPonits = (existingRankings.FirstOrDefault()?.Points ?? 0) + 2;
                                         var rankingData = new Ranking
                                         {
                                             PlayerId = playerId,
                                             TournamentId = dataTourmanetMatche.TournamentId,
-                                            Points = nextPonits,
+                                            Points = nextPoints,
                                             Position = nextPosition
                                         };
                                         await _rankingRepository.AddAsync(rankingData);
                                         await _rankingRepository.SaveChangesAsync();
                                         _touramentRegistrationRepository.Update(registration);
                                         await _touramentRegistrationRepository.SaveChangesAsync();
-                                        break;
                                     }
+                                }
+                            }
+                            var winner = await _touramentRegistrationRepository.Get().Where(x => x.TournamentId == dataTourmanetMatche.TournamentId &&
+                            (x.IsApproved != TouramentregistrationStatus.Eliminated && x.IsApproved == TouramentregistrationStatus.Approved)).ToListAsync();
+                            if (winner.Count() == 1)
+                            {
+                                var winnerId = winner.First();
+                                winnerId.IsApproved = TouramentregistrationStatus.Winner;
+
+                                var existingRankings = await _rankingRepository.Get()
+                                    .Where(r => r.TournamentId == dataTourmanetMatche.TournamentId)
+                                    .OrderByDescending(r => r.Position)
+                                    .ToListAsync();
+                                int nextPosition = (existingRankings.FirstOrDefault()?.Position ?? 0) + 1;
+                                int nextPoints = (existingRankings.FirstOrDefault()?.Points ?? 0) + 2;
+                                foreach (var winnerPlayer in winner)
+                                {
+                                    var touramentData = await _touramentRepository.GetById(winnerPlayer.TournamentId);
+                                    var rankingData = new Ranking
+                                    {
+                                        PlayerId = winnerPlayer.PlayerId,
+                                        TournamentId = dataTourmanetMatche.TournamentId,
+                                        Points = nextPoints,
+                                        Position = nextPosition
+                                    };
+                                    var Achivement = new Achievement
+                                    {
+                                        UserId = winnerPlayer.PlayerId,
+                                        Title = "Winner of Tourament",
+                                        Description = "Winner of Tourament in " + touramentData.Name,
+                                        AwardedAt = DateTime.Now,
+                                    };
+                                    if (winnerPlayer.PartnerId != null)
+                                    {
+                                        var rankingDataPartner = new Ranking
+                                        {
+                                            PlayerId = (int)winnerPlayer.PartnerId,
+                                            TournamentId = dataTourmanetMatche.TournamentId,
+                                            Points = nextPoints,
+                                            Position = nextPosition
+                                        };
+                                        var AchivementPartner = new Achievement
+                                        {
+                                            UserId = (int)winnerPlayer.PartnerId,
+                                            Title = "Winner of Tourament",
+                                            Description = "Winner of Tourament in " + touramentData.Name,
+                                            AwardedAt = DateTime.Now,
+                                        };
+                                        await _rankingRepository.AddAsync(rankingDataPartner);
+                                        await _achivementRepository.AddAsync(AchivementPartner);
+                                    }
+                                    await _achivementRepository.AddAsync(Achivement);
+                                    await _rankingRepository.AddAsync(rankingData);
+                                    await _rankingRepository.SaveChangesAsync();
+                                    await _achivementRepository.SaveChangesAsync();
                                 }
                             }
                             _matchesRepo.Update(data);
@@ -1019,7 +1080,7 @@ namespace Services.Services
                 else
                     player.RankingPoint += isWinner ? gain : -lose;
                 player.RankingPoint = Math.Max(player.RankingPoint, 0); // Không cho âm điểm
-                // Cập nhật Level nếu cần (có thể gán bằng lại dựa trên điểm)
+                                                                        // Cập nhật Level nếu cần (có thể gán bằng lại dựa trên điểm)
                 player.ExperienceLevel = player.RankingPoint switch
                 {
                     <= 200 => 1,
@@ -1074,7 +1135,7 @@ namespace Services.Services
 
                     if (dto.MatchCategory.HasValue)
                         match.MatchCategory = dto.MatchCategory.Value;
-                    if(dto.MatchFormat.HasValue)
+                    if (dto.MatchFormat.HasValue)
                         match.MatchFormat = dto.MatchFormat.Value;
                     if (dto.WinScore.HasValue)
                         match.WinScore = dto.WinScore.Value;
@@ -1102,10 +1163,16 @@ namespace Services.Services
             var response = new StatusResponse<List<RoomResponseDTO>>();
             try
             {
-                var data = await _matchesRepo.Get().Where(x => x.MatchCategory == MatchCategory.Competitive || x.MatchCategory == MatchCategory.Custom).ToArrayAsync();
-                if(data == null || data.Length == 0)
+                var data = await _matchesRepo.Get()
+                    .Include(m => m.Teams)
+                        .ThenInclude(t => t.Members)
+                    .Where(m =>
+                        (m.MatchCategory == MatchCategory.Competitive || m.MatchCategory == MatchCategory.Custom)
+                        && m.IsPublic == true)
+                    .ToListAsync();
+                if (data == null)
                 {
-                    response.statusCode = HttpStatusCode.NotFound;
+                    response.statusCode = HttpStatusCode.OK;
                     response.Message = "No matches found";
                     return response;
                 }
@@ -1113,6 +1180,28 @@ namespace Services.Services
                 response.Data = matchResponses;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Matches retrieved successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<MatchHistoryResponseDTO>>> HistoryMatchByUserId(int userId)
+        {
+            var response = new StatusResponse<List<MatchHistoryResponseDTO>>();
+            try
+            {
+                var matchHistoryByUserId = await _teamRepository.Get()
+                    .Include(x => x.Members)
+                    .Include(x => x.Matches)
+                    .Where(x => x.CaptainId == userId || x.Members.Any(m => m.PlayerId == userId))
+                    .Select(t => t.Matches)
+                    .Distinct()
+                    .ToListAsync();
+
             }
             catch (Exception ex)
             {

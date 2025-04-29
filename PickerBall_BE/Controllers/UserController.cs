@@ -11,11 +11,13 @@ namespace PickerBall_BE.Controllers
     {
         private readonly IUserServices _userServices;
         private readonly IReFeeSevice _refreeService;
+        private readonly IFriendServices _friendServices;
 
-        public UserController(IUserServices userServices, IReFeeSevice refreeService)
+        public UserController(IUserServices userServices, IReFeeSevice refreeService, IFriendServices friendServices)
         {
             _userServices = userServices;
             _refreeService = refreeService;
+            _friendServices = friendServices;
         }
 
         [HttpGet("GetAllUser")]
@@ -61,6 +63,13 @@ namespace PickerBall_BE.Controllers
             var response = await _userServices.UpdateUser(dto, id);
             return StatusCode((int)response.statusCode, response);
         }
+
+        [HttpPatch("UpdateUserWithUserDetails/{id}")]
+        public async Task<IActionResult> UpdateUserWithUserDetails([FromRoute] int id, [FromBody] UserUpdateRequestDTO dto)
+        {
+            var response = await _userServices.UpdateUserWithUserDetails(dto, id);
+            return StatusCode((int)response.statusCode, response);
+        }
         [HttpDelete("DeletedUser/{UserId}")]
         public async Task<IActionResult> DeletedUser([FromRoute] int UserId)
         {
@@ -71,6 +80,13 @@ namespace PickerBall_BE.Controllers
         public async Task<IActionResult> CreateReferee([FromBody] RefereeCreateRequestDTO dto)
         {
             var response = await _userServices.CreateReferee(dto);
+            return StatusCode((int)response.statusCode, response);
+        }
+
+        [HttpGet("GetAllPlayerNotFriend/{id}")]
+        public async Task<IActionResult> GetAllPlayerNotFriend([FromRoute] int id)
+        {
+            var response = await _friendServices.GetPlayerNotFriend(id);
             return StatusCode((int)response.statusCode, response);
         }
     }

@@ -20,6 +20,6 @@ namespace Services.Services.Interface
         public Task<StatusResponse<List<Refree>>> getAllRefeeUser();
         public Task<StatusResponse<List<UserResponseDTO>>> getAllPlayerUser();
         public Task<StatusResponse<bool>> UpdatePointPlayer(int userId, int point, int level); 
-
+        public Task<StatusResponse<UserResponseDTO>> UpdateUserWithUserDetails(UserUpdateRequestDTO dto, int id);
     }
 }

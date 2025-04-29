@@ -36,10 +36,10 @@ namespace PickerBall_BE.Controllers
             var result = await _vpnpayService.GetAllBillByTourament(TouramentId);
             return Ok(result);
         }
-        [HttpGet("vn-pay/GetAllBillBySponnerId/{SponnerId}")]
-        public async Task<IActionResult> GetAllBillBySponnerId([FromRoute] int SponnerId)
+        [HttpGet("vn-pay/GetAllBillByUserId/{UserId}")]
+        public async Task<IActionResult> GetAllBillBySponnerId([FromRoute] int UserId)
         {
-            var result = await _vpnpayService.GetAllBillBySponnerId(SponnerId);
+            var result = await _vpnpayService.GetAllBillBySponnerId(UserId);
             return Ok(result);
         }
         [HttpGet("vn-pay/GetById/{BillId}")]

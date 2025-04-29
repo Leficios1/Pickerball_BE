@@ -38,6 +38,7 @@ namespace Database.Model
         public ICollection<TouramentMatches> TournamentMatches { get; set; } = new List<TouramentMatches>();
         public ICollection<MatchesSendRequest> MatchRequests { get; set; } = new List<MatchesSendRequest>();
         public ICollection<MatchScore> MatchScores { get; set; } = new List<MatchScore>();
+        public ICollection<Team> Teams { get; set; }
     }
 
     public enum WinScore

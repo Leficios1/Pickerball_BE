@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Azure.Core;
 using Database.DTO.Request;
 using Database.DTO.Response;
@@ -189,7 +190,7 @@ namespace Services.Services
                 //    TotalWins = x.Player.TotalWins,
                 //}
             }).SingleOrDefaultAsync(x => x.Id.ToString().Equals(id));
-            if(user.RoleId == 1)
+            if (user.RoleId == 1)
             {
                 var userDetails = await _userRepo.Get().Where(x => x.Id == user.Id).Include(x => x.Player).SingleOrDefaultAsync();
                 if (userDetails == null) throw new Exception("There is no user has by id:");
@@ -433,10 +434,38 @@ namespace Services.Services
                 response.Data = data.Id;
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Ok";
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                response.Message=ex.Message;
+                response.Message = ex.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<bool>> CheckPasswordCorrectOrNot(int userId, string password)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var checkUser = await _userRepo.Get()
+                    .Include(x => x.Role)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                if (checkUser == null || _passwordHasher.VerifyHashedPassword(checkUser, checkUser.PasswordHash, password) != PasswordVerificationResult.Success)
+                {
+                    response.Data = false;
+                    response.statusCode = HttpStatusCode.Unauthorized;
+                    response.Message = "Invalid email or password!";
+                    return response;
+                }
+                response.Data = true;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Update Password Succesfull";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
             }
             return response;
         }

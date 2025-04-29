@@ -38,8 +38,8 @@ namespace Database.Model
     }
     public enum TypePayment
     {
-        Donate,
-        Fee,
-        Sponsor
+        Donate = 1,
+        Fee = 2,
+        Award = 3,
     }
 }

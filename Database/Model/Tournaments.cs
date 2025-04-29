@@ -33,6 +33,7 @@ namespace Database.Model
         public bool IsAccept { get; set; }
         public bool IsFree { get; set; }
         public decimal? EntryFee { get; set; }
+        public bool isAward { get; set; } = false;
 
         [ForeignKey("Organizer")]
         public int OrganizerId { get; set; }

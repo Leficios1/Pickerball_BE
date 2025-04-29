@@ -34,7 +34,7 @@ namespace Services.Mapping
             CreateMap<MatchRequestDTO, Matches>().ReverseMap();
             CreateMap<SponnerRequestDTO, Sponsor>().ReverseMap();
             CreateMap<Sponsor, SponnerResponseDTO>().ReverseMap();
-            CreateMap<TouramentRegistraionResponseDTO, TournamentRegistration>().ReverseMap();    
+            CreateMap<TouramentRegistraionResponseDTO, TournamentRegistration>().ReverseMap();
             CreateMap<MatchUpdateRequestDTO, Matches>().ReverseMap();
             CreateMap<MatchUpdateRequestForNormalMatchRequestDTO, Matches>().ReverseMap();
             CreateMap<RefereeCreateRequestDTO, User>().ReverseMap();
@@ -43,6 +43,22 @@ namespace Services.Mapping
             CreateMap<TeamResponseDTO, Team>().ReverseMap();
             CreateMap<TeamMemberDTO, TeamMembers>().ReverseMap();
             CreateMap<Matches, MatchResponseDTO>().ReverseMap();
+            CreateMap<Team, TeamResponseDTO>().ReverseMap();
+            CreateMap<TeamMemberDTO, TeamMembers>().ReverseMap();
+            CreateMap<Ranking, RankingResponseDTO>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Player.User.Id))
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src =>
+             src.Player.User.SecondName != null
+        ? $"{src.Player.User.LastName} {src.Player.User.FirstName} {src.Player.User.SecondName}".Trim()
+        : $"{src.Player.User.LastName} {src.Player.User.FirstName}".Trim()
+))
+            .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Player.User.AvatarUrl))
+            .ForMember(dest => dest.RankingPoint, opt => opt.MapFrom(src => src.Player.RankingPoint))
+            .ForMember(dest => dest.ExeprienceLevel, opt => opt.MapFrom(src => src.Player.ExperienceLevel))
+            .ForMember(dest => dest.TotalMatch, opt => opt.MapFrom(src => src.Player.TotalMatch))
+            .ForMember(dest => dest.TotalWins, opt => opt.MapFrom(src => src.Player.TotalWins))
+            .ForMember(dest => dest.Point, opt => opt.MapFrom(src => src.Player.RankingPoint))
+            .ForMember(dest => dest.Position, opt => opt.MapFrom(src => src.Position));
 
             //Mapping for Blog Category
             CreateMap<BlogCategoryCreateDTO, BlogCategory>().ReverseMap();
@@ -62,7 +78,7 @@ namespace Services.Mapping
             CreateMap<FriendRequestDTO, Friends>().ReverseMap();
             CreateMap<FriendResponseDTO, Friends>().ReverseMap();
             CreateMap<VenuesRequestDTO, Venues>().ReverseMap();
-            CreateMap<Venues, VenuesResponseDTO>().ReverseMap(); 
+            CreateMap<Venues, VenuesResponseDTO>().ReverseMap();
 
             CreateMap<NotificationResponseDTO, Notification>().ReverseMap();
             CreateMap<Payments, BillResponseDTO>().ReverseMap();
@@ -75,7 +91,7 @@ namespace Services.Mapping
                     .ForMember(dest => dest.ExeprienceLevel, opt => opt.MapFrom(src => src.Player.ExperienceLevel))
                     .ForMember(dest => dest.TotalWins, opt => opt.MapFrom(src => src.Player.TotalWins))
                     .ForMember(dest => dest.TotalMatch, opt => opt.MapFrom(src => src.Player.TotalMatch));
-
+            CreateMap<RuleOfAwardResponseDTO, RuleOfAward>().ReverseMap();
 
         }
     }

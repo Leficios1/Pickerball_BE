@@ -41,6 +41,9 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IVnpayRepository, VnpayRepository>();
             services.AddScoped<IMatchScoreRepository, MatchScoreRepository>();
             services.AddScoped<IRankingRepository, RankingRepository>();
+            services.AddScoped<IPayOsServices, PayOsServices>();
+            services.AddScoped<IAchivementRepository, AchivementRepository>();
+            services.AddScoped<IRuleOfAwardRepository, RuleOfAwardRepository>();
 
 
             // Register Services here

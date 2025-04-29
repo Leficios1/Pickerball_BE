@@ -80,7 +80,7 @@ namespace Services.Services
                         return response;
                     }
                 }
-                else 
+                else
                 {
                     dto.EntryFee = 0;
                 }
@@ -557,7 +557,7 @@ namespace Services.Services
                 {
                     response.Data.Status = 6;
                 }
-                response.statusCode=HttpStatusCode.OK;
+                response.statusCode = HttpStatusCode.OK;
                 response.Message = "Check Join Tournament Successfully";
             }
             catch (Exception ex)
@@ -599,15 +599,82 @@ namespace Services.Services
         public async Task<StatusResponse<bool>> EndTournament(int TourId)
         {
             var response = new StatusResponse<bool>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var data = await _touramentRepository.GetById(TourId);
+                    if (data == null)
+                    {
+                        response.Message = "Not Found Tourament";
+                        response.statusCode = HttpStatusCode.NotFound;
+                        return response;
+                    }
+                    var dataRegister = await _tournamentRegistrationRepository.Get()
+                                    .Where(x => x.TournamentId == TourId &&
+                                        x.IsApproved != TouramentregistrationStatus.Eliminated &&
+                                        x.IsApproved != TouramentregistrationStatus.Winner)
+                                    .ToListAsync();
+
+                    if (dataRegister.Count > 0)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Can't end this tournament because there are players without final ranking.";
+                        return response;
+                    }
+
+                    var matchData = await _touramentMatchesRepository.Get()
+                        .Include(x => x.Matches)
+                        .Where(x => x.TournamentId == TourId && x.Matches.Status != MatchStatus.Completed)
+                        .ToListAsync();
+
+                    if (matchData.Count > 0)
+                    {
+                        response.statusCode = HttpStatusCode.BadRequest;
+                        response.Message = "Can't end this tournament because there are uncompleted matches.";
+                        return response;
+                    }
+                    data.Status = "Completed";
+                    _touramentRepository.Update();
+                    await _touramentRepository.SaveChangesAsync();
+                    response.Data = true;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "End Tourament Successful";
+                    transaction.Complete();
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                }
+            }
+            return response;
+        }
+
+        public Task<StatusResponse<TournamentResponseDTO>> AwardDetailsByTourId(int TourId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<StatusResponse<CheckAwardOfTouramentResponseDTO>> isAwardOrNot(int TourId)
+        {
+            var response = new StatusResponse<CheckAwardOfTouramentResponseDTO>();
             try
             {
-                var data = await _teamRepository.GetById(TourId);
-                
+                var data = await _touramentRepository.GetById(TourId);
+                var result = new CheckAwardOfTouramentResponseDTO
+                {
+                    TourId = TourId,
+                    isReward = data.isAward,
+                };
+                response.Data = result;
+                response.Message = "Get Successfully";
+                response.statusCode = HttpStatusCode.OK;
             }
             catch (Exception ex)
             {
-                response.Message = ex.Message;
                 response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
             }
             return response;
         }

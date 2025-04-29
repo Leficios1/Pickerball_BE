@@ -18,5 +18,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<UserResponseDTO>> RefereeRegisterAsync(UserRegisterRequestDTO dto);
         public Task<StatusResponse<bool>> UpdatePassword(int userId, string newPassword);
         public Task<StatusResponse<int>> ForgotPassword(string email);
+        public Task<StatusResponse<bool>> CheckPasswordCorrectOrNot(int userId, string password);
+
     }
 }

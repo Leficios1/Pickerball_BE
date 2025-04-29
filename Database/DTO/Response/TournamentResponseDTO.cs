@@ -32,8 +32,21 @@ namespace Database.DTO.Response
         public List<MatcheDetails>? TouramentDetails { get; set; }
         public List<RegistrationDetails>? RegistrationDetails { get; set; }
         public List<SponerDetails>? sponerDetails { get; set; }
+        public List<AwardDetails>? AwarDetails { get; set; }
 
     }
+    public class AwardDetails
+    {
+        public int userId {  get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string? SecondName { get; set; }
+        public string AvatarUrl { get; set; }
+        public string Position { get; set; }
+        public string PercentOfAward { get; set; }
+        public string TotalAward { get; set; }
+    }
+
     public class MatcheDetails
     {
         public int Id { get; set; }

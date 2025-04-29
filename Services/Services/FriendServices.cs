@@ -2,6 +2,8 @@
 using Database.DTO.Request;
 using Database.DTO.Response;
 using Database.Model;
+using Microsoft.EntityFrameworkCore;
+using Repository.Repository;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
 using System;
@@ -76,13 +78,21 @@ namespace Services.Services
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 try
                 {
+                    if (dto.User1Id > dto.User2Id)
+                    {
+                        var temp = dto.User1Id;
+                        dto.User1Id = dto.User2Id;
+                        dto.User2Id = temp;
+                    }
                     var friend = _mapper.Map<Friends>(dto);
                     friend.Status = FriendStatus.Pending;
                     friend.CreatedAt = DateTime.UtcNow;
                     var check = await _friendRepository.getFriendResponseByUserId(friend.User2Id);
                     if (check.Any())
                     {
-                        var data = check.SingleOrDefault(x => x.User1Id == friend.User2Id && x.User2Id == friend.User1Id);
+                        var data = check.SingleOrDefault(x =>
+                            (x.User1Id == friend.User1Id && x.User2Id == friend.User2Id) ||
+                            (x.User1Id == friend.User2Id && x.User2Id == friend.User1Id));
                         if (data != null && data.Status == FriendStatus.Accepted)
                         {
                             response.Message = "Friend already exists";
@@ -155,8 +165,8 @@ namespace Services.Services
     : (f.User1 != null ? f.User1.FirstName + " " + f.User1.LastName : "Unknown"),
 
                     UserFriendAvatar = f.User1Id == userId
-    ? (f.User2?.AvatarUrl ?? "")
-    : (f.User1?.AvatarUrl ?? ""),
+    ? (f.User2?.AvatarUrl)
+    : (f.User1?.AvatarUrl),
                     Status = f.Status,
                     CreatedAt = f.CreatedAt
                 }).ToList();
@@ -230,6 +240,35 @@ namespace Services.Services
                 response.Data = result;
                 response.Message = "Friends fetched successfully";
                 response.statusCode = HttpStatusCode.OK;
+            }
+            catch (Exception e)
+            {
+                response.Message = e.Message;
+                response.statusCode = HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<List<UserResponseDTO>>> GetPlayerNotFriend(int userId)
+        {
+            var response = new StatusResponse<List<UserResponseDTO>>();
+            try
+            {
+                var friendShip = await _friendRepository.GetFriendsAsync(userId);
+                var friendIds = friendShip
+                    .Select(f => f.User1Id == userId ? f.User2Id : f.User1Id)
+                    .ToList();
+                var allPlayers = await _userRepository.Get().Include(x => x.Player).ToListAsync();
+
+                var notFriends = allPlayers
+                        .Where(p => !friendIds.Contains(p.Id) && p.Id != userId && p.RoleId == 1)
+                        .ToList();
+
+                var mapper = _mapper.Map<List<UserResponseDTO>>(notFriends);
+                response.Data = mapper;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Successful";
+
             }
             catch (Exception e)
             {

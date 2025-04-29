@@ -25,7 +25,7 @@ namespace Repository.Repository
 
         public async Task<List<Friends>> getFriendResponseByUserId(int UserId)
         {
-            return await _context.Friends.Where(x => x.User2Id == UserId).ToListAsync();
+            return await _context.Friends.Where(x => x.User2Id == UserId).Include(x => x.User1).ToListAsync();
         }
 
         public async Task<List<Friends>> GetFriendsAsync(int userId)

@@ -4,6 +4,7 @@ using Database.Model.Dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(PickerBallDbcontext))]
-    partial class PickerBallDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20250424070318_UpdateMatch")]
+    partial class UpdateMatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -361,9 +364,6 @@ namespace Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("PercentOfPrize")
-                        .HasColumnType("int");
-
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
@@ -372,9 +372,6 @@ namespace Database.Migrations
 
                     b.Property<int>("Position")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("Prize")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TournamentId")
                         .HasColumnType("int");
@@ -500,51 +497,6 @@ namespace Database.Migrations
                     b.HasIndex("BlogCategoryId");
 
                     b.ToTable("Rules");
-                });
-
-            modelBuilder.Entity("Database.Model.RuleOfAward", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PercentOfPrize")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RuleOfAwards");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            PercentOfPrize = 40,
-                            Position = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            PercentOfPrize = 30,
-                            Position = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            PercentOfPrize = 15,
-                            Position = 3
-                        },
-                        new
-                        {
-                            Id = 4,
-                            PercentOfPrize = 15,
-                            Position = 4
-                        });
                 });
 
             modelBuilder.Entity("Database.Model.RulesScore", b =>
@@ -930,9 +882,6 @@ namespace Database.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<bool>("isAward")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

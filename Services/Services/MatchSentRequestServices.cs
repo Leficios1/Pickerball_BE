@@ -5,6 +5,7 @@ using Database.DTO.Response;
 using Database.Model;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using Repository.Repository.Interface;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
@@ -104,6 +105,13 @@ namespace Services.Services
                         data.status = Accpet;
                         data.LastUpdatedAt = DateTime.UtcNow;
 
+                        bool isAlreadyInMatch = teams.Any(t => t.Members.Any(m => m.PlayerId == UserAcceptId));
+                        if (isAlreadyInMatch)
+                        {
+                            response.Message = "Player already in match";
+                            response.statusCode = HttpStatusCode.BadRequest;
+                            return response;
+                        }
                         // 🔥 Xử lý cập nhật Team
                         await ProcessTeamUpdate(teams, UserAcceptId, match.MatchFormat);
 
@@ -310,6 +318,13 @@ namespace Services.Services
                         CreateAt = DateTime.UtcNow,
                         LastUpdatedAt = DateTime.UtcNow
                     };
+                    var flag = await _matchSentRequestRepository.Get().Where(x => x.MatchingId == dto.MatchingId && dto.PlayerRequestId == x.PlayerRequestId && x.PlayerRecieveId == dto.PlayerRecieveId && x.status != SendRequestStatus.Reject).ToListAsync();
+                    if(flag != null)
+                    {
+                        response.Message = "Sent";
+                        response.statusCode = HttpStatusCode.OK;
+                        return response;
+                    }
                     await _matchSentRequestRepository.AddAsync(data);
                     await _matchSentRequestRepository.SaveChangesAsync();
                     var dataUser = await _userRepository.GetById(dto.PlayerRequestId);

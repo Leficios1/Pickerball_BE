@@ -4,6 +4,7 @@ using Database.Model.Dbcontext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(PickerBallDbcontext))]
-    partial class PickerBallDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20250428044234_UpdateRankingTables")]
+    partial class UpdateRankingTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,8 +376,8 @@ namespace Database.Migrations
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Prize")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int?>("Prize")
+                        .HasColumnType("int");
 
                     b.Property<int>("TournamentId")
                         .HasColumnType("int");
@@ -930,9 +933,6 @@ namespace Database.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<bool>("isAward")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

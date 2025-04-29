@@ -51,7 +51,33 @@ namespace Database.Model.Dbcontext
                     RoleName = "=Admin Club"
                 }
             );
-            
+            modelBuilder.Entity<RuleOfAward>().HasData(
+                new RuleOfAward
+                {
+                    Id = 1,
+                    Position = 1,
+                    PercentOfPrize = 40
+                },
+                new RuleOfAward
+                {
+                    Id = 2,
+                    Position = 2,
+                    PercentOfPrize = 30
+                },
+                new RuleOfAward
+                {
+                    Id = 3,
+                    Position = 3,
+                    PercentOfPrize = 15
+                },
+                new RuleOfAward
+                {
+                    Id = 4,
+                    Position = 4,
+                    PercentOfPrize = 15
+                }
+            );
         }
     }
 }
+

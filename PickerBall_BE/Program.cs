@@ -15,7 +15,15 @@ using Database.Model;
 using Microsoft.AspNetCore.Identity;
 using Services.Real_Time;
 using Microsoft.Azure.SignalR;
+using Net.payOS;
+using Database.DTO.PayOsDTO;
 
+
+IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+PayOS payOS = new PayOS(configuration["Environment:PAYOS_CLIENT_ID"] ?? throw new Exception("Cannot find environment"),
+                    configuration["Environment:PAYOS_API_KEY"] ?? throw new Exception("Cannot find environment"),
+                    configuration["Environment:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Cannot find environment"));
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +47,9 @@ builder.Services.AddCors(options =>
     //    });
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://192.168.56.1:5500", "https://pickleball-admin-dlby.vercel.app", "http://localhost:5173", "http://localhost:52124", "https://score-pickle.vercel.app", "https://pickleball-admin-brfb.vercel.app", "http://pickleball-admin.vercel.app") 
+        policy.WithOrigins("http://192.168.56.1:5500", "https://pickleball-admin-dlby.vercel.app", "http://localhost:5173",
+            "http://localhost:52124", "https://score-pickle.vercel.app", "https://pickleball-admin-brfb.vercel.app",
+            "http://pickleball-admin.vercel.app", "https://pickleball-admin-zcg1.vercel.app") 
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); 
@@ -48,10 +58,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<PickerBallDbcontext>(options =>
 {
-    //options.UseSqlServer("data source=pacific1.database.windows.net;initial catalog=epplus;user id=sa1;password=be12345@;trustservercertificate=true;multipleactiveresultsets=true;");
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PickerBall"), b => b.MigrationsAssembly("Database"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PickerBall"));
 });
 builder.Services.AddAutoMapper(typeof(Program));
+//PayOsConfig
+builder.Services.Configure<PayOsSettings>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddHttpClient<PayOsServices>(); // cho HttpClient
+
 
 //Add JSON 
 builder.Services.AddControllers().AddJsonOptions(options =>

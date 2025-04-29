@@ -26,8 +26,8 @@ namespace Services.Services
         private readonly ISponsorRepository _sponsorRepository;
         private readonly IRefreeRepository _refreeRepository;
         private readonly IMapper _mapper;
-        
-        public UserServices(IUserRepository userRepository, IMapper mapper, IPlayerRepository playerRepository,IRefreeRepository refreeRepository, ISponsorRepository sponsorRepository)
+
+        public UserServices(IUserRepository userRepository, IMapper mapper, IPlayerRepository playerRepository, IRefreeRepository refreeRepository, ISponsorRepository sponsorRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
@@ -74,7 +74,7 @@ namespace Services.Services
                     response.Message = "User not found!";
                     return response;
                 }
-                var playerInfo =await _playerRepository.GetPlayerById(UserId);
+                var playerInfo = await _playerRepository.GetPlayerById(UserId);
                 var sponsorInfo = await _sponsorRepository.GetById(UserId);
                 if (playerInfo == null && sponsorInfo == null)
                 {
@@ -239,7 +239,7 @@ namespace Services.Services
                 }
             return response;
         }
-        
+
         public async Task<StatusResponse<Refree>> CreateReferee(RefereeCreateRequestDTO dto)
         {
             var response = new StatusResponse<Refree>();
@@ -300,7 +300,8 @@ namespace Services.Services
                 response.Data = _mapper.Map<List<UserResponseDTO>>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all player user success!";
-            }catch (Exception e)
+            }
+            catch (Exception e)
             {
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.Message = e.Message;
@@ -309,14 +310,14 @@ namespace Services.Services
         }
 
         public async Task<StatusResponse<bool>> UpdatePointPlayer(int userId, int point, int level)
-        { 
+        {
             var response = new StatusResponse<bool>();
             try
             {
                 var data = await _playerRepository.GetById(userId);
-                if(data == null)
+                if (data == null)
                 {
-                    response.statusCode=HttpStatusCode.BadRequest;
+                    response.statusCode = HttpStatusCode.BadRequest;
                     response.Message = "Not Found Player";
                     return response;
                 }
@@ -332,6 +333,36 @@ namespace Services.Services
                 response.statusCode = HttpStatusCode.InternalServerError;
                 response.Message = e.Message;
             }
+            return response;
+        }
+
+        public async Task<StatusResponse<UserResponseDTO>> UpdateUserWithUserDetails(UserUpdateRequestDTO dto, int id)
+        {
+            var response = new StatusResponse<UserResponseDTO>();
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
+                {
+                    var existingUser = await _userRepository.Get().Where(x => x.Id == id).Include(y => y.Player).SingleOrDefaultAsync();
+                    if (existingUser == null)
+                    {
+                        response.statusCode = HttpStatusCode.NotFound;
+                        response.Message = "User not found!";
+                        return response;
+                    }
+                    _mapper.Map(dto, existingUser);
+                    response.Data = _mapper.Map<UserResponseDTO>(existingUser);
+
+                    await _userRepository.SaveChangesAsync();
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Update user success!";
+                    transaction.Complete();
+                }
+                catch (Exception e)
+                {
+                    transaction.Dispose();
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                    response.Message = e.Message;
+                }
             return response;
         }
     }

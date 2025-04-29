@@ -24,5 +24,7 @@ namespace Services.Services.Interface
         public Task<StatusResponse<AllTouramentResponseDTO>> checkJoinTounramentorNot(int userId, int TournamentId);
         public Task<StatusResponse<List<TournamentResponseDTO>>> GetTournamentHaveRequest(int userId);
         public Task<StatusResponse<bool>> EndTournament(int TourId);
+        public Task<StatusResponse<TournamentResponseDTO>> AwardDetailsByTourId (int TourId);
+        public Task<StatusResponse<CheckAwardOfTouramentResponseDTO>> isAwardOrNot(int TourId);
     }
 }
