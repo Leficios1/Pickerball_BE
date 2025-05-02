@@ -298,7 +298,7 @@ namespace Services.Services
                         if (playerData != null)
                         {
                             var userData = await _userRepository.GetById(playerData.PlayerId);
-                            var paymentData = await _paymentRepository.Get().Where(x => x.UserId == playerData.PlayerId && x.TournamentId == id).SingleOrDefaultAsync();
+                            var paymentData = await _paymentRepository.Get().Where(x => x.UserId == playerData.PlayerId && x.TournamentId == id && x.Type == TypePayment.Fee).SingleOrDefaultAsync();
                             var playerRegistration = new PlayerRegistrationDetails
                             {
                                 FirstName = userData.FirstName,

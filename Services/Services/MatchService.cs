@@ -15,6 +15,7 @@ using System.Transactions;
 using Repository.Repository;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Services.Services
 {
@@ -34,11 +35,12 @@ namespace Services.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IAchivementRepository _achivementRepository;
         private readonly IRuleOfAwardRepository _ruleOfAwardRepository;
+        private readonly IMemoryCache _memoryCache;
         public MatchService(IMatchesRepository matchesRepo, IMapper mapper, ITeamService teamService,
             ITeamMembersService teamMembersService, ITouramentMatchesRepository touramentMatchesRepository,
             ITouramentRepository touramentRepository, ITeamRepository teamRepository, ITeamMembersRepository teamMembersRepository, IMatchScoreRepository matchScoreRepository,
             ITournamentRegistrationRepository tournamentRegistrationRepository, IRankingRepository rankingRepository, IPlayerRepository playerRepository, IAchivementRepository achivementRepository,
-            IRuleOfAwardRepository ruleOfAwardRepository)
+            IRuleOfAwardRepository ruleOfAwardRepository, IMemoryCache memoryCache)
         {
             _matchesRepo = matchesRepo;
             _mapper = mapper;
@@ -54,6 +56,7 @@ namespace Services.Services
             _playerRepository = playerRepository;
             _achivementRepository = achivementRepository;
             _ruleOfAwardRepository = ruleOfAwardRepository;
+            _memoryCache = memoryCache;
         }
 
         public async Task<StatusResponse<RoomResponseDTO>> CreateRoomWithTeamsAsync(CreateRoomDTO dto)
@@ -1202,6 +1205,49 @@ namespace Services.Services
                     .Distinct()
                     .ToListAsync();
 
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<bool>> isMatchConfirm(int matchId, int playerId)
+        {
+            var response = new StatusResponse<bool>();
+            try
+            {
+                var data = await _matchesRepo.GetById(matchId);
+                if(data == null || data.MatchCategory != MatchCategory.Competitive)
+                {
+                    response.statusCode = HttpStatusCode.BadRequest;
+                    response.Message = "This match doens't have required to confirm";
+                    return response;
+                }
+                var key = $"match-confirm-{matchId}";
+
+                var confirmedPlayers = _memoryCache.Get<HashSet<int>>(key) ?? new HashSet<int>();
+                confirmedPlayers.Add(playerId);
+
+                _memoryCache.Set(key, confirmedPlayers, TimeSpan.FromMinutes(10)); // Xác nhận hết hạn sau 10 phút
+
+                if (confirmedPlayers.Count >= 2)
+                {
+                    // Cả 2 người đã xác nhận
+                    // TODO: Gọi repository để lưu trận đấu vào DB
+
+                    _memoryCache.Remove(key); // Xóa cache sau khi xử lý
+                    response.Data = true;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Both player accept successful";
+                    return response;
+                }
+                response.Data = false;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Have player doesn't accept";
+                return response;
             }
             catch (Exception ex)
             {

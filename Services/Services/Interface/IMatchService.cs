@@ -27,5 +27,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<bool>> endMatchCustomOrChallenge(EndMatchNormalRequestDTO dto);
         Task<StatusResponse<MatchResponseDTO>> UpdateMatch(int MatchId, MatchUpdateRequestForNormalMatchRequestDTO dto);
         Task<StatusResponse<List<MatchHistoryResponseDTO>>> HistoryMatchByUserId(int userId);
+        Task<StatusResponse<bool>> isMatchConfirm(int matchId, int playerId);
     }
 }

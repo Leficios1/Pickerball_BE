@@ -18,6 +18,8 @@ namespace Services.Real_Time
     public class MatchHub : Hub
     {
         public static List<MatchRequest> WaitingUsers = new();
+        public static Dictionary<int, HashSet<int>> ConfirmedPlayersPerMatch = new();
+
         private readonly IServiceProvider _serviceProvider;
 
         public MatchHub(IServiceProvider serviceProvider)
@@ -108,6 +110,20 @@ namespace Services.Real_Time
             if (user != null)
                 WaitingUsers.Remove(user);
             return base.OnDisconnectedAsync(exception);
+        }
+        public async Task ConfirmScore(int matchId, int userId)
+        {
+            if (!ConfirmedPlayersPerMatch.ContainsKey(matchId))
+                ConfirmedPlayersPerMatch[matchId] = new HashSet<int>();
+            if (ConfirmedPlayersPerMatch[matchId].Contains(userId))
+                return;
+            ConfirmedPlayersPerMatch[matchId].Add(userId);
+            await Clients.Group(matchId.ToString()).SendAsync("PlayerConfirmed", userId);
+            if (ConfirmedPlayersPerMatch[matchId].Count >= 2)
+            {
+                await Clients.Group(matchId.ToString()).SendAsync("ScoreConfirmed", "Both players confirmed");
+                ConfirmedPlayersPerMatch.Remove(matchId);
+            }
         }
 
     }

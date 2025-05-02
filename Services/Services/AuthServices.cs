@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using Repository.Repository;
 using Repository.Repository.Interfeace;
 using Services.Services.Interface;
@@ -17,11 +18,14 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 namespace Services.Services
 {
@@ -468,6 +472,96 @@ namespace Services.Services
                 response.Message = ex.Message;
             }
             return response;
+        }
+
+        public async Task<StatusResponse<VerifyEmailResponseDTO>> VerifyEmailAsync(string email)
+        {
+            var response = new StatusResponse<VerifyEmailResponseDTO>();
+            try
+            {
+                var otp = new Random().Next(100000, 999999);
+                string html = $@"
+<!DOCTYPE html>
+<html lang=""vi"">
+<head>
+    <meta charset=""UTF-8"">
+    <title>Xác thực OTP</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fb;
+            color: #333;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 500px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }}
+        .otp-code {{
+            font-size: 32px;
+            font-weight: bold;
+            color: #2d89ef;
+            margin: 20px 0;
+        }}
+        .message {{
+            font-size: 16px;
+        }}
+        .footer {{
+            margin-top: 30px;
+            font-size: 12px;
+            color: #888;
+        }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <h2>Xác thực tài khoản của bạn</h2>
+        <p class=""message"">Sử dụng mã OTP dưới đây để xác thực địa chỉ email của bạn:</p>
+        <div class=""otp-code"">{otp}</div>
+        <p class=""message"">Mã có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+        <div class=""footer"">Nếu bạn không yêu cầu xác thực này, hãy bỏ qua email này.</div>
+    </div>
+</body>
+</html>";
+                var Sendemail = new MimeMessage();
+                Sendemail.From.Add(MailboxAddress.Parse(_configuration["EmailSettings:SenderEmail"]));
+                Sendemail.To.Add(MailboxAddress.Parse(email));
+                Sendemail.Subject = "Xác thực Email - OTP";
+                Sendemail.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                {
+                    Text = html
+                };
+
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_configuration["EmailSettings:SenderEmail"], _configuration["EmailSettings:AppPassword"]);
+                await smtp.SendAsync(Sendemail);
+                await smtp.DisconnectAsync(true);
+
+                response.Data = new VerifyEmailResponseDTO
+                {
+                    Email = email,
+                    OTP = otp
+                };
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "OTP đã được gửi đến email của bạn.";
+            }
+            catch(Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = "Lỗi gửi email: " + ex.Message;
+            }
+            return response;
+        }
+
+        public Task<StatusResponse<VerifyEmailResponseDTO>> restPassword(string email)
+        {
+            throw new NotImplementedException();
         }
     }
 }

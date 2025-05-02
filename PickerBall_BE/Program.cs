@@ -64,7 +64,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 //PayOsConfig
 builder.Services.Configure<PayOsSettings>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient<PayOsServices>(); // cho HttpClient
-
+builder.Services.AddMemoryCache();
 
 //Add JSON 
 builder.Services.AddControllers().AddJsonOptions(options =>

@@ -69,5 +69,12 @@ namespace PickerBall_BE.Controllers
             var response = await _authServices.CheckPasswordCorrectOrNot(id, password);
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
+
+        [HttpGet("VerifyEmail/{Email}")]
+        public async Task<IActionResult> VerifyEmail([FromRoute] string Email)
+        {
+            var response = await _authServices.VerifyEmailAsync(Email);
+            return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
+        }
     }
 }
