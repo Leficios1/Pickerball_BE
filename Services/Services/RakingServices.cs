@@ -111,6 +111,7 @@ namespace Services.Services
                         };
                         await _paymentRepository.AddAsync(paymentInfo);
                         _rankingRepository.Update(playerInfo);
+                        index++;
                     }
                     touramentData.isAward = true;
                     _touramentRepository.Update(touramentData);

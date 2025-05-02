@@ -43,13 +43,13 @@ namespace Services.Services
                 switch (linkReturn)
                 {
                     case 1:
-                        return_URL = "http://localhost:5173/payment-return";
+                        return_URL = "https://score-pickle.vercel.app/payment-return";
                         break;
                     case 2:
-                        return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";
+                        return_URL = "http://pickleball.runasp.net/index.html";
                         break;
                     default:
-                        return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";
+                        return_URL = "http://pickleball.runasp.net/index.html";
                         break;
                 }
                 //string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";

@@ -1171,7 +1171,7 @@ namespace Services.Services
                         .ThenInclude(t => t.Members)
                     .Where(m =>
                         (m.MatchCategory == MatchCategory.Competitive || m.MatchCategory == MatchCategory.Custom)
-                        && m.IsPublic == true)
+                        && m.IsPublic == true && m.MatchDate >= DateTime.UtcNow) 
                     .ToListAsync();
                 if (data == null)
                 {
