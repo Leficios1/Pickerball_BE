@@ -155,7 +155,7 @@ namespace Services.Services
                         response.Message = "Player does not meet the experience requirements for the tournament!";
                         return response;
                     }
-                    
+
                     data = new TournamentRegistration()
                     {
                         PlayerId = dto.PlayerId,
@@ -163,7 +163,7 @@ namespace Services.Services
                         RegisteredAt = DateTime.UtcNow,
                         IsApproved = TouramentregistrationStatus.Pending,
                     };
-                    if(touramentData.IsFree == false)
+                    if (touramentData.IsFree == false)
                     {
                         data.IsApproved = TouramentregistrationStatus.Approved;
                     }
@@ -240,6 +240,39 @@ namespace Services.Services
                 response.Data = _mapper.Map<List<TouramentRegistraionResponseDTO>>(data);
                 response.statusCode = HttpStatusCode.OK;
                 response.Message = "Get all registration successfully!";
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<StatusResponse<TouramentRegistraionResponseDTO>> getByUserIdAndTournamentId(int userId, int tournamentId)
+        {
+            var response = new StatusResponse<TouramentRegistraionResponseDTO>();
+            try
+            {
+                var registrationData = await _tournamentRegistrationRepository.Get().Where(x => x.PlayerId == userId && x.TournamentId == tournamentId).SingleOrDefaultAsync();
+                if (registrationData == null)
+                {
+                    response.statusCode = HttpStatusCode.NotFound;
+                    response.Message = "This player doesn't join tournament";
+                    return response;
+                }
+                var result = new TouramentRegistraionResponseDTO
+                {
+                    Id = registrationData.Id,
+                    TournamentId = tournamentId,
+                    PlayerId = userId,
+                    RegisteredAt = registrationData.RegisteredAt,
+                    IsApproved = registrationData.IsApproved,
+                    PartnerId = registrationData.PartnerId,
+                };
+                response.Data = result;
+                response.statusCode = HttpStatusCode.OK;
+                response.Message = "Get User Successfull";
             }
             catch (Exception ex)
             {

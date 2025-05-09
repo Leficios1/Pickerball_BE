@@ -284,6 +284,12 @@ namespace Services.Services
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 try
                 {
+                    if(dto.User1Id > dto.User2Id)
+                    {
+                        var temp = dto.User1Id;
+                        dto.User1Id = dto.User2Id;
+                        dto.User2Id = temp;
+                    }
                     var data = await _friendRepository.getFriendByUserId(dto.User1Id);
                     var friend = data.FirstOrDefault(x => x.User1Id == dto.User1Id && x.User2Id == dto.User2Id);
                     if (friend == null)

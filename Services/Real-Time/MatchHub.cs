@@ -19,6 +19,7 @@ namespace Services.Real_Time
     {
         public static List<MatchRequest> WaitingUsers = new();
         public static Dictionary<int, HashSet<int>> ConfirmedPlayersPerMatch = new();
+        private static readonly object _lock = new object();
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -30,78 +31,103 @@ namespace Services.Real_Time
 
         public async Task FindMatch(MatchRequest request)
         {
-            var existing = WaitingUsers.FirstOrDefault(u =>
-                u.UserId != request.UserId &&
-                u.Gender == request.Gender &&
-                u.City == request.City &&
-                u.MatchFormat == request.MatchFormat &&
-
-                Math.Abs(u.Ranking - request.Ranking) <= 50);
-
-            if (existing != null)
+            try
             {
-                WaitingUsers.Remove(existing);
+                MatchRequest existing = null;
 
-                // 👉 Ghép trận
-                //var matchId = Guid.NewGuid().ToString();
+                lock (_lock)
+                {
+                    existing = WaitingUsers.FirstOrDefault(u =>
+                        u.UserId != request.UserId &&
+                        u.Gender == request.Gender &&
+                        u.City == request.City &&
+                        u.MatchFormat == request.MatchFormat &&
 
-                await Clients.Client(Context.ConnectionId).SendAsync("MatchFound", new { Rival = existing });
-                var targetConnection = existing.ConnectionId;
-                await Clients.Client(targetConnection).SendAsync("MatchFound", new { Rival = request });
+                        Math.Abs(u.Ranking - request.Ranking) <= 50);
 
-                // 👉 Lưu vào DB ở đây nếu cần
-                using (var scope = _serviceProvider.CreateScope())
-                    try
+                    if (existing != null)
                     {
-                        var matchRepo = scope.ServiceProvider.GetRequiredService<IMatchesRepository>();
-                        var matchService = scope.ServiceProvider.GetRequiredService<IMatchService>();
-                        var teamRepo = scope.ServiceProvider.GetRequiredService<ITeamRepository>();
-                        var db = scope.ServiceProvider.GetRequiredService<PickerBallDbcontext>();
-
-                        // Giả lập tạo 2 team (bạn cần xử lý chuẩn theo project của bạn)
-                        var createRoomDto = new CreateRoomDTO
-                        {
-                            Title = $"Match {DateTime.Now:yyyyMMddHHmmss}",
-                            Description = "Auto matched via real-time",
-                            MatchDate = DateTime.Now.AddDays(1), // Giả định trận đấu bắt đầu sau 5 phút
-                            VenueId = null, // Nếu có thể chọn sân thì gán
-                            Status = MatchStatus.Scheduled,
-                            MatchCategory = MatchCategory.Competitive,
-                            MatchFormat = (MatchFormat)request.MatchFormat,
-                            WinScore = WinScore.Eleven,
-                            IsPublic = false,
-                            RefereeId = null, // nếu chưa có trọng tài
-                            TournamentId = null, // nếu không nằm trong giải nào
-                            RoomOnwer = request.UserId, // Người vừa request sẽ là chủ phòng
-                            Player1Id = request.UserId,
-                            Player2Id = existing.UserId
-                        };
-
-                        var createRoomResult = await matchService.CreateRoomWithTeamsAsync(createRoomDto);
-
-                        if (createRoomResult.statusCode == HttpStatusCode.OK)
-                        {
-                            // Bạn có thể bắn thêm event cho 2 client biết roomId nếu cần
-                            await Clients.Client(Context.ConnectionId).SendAsync("RoomCreated", createRoomResult.Data.Id);
-                            await Clients.Client(targetConnection).SendAsync("RoomCreated", createRoomResult.Data.Id);
-                        }
-                        else
-                        {
-                            // Nếu lỗi, thông báo cho cả 2 client
-                            await Clients.Client(Context.ConnectionId).SendAsync("RoomCreationFailed", createRoomResult.Message);
-                            await Clients.Client(targetConnection).SendAsync("RoomCreationFailed", createRoomResult.Message);
-                        }
-
-                    }catch(Exception ex)
-                    {
-                        throw new Exception(ex.Message);
+                        WaitingUsers.Remove(existing);
                     }
+                    else
+                    {
+                        request.ConnectionId = Context.ConnectionId;
+                        WaitingUsers.Add(request);
+                    }
+                }
+                if (existing != null)
+                {
+                    //WaitingUsers.Remove(existing);
+
+                    // 👉 Ghép trận
+                    //var matchId = Guid.NewGuid().ToString();
+
+                    await Clients.Client(Context.ConnectionId).SendAsync("MatchFound", new { Rival = existing });
+                    var targetConnection = existing.ConnectionId;
+                    await Clients.Client(targetConnection).SendAsync("MatchFound", new { Rival = request });
+
+                    // 👉 Lưu vào DB ở đây nếu cần
+                    using (var scope = _serviceProvider.CreateScope())
+                        try
+                        {
+                            var matchRepo = scope.ServiceProvider.GetRequiredService<IMatchesRepository>();
+                            var matchService = scope.ServiceProvider.GetRequiredService<IMatchService>();
+                            var teamRepo = scope.ServiceProvider.GetRequiredService<ITeamRepository>();
+                            var db = scope.ServiceProvider.GetRequiredService<PickerBallDbcontext>();
+
+                            // Giả lập tạo 2 team (bạn cần xử lý chuẩn theo project của bạn)
+                            var createRoomDto = new CreateRoomDTO
+                            {
+                                Title = $"Match {DateTime.Now:yyyyMMddHHmmss}",
+                                Description = "Auto matched via real-time",
+                                MatchDate = DateTime.UtcNow.AddDays(1),
+                                VenueId = null, // Nếu có thể chọn sân thì gán
+                                Status = MatchStatus.Scheduled,
+                                MatchCategory = MatchCategory.Competitive,
+                                MatchFormat = (MatchFormat)request.MatchFormat,
+                                WinScore = WinScore.Eleven,
+                                IsPublic = false,
+                                RefereeId = null, // nếu chưa có trọng tài
+                                TournamentId = null, // nếu không nằm trong giải nào
+                                RoomOnwer = request.UserId, // Người vừa request sẽ là chủ phòng
+                                Player1Id = request.UserId,
+                                Player2Id = existing.UserId
+                            };
+
+                            var createRoomResult = await matchService.CreateRoomWithTeamsAsync(createRoomDto);
+
+                            if (createRoomResult.statusCode == HttpStatusCode.OK)
+                            {
+                                // Bạn có thể bắn thêm event cho 2 client biết roomId nếu cần
+                                await Clients.Client(Context.ConnectionId).SendAsync("RoomCreated", createRoomResult.Data.Id);
+                                await Clients.Client(targetConnection).SendAsync("RoomCreated", createRoomResult.Data.Id);
+                            }
+                            else
+                            {
+                                // Nếu lỗi, thông báo cho cả 2 client
+                                await Clients.Client(Context.ConnectionId).SendAsync("RoomCreationFailed", createRoomResult.Message);
+                                await Clients.Client(targetConnection).SendAsync("RoomCreationFailed", createRoomResult.Message);
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[FindMatch ERROR] {ex.Message}\n{ex.StackTrace}");
+                            await Clients.Client(Context.ConnectionId).SendAsync("Error", "Server error occurred.");
+
+                        }
+                }
+                else
+                {
+                    //request.ConnectionId = Context.ConnectionId;
+                    //WaitingUsers.Add(request);
+                    await Clients.Client(Context.ConnectionId).SendAsync("WaitingForMatch");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                request.ConnectionId = Context.ConnectionId;
-                WaitingUsers.Add(request);
-                await Clients.Client(Context.ConnectionId).SendAsync("WaitingForMatch");
+                Console.WriteLine($"[RoomCreation ERROR] {ex.Message}\n{ex.StackTrace}");
+                await Clients.Client(Context.ConnectionId).SendAsync("Error", "Server error occurred.");
             }
         }
         public override Task OnDisconnectedAsync(Exception? exception)

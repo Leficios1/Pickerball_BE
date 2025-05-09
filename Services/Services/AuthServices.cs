@@ -277,7 +277,8 @@ namespace Services.Services
                     Status = user.Status,
                     RefreshToken = user.RefreshToken,
                     CreateAt = user.CreateAt,
-                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
+                    RefreshTokenExpiryTime = user.RefreshTokenExpiryTime,
+                    RoleId = user.RoleId
                 };
 
                 response.Data = userResponse;

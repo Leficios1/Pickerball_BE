@@ -66,6 +66,9 @@ namespace Services.Services
                     case 2:
                         return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";
                         break;
+                    case 3:
+                        return_URL = "https://score-pickle.vercel.app/sponsor/sponsorship-return";
+                        break;
                     default:
                         return_URL = "https://pickbleballcapston-a4eagpasc9fbeeb8.eastasia-01.azurewebsites.net/index.html";
                         break;

@@ -17,5 +17,6 @@ namespace Services.Services.Interface
         Task<StatusResponse<TouramentRegistraionResponseDTO>> GetById(int id);
         Task<StatusResponse<List<TouramentRegistraionResponseDTO>>> GetByTouramentId(int TourId);
         Task<StatusResponse<int>> CountTeamJoin(int TouramentId);
+        Task<StatusResponse<TouramentRegistraionResponseDTO>> getByUserIdAndTournamentId(int userId, int tournamentId);
     }
 }

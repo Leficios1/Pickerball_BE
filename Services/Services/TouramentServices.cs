@@ -33,11 +33,12 @@ namespace Services.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly ISponserTouramentRepository _sponserTouramentRepository;
         private readonly ITournamentTeamRequestRepository _tournamentTeamRequestRepository;
+        private readonly IAchivementRepository _achivementRepository;
 
         public TouramentServices(ITouramentRepository touramentRepository, IMapper mapper, ISponsorRepository sponsorRepository, IPlayerRepository playerRepository,
             IMatchesRepository matchRepository, ITournamentRegistrationRepository tournamentRegistrationRepository, ITouramentMatchesRepository touramentMatchesRepository
             , ITeamRepository teamRepository, IUserRepository userRepository, IPaymentRepository paymentRepository, ISponserTouramentRepository sponserTouramentRepository,
-            ITournamentTeamRequestRepository tournamentTeamRequestRepository)
+            ITournamentTeamRequestRepository tournamentTeamRequestRepository, IAchivementRepository achivementRepository)
         {
             _touramentRepository = touramentRepository;
             _mapper = mapper;
@@ -51,6 +52,7 @@ namespace Services.Services
             _paymentRepository = paymentRepository;
             _sponserTouramentRepository = sponserTouramentRepository;
             _tournamentTeamRequestRepository = tournamentTeamRequestRepository;
+            _achivementRepository = achivementRepository;
         }
 
         public async Task<StatusResponse<TournamentResponseDTO>> CreateTournament(TournamentRequestDTO dto)

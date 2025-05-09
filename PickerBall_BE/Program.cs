@@ -120,7 +120,8 @@ builder.Services.AddSwaggerGen(opt =>
     });
 });
 builder.Services.AddSignalR().AddAzureSignalR(builder.Configuration["Azure:SignalRConnectionString"]);
-
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.Configure<VnpayConfig>(builder.Configuration.GetSection("VNPAY"));
 builder.Services.AddHttpContextAccessor();

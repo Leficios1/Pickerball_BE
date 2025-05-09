@@ -1080,8 +1080,7 @@ namespace Services.Services
                 else if (currentPoint <= 450) { gain = 15; lose = 15; }
                 else if (currentPoint <= 500) { gain = 14; lose = 16; }
                 else if (currentPoint <= 550) { gain = 13; lose = 17; }
-                else
-                    player.RankingPoint += isWinner ? gain : -lose;
+                player.RankingPoint += isWinner ? gain : -lose;
                 player.RankingPoint = Math.Max(player.RankingPoint, 0); // Không cho âm điểm
                                                                         // Cập nhật Level nếu cần (có thể gán bằng lại dựa trên điểm)
                 player.ExperienceLevel = player.RankingPoint switch
@@ -1171,7 +1170,7 @@ namespace Services.Services
                         .ThenInclude(t => t.Members)
                     .Where(m =>
                         (m.MatchCategory == MatchCategory.Competitive || m.MatchCategory == MatchCategory.Custom)
-                        && m.IsPublic == true && m.MatchDate >= DateTime.UtcNow) 
+                        && m.IsPublic == true && m.MatchDate >= DateTime.UtcNow)
                     .ToListAsync();
                 if (data == null)
                 {
@@ -1220,7 +1219,7 @@ namespace Services.Services
             try
             {
                 var data = await _matchesRepo.GetById(matchId);
-                if(data == null || data.MatchCategory != MatchCategory.Competitive)
+                if (data == null || data.MatchCategory != MatchCategory.Competitive)
                 {
                     response.statusCode = HttpStatusCode.BadRequest;
                     response.Message = "This match doens't have required to confirm";

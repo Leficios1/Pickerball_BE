@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Repository.Repository;
 using Repository.Repository.Interface;
 using Repository.Repository.Interfeace;
+using Services.Background;
 using Services.Mapping;
 using Services.Services;
 using Services.Services.Interface;
@@ -45,6 +46,10 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IAchivementRepository, AchivementRepository>();
             services.AddScoped<IRuleOfAwardRepository, RuleOfAwardRepository>();
 
+            //Register Background here
+            services.AddHostedService<DailyJobHostedService>();
+            services.AddScoped<IMyScheduledService, MyScheduledService>();
+
 
             // Register Services here
             services.AddScoped<IAuthServices, AuthServices>();
@@ -68,6 +73,7 @@ namespace PickerBall_BE.Extension
             services.AddScoped<IVnpayService, VnpayService>();
             services.AddScoped<IReFeeSevice, ReFeeSevice>();
             services.AddScoped<IRankingServices, RakingServices>();
+            services.AddScoped<IAchivementServices, AchivementServices>();
             return services;
         }
     }

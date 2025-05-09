@@ -69,5 +69,12 @@ namespace PickerBall_BE.Controllers
             var response = await _playerRegistrationServices.CountTeamJoin(tourId);
             return StatusCode((int)response.statusCode, response);
         }
+
+        [HttpGet("GetByUserIdAndTournamentId/{UserId}/{TourId}")]
+        public async Task<IActionResult> GetByUserIdAndTournamentId([FromRoute] int UserId, [FromRoute] int TourId)
+        {
+            var response = await _playerRegistrationServices.getByUserIdAndTournamentId(UserId, TourId);
+            return StatusCode((int)response.statusCode, response);
+        }
     }
 }

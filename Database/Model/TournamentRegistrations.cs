@@ -24,6 +24,7 @@ namespace Database.Model
         public string? Reason { get; set; }
 
         //Fk
+        public ICollection<TournamentTeamRequest> TournamentTeams { get; set; }
 
     }
     public enum TouramentregistrationStatus

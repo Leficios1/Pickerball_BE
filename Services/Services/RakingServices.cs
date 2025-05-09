@@ -23,10 +23,10 @@ namespace Services.Services
         private readonly IMapper _mapper;
         private readonly IRuleOfAwardRepository _ruleOfAwardRepository;
         private readonly IPaymentRepository _paymentRepository;
-
+        private readonly IAchivementRepository _achievementRepository;
         public RakingServices(IUserRepository userRepository, IPlayerRepository playerRepository, IMapper mapper,
             IRankingRepository rankingRepository, ITouramentRepository touramentRepository, IRuleOfAwardRepository ruleOfAwardRepository,
-            IPaymentRepository paymentRepository)
+            IPaymentRepository paymentRepository, IAchivementRepository achievementRepository)
         {
             _userRepository = userRepository;
             _playerRepository = playerRepository;
@@ -35,6 +35,7 @@ namespace Services.Services
             _touramentRepository = touramentRepository;
             _ruleOfAwardRepository = ruleOfAwardRepository;
             _paymentRepository = paymentRepository;
+            _achievementRepository = achievementRepository;
         }
 
         public async Task<StatusResponse<bool>> AwardForPlayer(List<RankingRequestDTO> dto)
@@ -103,7 +104,7 @@ namespace Services.Services
                             UserId = playerInfo.PlayerId,
                             TournamentId = playerInfo.TournamentId,
                             Amount = award,
-                            Note = $"Reward for top " + index + "in:" + touramentData.Name,
+                            Note = $"Reward for top " + index + " in: " + touramentData.Name,
                             PaymentMethod = "Banking",
                             Status = PaymentStatus.Completed,
                             Type = TypePayment.Award,
@@ -152,7 +153,7 @@ namespace Services.Services
             var response = new StatusResponse<List<RankingResponseDTO>>();
             try
             {
-                var data = await _userRepository.Get().Include(x => x.Player).OrderByDescending(x => x.Player.RankingPoint).Take(50).ToListAsync();
+                var data = await _userRepository.Get().Include(x => x.Player).Where(u => u.RoleId == 1).OrderByDescending(x => x.Player.RankingPoint).Take(50).ToListAsync();
                 response.Data = _mapper.Map<List<RankingResponseDTO>>(data);
                 response.Message = "Get LeaderBoard Success";
                 response.statusCode = System.Net.HttpStatusCode.OK;

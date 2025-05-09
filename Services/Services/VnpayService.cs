@@ -36,134 +36,146 @@ namespace Services.Services
         public async Task<StatusResponse<string>> CallApiByUserId(int UserId, int linkReturn, int? registrationId, int? TouramentId, int? DonateAmount)
         {
             var response = new StatusResponse<string>();
-            //using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            try
-            {
-                string return_URL;
-                switch (linkReturn)
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
                 {
-                    case 1:
-                        return_URL = "https://score-pickle.vercel.app/payment-return";
-                        break;
-                    case 2:
-                        return_URL = "http://pickleball.runasp.net/index.html";
-                        break;
-                    default:
-                        return_URL = "http://pickleball.runasp.net/index.html";
-                        break;
-                }
-                //string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-                //string vnp_TmnCode = "F8V1A5TK";
-                //string vnp_HashSecret = "GCLECYOCZYQLDTIUGHGWZAWPNALXPLOJ";
+                    string return_URL;
+                    switch (linkReturn)
+                    {
+                        case 1:
+                            return_URL = "https://score-pickle.vercel.app/payment-return";
+                            break;
+                        case 2:
+                            return_URL = "http://pickleball.runasp.net/index.html";
+                            break;
+                        case 3:
+                            return_URL = "https://score-pickle.vercel.app/sponsor/sponsorship-return";
+                            break;
+                        default:
+                            return_URL = "http://pickleball.runasp.net/index.html";
+                            break;
+                    }
+                    //string vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+                    //string vnp_TmnCode = "F8V1A5TK";
+                    //string vnp_HashSecret = "GCLECYOCZYQLDTIUGHGWZAWPNALXPLOJ";
 
-                if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret))
-                {
-                    throw new Exception("Merchant code or secret key is missing.");
-                }
-                string amount;
-                string vnp_TxnRef;
-                string vnp_Amount;
-                string typePayment;
-                var vnpay = new VnpayLibrary();
-                if (registrationId != null && TouramentId == null)
-                {
-                    var registration = await _tenantRegistrationRepository.Get().Where(x => x.Id == registrationId).SingleOrDefaultAsync();
-                    if (registration == null)
+                    if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret))
                     {
-                        response.statusCode = HttpStatusCode.NotFound;
-                        response.Message = "Registration not found!";
+                        throw new Exception("Merchant code or secret key is missing.");
+                    }
+                    var paymentData = await _paymentRepository.Get().Where(x => x.UserId == UserId && x.TournamentId == TouramentId
+                                && x.Status == PaymentStatus.Completed).SingleOrDefaultAsync();
+                    if (paymentData != null)
+                    {
+                        response.Data = null;
+                        response.Message = "This user signed this tournament";
+                        response.statusCode = HttpStatusCode.BadRequest;
                         return response;
                     }
-                    var tourament = await _tournamentRepository.Get().Where(x => x.Id == registration.TournamentId).SingleOrDefaultAsync();
-                    if (tourament.IsFree == false)
+                    string amount;
+                    string vnp_TxnRef;
+                    string vnp_Amount;
+                    string typePayment;
+                    var vnpay = new VnpayLibrary();
+                    if (registrationId != null && TouramentId == null)
                     {
-                        response.statusCode = HttpStatusCode.Forbidden;
-                        response.Message = "This tourament is no need to payment!";
-                        return response;
-                    }
-                    if (registration.IsApproved != TouramentregistrationStatus.Pending)
-                    {
-                        if (registration.IsApproved == TouramentregistrationStatus.Waiting)
+                        var registration = await _tenantRegistrationRepository.Get().Where(x => x.Id == registrationId).SingleOrDefaultAsync();
+                        if (registration == null)
+                        {
+                            response.statusCode = HttpStatusCode.NotFound;
+                            response.Message = "Registration not found!";
+                            return response;
+                        }
+                        var tourament = await _tournamentRepository.Get().Where(x => x.Id == registration.TournamentId).SingleOrDefaultAsync();
+                        if (tourament.IsFree == false)
                         {
                             response.statusCode = HttpStatusCode.Forbidden;
-                            response.Message = "Registration has been wait for accept from partner!";
+                            response.Message = "This tourament is no need to payment!";
                             return response;
                         }
-                        else if (registration.IsApproved == TouramentregistrationStatus.Approved)
+                        if (registration.IsApproved != TouramentregistrationStatus.Pending)
+                        {
+                            if (registration.IsApproved == TouramentregistrationStatus.Waiting)
+                            {
+                                response.statusCode = HttpStatusCode.Forbidden;
+                                response.Message = "Registration has been wait for accept from partner!";
+                                return response;
+                            }
+                            else if (registration.IsApproved == TouramentregistrationStatus.Approved)
+                            {
+                                response.statusCode = HttpStatusCode.BadRequest;
+                                response.Message = "Registration has been paid!";
+                                return response;
+                            }
+                        }
+                        if (tourament.EntryFee == null || tourament.EntryFee == 0)
+                        {
+                            response.statusCode = HttpStatusCode.Forbidden;
+                            response.Message = "Erro when tourament request Payment but no fee";
+                            return response;
+                        }
+                        amount = ((long)tourament.EntryFee * 100).ToString();
+                        vnp_TxnRef = $"{UserId}{registration.Id}{DateTime.Now.ToString("HHmmss")}";
+                        vnp_Amount = amount;
+                        vnpay.AddRequestData("vnp_OrderInfo", $"fee:{registrationId}");
+                    }
+                    else if (registrationId == null && TouramentId != null)
+                    {
+                        if (DonateAmount == null)
                         {
                             response.statusCode = HttpStatusCode.BadRequest;
-                            response.Message = "Registration has been paid!";
+                            response.Message = "Donate amount is required!";
                             return response;
                         }
+                        var tourament = await _tournamentRepository.Get().Where(x => x.Id == TouramentId).SingleOrDefaultAsync();
+                        if (tourament == null)
+                        {
+                            response.statusCode = HttpStatusCode.NotFound;
+                            response.Message = "Tourament not found!";
+                            return response;
+                        }
+                        amount = ((long)DonateAmount * 100).ToString();
+                        vnp_TxnRef = $"{UserId}{TouramentId}{DateTime.Now.ToString("HHmmss")}";
+                        vnp_Amount = amount;
+                        vnpay.AddRequestData("vnp_OrderInfo", $"donate:{TouramentId}");
+
+                        typePayment = "donate";
                     }
-                    if (tourament.EntryFee == null || tourament.EntryFee == 0)
-                    {
-                        response.statusCode = HttpStatusCode.Forbidden;
-                        response.Message = "Erro when tourament request Payment but no fee";
-                        return response;
-                    }
-                    amount = ((long)tourament.EntryFee * 100).ToString();
-                    vnp_TxnRef = $"{UserId}{registration.Id}{DateTime.Now.ToString("HHmmss")}";
-                    vnp_Amount = amount;
-                    vnpay.AddRequestData("vnp_OrderInfo", $"fee:{registrationId}");
-                }
-                else if (registrationId == null && TouramentId != null)
-                {
-                    if (DonateAmount == null)
+                    else
                     {
                         response.statusCode = HttpStatusCode.BadRequest;
-                        response.Message = "Donate amount is required!";
+                        response.Message = "Just one field is required";
                         return response;
                     }
-                    var tourament = await _tournamentRepository.Get().Where(x => x.Id == TouramentId).SingleOrDefaultAsync();
-                    if (tourament == null)
-                    {
-                        response.statusCode = HttpStatusCode.NotFound;
-                        response.Message = "Tourament not found!";
-                        return response;
-                    }
-                    amount = ((long)DonateAmount * 100).ToString();
-                    vnp_TxnRef = $"{UserId}{TouramentId}{DateTime.Now.ToString("HHmmss")}";
-                    vnp_Amount = amount;
-                    vnpay.AddRequestData("vnp_OrderInfo", $"donate:{TouramentId}");
+                    TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
 
-                    typePayment = "donate";
+                    vnpay.AddRequestData("vnp_Version", "2.1.0");
+                    vnpay.AddRequestData("vnp_Command", "pay");
+                    vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                    vnpay.AddRequestData("vnp_Amount", vnp_Amount);
+                    vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.AddMinutes(-20).ToString("yyyyMMddHHmmss"));
+                    vnpay.AddRequestData("vnp_CurrCode", "VND");
+                    vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress());
+                    vnpay.AddRequestData("vnp_Locale", "vn");
+                    vnpay.AddRequestData("vnp_OrderType", "order");
+                    vnpay.AddRequestData("vnp_ReturnUrl", return_URL);
+                    vnpay.AddRequestData("vnp_TxnRef", vnp_TxnRef);
+                    vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddMinutes(15).ToString("yyyyMMddHHmmss"));
+                    //vnpay.AddRequestData("vnp_TypePayment", typePayment);
+
+                    string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+
+                    response.Data = paymentUrl;
+                    response.statusCode = HttpStatusCode.OK;
+                    response.Message = "Get payment url successfully!";
+                    transaction.Complete();
                 }
-                else
+                catch (Exception ex)
                 {
-                    response.statusCode = HttpStatusCode.BadRequest;
-                    response.Message = "Just one field is required";
-                    return response;
+                    response.statusCode = HttpStatusCode.InternalServerError;
+                    response.Message = ex.Message;
                 }
-                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
-
-                vnpay.AddRequestData("vnp_Version", "2.1.0");
-                vnpay.AddRequestData("vnp_Command", "pay");
-                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-                vnpay.AddRequestData("vnp_Amount", vnp_Amount);
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.AddMinutes(-20).ToString("yyyyMMddHHmmss"));
-                vnpay.AddRequestData("vnp_CurrCode", "VND");
-                vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress());
-                vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_OrderType", "order");
-                vnpay.AddRequestData("vnp_ReturnUrl", return_URL);
-                vnpay.AddRequestData("vnp_TxnRef", vnp_TxnRef);
-                vnpay.AddRequestData("vnp_ExpireDate", vietnamTime.AddDays(1).ToString("yyyyMMddHHmmss"));
-                //vnpay.AddRequestData("vnp_TypePayment", typePayment);
-
-                string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-
-                response.Data = paymentUrl;
-                response.statusCode = HttpStatusCode.OK;
-                response.Message = "Get payment url successfully!";
-                //transaction.Complete();
-            }
-            catch (Exception ex)
-            {
-                response.statusCode = HttpStatusCode.InternalServerError;
-                response.Message = ex.Message;
-            }
             return response;
         }
 
@@ -232,6 +244,15 @@ namespace Services.Services
                         {
                             var order = await _tenantRegistrationRepository.Get().Where(x => x.Id == Int32.Parse(orderId)).SingleOrDefaultAsync();
                             if (order == null) throw new Exception("Error to payment: Can not find order to payment");
+                            var paymentData = await _paymentRepository.Get().Where(x => x.UserId == order.PlayerId && x.TournamentId == order.TournamentId
+                                                                                && x.Status == PaymentStatus.Completed).SingleOrDefaultAsync();
+                            if (paymentData != null)
+                            {
+                                response.Data = null;
+                                response.Message = "This user signed this tournament";
+                                response.statusCode = HttpStatusCode.BadRequest;
+                                return response;
+                            }
                             order.IsApproved = TouramentregistrationStatus.Approved;
                             Payments payment = new Payments()
                             {
@@ -307,6 +328,52 @@ namespace Services.Services
                             response.statusCode = HttpStatusCode.BadRequest;
                             response.Message = "Payment failed!";
                         }
+                    }
+                    else if (vnp_ResponseCode != "00" && transactionStatus != "00" || vnp_ResponseCode == "07" && transactionStatus == "07")
+                    {
+                        if (typePayment.ToLower() == "Fee".ToLower())
+                        {
+                            var order = await _tenantRegistrationRepository.Get().Where(x => x.Id == Int32.Parse(orderId)).SingleOrDefaultAsync();
+                            if (order == null) throw new Exception("Error to payment: Can not find order to payment");
+                            var paymentData = await _paymentRepository.Get().Where(x => x.UserId == order.PlayerId && x.TournamentId == order.TournamentId
+                                                                                && x.Status == PaymentStatus.Completed).SingleOrDefaultAsync();
+                            if (paymentData != null)
+                            {
+                                response.Data = null;
+                                response.Message = "This user signed this tournament";
+                                response.statusCode = HttpStatusCode.BadRequest;
+                                return response;
+                            }
+                            else
+                            {
+                                var tournamentData = await _tournamentRepository.GetById(order.TournamentId);
+                                if (tournamentData == null)
+                                {
+                                    response.Data = null;
+                                    response.statusCode = HttpStatusCode.BadRequest;
+                                    response.Message = "Not found Tournament";
+                                    return response;
+                                }
+                                if (tournamentData.Type == TournamentType.SinglesFemale || tournamentData.Type == TournamentType.SinglesMale)
+                                {
+                                    _tenantRegistrationRepository.Delete(order);
+                                    await _tenantRegistrationRepository.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    var tournamentSendRequest = await _tenantRegistrationRepository.Get().Include(x => x.TournamentTeams).Where(x => x.Id == int.Parse(orderId)).SingleOrDefaultAsync();
+                                    _tenantRegistrationRepository.Delete(tournamentSendRequest);
+                                    await _tenantRegistrationRepository.SaveChangesAsync();
+                                }
+                            }
+                        }
+                        else if (typePayment.ToLower() == "Donate".ToLower())
+                        {
+                            response.statusCode = HttpStatusCode.BadRequest;
+                            response.Message = "Payment failed!";
+                        }
+                        response.statusCode = HttpStatusCode.OK;
+                        transaction.Complete();
                     }
                 }
                 catch (Exception ex)

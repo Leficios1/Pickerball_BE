@@ -319,7 +319,7 @@ namespace Services.Services
                         LastUpdatedAt = DateTime.UtcNow
                     };
                     var flag = await _matchSentRequestRepository.Get().Where(x => x.MatchingId == dto.MatchingId && dto.PlayerRequestId == x.PlayerRequestId && x.PlayerRecieveId == dto.PlayerRecieveId && x.status != SendRequestStatus.Reject).ToListAsync();
-                    if(flag != null)
+                    if(flag.Count() != 0)
                     {
                         response.Message = "Sent";
                         response.statusCode = HttpStatusCode.OK;
@@ -341,10 +341,9 @@ namespace Services.Services
                         CreatedAt = DateTime.UtcNow,
                         IsRead = false,
                         Type = NotificationType.MatchRequest,
-                        ReferenceId = data.Id
+                        ReferenceId = data.Id,
                     };
                     await _notificationRepository.AddAsync(notification);
-
                     await _notificationRepository.SaveChangesAsync();
                     var responseData = _mapper.Map<MatchSentRequestResponseDTO>(data);
                     response.Data = responseData;

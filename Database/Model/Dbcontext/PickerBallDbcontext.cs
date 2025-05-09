@@ -114,6 +114,12 @@ namespace Database.Model.Dbcontext
                 .HasForeignKey(t => t.PartnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<TournamentTeamRequest>()
+                .HasOne(x => x.TournamentRegistration)
+                .WithMany(x => x.TournamentTeams)
+                .HasForeignKey(x => x.RegistrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             // ===================== [ Ranking & Achievements ] =====================
             modelBuilder.Entity<Ranking>()

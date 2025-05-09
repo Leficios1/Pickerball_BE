@@ -39,7 +39,7 @@ namespace PickerBall_BE.Controllers
             return StatusCode((int)response.statusCode, new { data = response.Data, message = response.Message });
         }
         [HttpGet("GetUserByToken/{token}")]
-        public async Task<IActionResult> GetUserByToken(string token)
+        public async Task<IActionResult> GetUserByToken([FromRoute]string token)
         {
             var response = await _authServices.GetUserByToken(token);
             return Ok(response); 
