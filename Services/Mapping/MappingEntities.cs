@@ -92,7 +92,7 @@ namespace Services.Mapping
                     .ForMember(dest => dest.TotalWins, opt => opt.MapFrom(src => src.Player.TotalWins))
                     .ForMember(dest => dest.TotalMatch, opt => opt.MapFrom(src => src.Player.TotalMatch));
             CreateMap<RuleOfAwardResponseDTO, RuleOfAward>().ReverseMap();
-
+            CreateMap<Achievement,AchivementResponseDTO>().ReverseMap();
         }
     }
 }
