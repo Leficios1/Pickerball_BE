@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "443076766052",
+    "firebase_url": "https://spocepicker-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "spocepicker",
+    "storage_bucket": "spocepicker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443076766052:android:dead2d3632a2211a863271",
+        "android_client_info": {
+          "package_name": "com.example.pickleball_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALTKcvL8Ftcl2D1UcefdIQAG87QSA21Ro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

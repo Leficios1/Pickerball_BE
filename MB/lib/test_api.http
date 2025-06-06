@@ -1,0 +1,396 @@
+# pickerball
+POST localhost:5098/api/Auth/login
+Content-Type: application/json
+
+{
+  "email": "minhtu0408.work@gmail.com",
+  "password": "Thangban123@"
+}
+
+###
+GET http://localhost:8080/api/Auth/GetUserByToken/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiVHUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJtaW5odHUwNDA4LndvcmtAZ21haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiMSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiMSIsImV4cCI6MTc0MDU1Mjg4MCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MDI4IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDI4In0.YPaBbko_ZvEU0K9vx-YfgjcHqgHz2K4kwTCdpgG83R0
+
+###
+# group: user
+# @name register
+POST {{host}}:{{port}}/user/register
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "email": "hvmanh@software.misa.com.vn",
+  "password": "1234567890",
+  "username": "hvmanh",
+  "role": 3,
+  "display_name": "Hoàng Văn Mạnh",
+  "firstname": "Mạnh",
+  "lastname": "Hoàng"
+}
+
+###
+# group: user
+# @name get by id
+GET {{host}}:{{port}}/user/bd635dfe-d21d-4c34-b283-2f2cc1f22f36
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "email": "hvmanh@software.misa.com.vn",
+  "password": "123456",
+  "username": "hvmanh",
+  "role": 3,
+  "display_name": "Hoàng Văn Mạnh"
+}
+
+###
+# group: user
+# @name get all user
+GET {{host}}:{{port}}/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI3NTFiYjg3LTExNDMtNDIwOS1iZTk4LWNhZThiNzU4NWYyNCIsImlhdCI6MTczNzg4NjUzNiwiZXhwIjoxNzM3OTcyOTM2fQ.rlR-BIPHMyBXcTKKGi6q7eS06kLA3oQdBgbaL4HCIqU
+Content-Type: application/json
+
+{
+  "email": "hvmanh@software.misa.com.vn",
+  "password": "123456",
+  "username": "hvmanh",
+  "role": 3,
+  "display_name": "Hoàng Văn Mạnh"
+}
+
+###
+# group: user
+# @name delete
+DELETE {{host}}:{{port}}/user/bd635dfe-d21d-4c34-b283-2f2cc1f22f36
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "email": "hvmanh@software.misa.com.vn",
+  "password": "123456",
+  "username": "hvmanh",
+  "role": 3,
+  "display_name": "Hoàng Văn Mạnh"
+}
+
+###
+# group: user
+# @name update
+PUT {{host}}:{{port}}/user/bd635dfe-d21d-4c34-b283-2f2cc1f22f36
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "user": {
+    "email": "hvmanh@software.misa.com.vn",
+    "password": "1234567890",
+    "username": "hvmanh",
+    "role": 3,
+    "display_name": "Hoàng Văn Mạnh 2",
+    "firstname": "Mạnh 2",
+    "lastname": "Hoàng 2"
+  }
+}
+
+###
+# group: user
+# @name login
+POST {{host}}:{{port}}/login
+Authorization: Bearer
+Content-Type: application/json
+
+{
+  "email": "minhtu1@gmail.com",
+  "password": "Thangban123@"
+}
+
+###
+# group: user
+# @name refreshtoken
+GET {{host}}:{{port}}/user/refesh-token
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "refreshToken": "token"
+}
+
+###
+# group: user
+# @name logout
+POST {{host}}:{{port}}/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "userId": "23a2eb88-344b-4c9c-a98a-48eb1bc41208"
+}
+
+###
+# group: match
+# @name create
+POST {{host}}:{{port}}/match
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU5MWFkMGJiLTVkNzctNDFiZC1hMDhmLWNlOWY5OTgyYWUyOCIsImlhdCI6MTczNzk0ODg1MywiZXhwIjoxNzM4MDM1MjUzfQ.-MDEI31iB9sUgAI47oNSNE7HdF3vhLF5bxoHCptrZVs
+Content-Type: application/json
+
+{
+  "player1_id": "e91ad0bb-5d77-41bd-a08f-ce9f9982ae28",
+  "title": "Giải đấu tập 1",
+  "location": "Hà nội",
+  "notes": "đến đúng thời điểm",
+  "is_doubles": false,
+  "match_type": "PRACTICE",
+  "scheduled_at": "2025-01-25T12:59:38.290Z",
+  "status": "SCHEDULED",
+  "comfirmed": false,
+  "tournament_id": ""
+}
+
+###
+# group: match
+# @name get match
+GET {{host}}:{{port}}/match?
+    page=1&
+    limit=10&
+    startDate="2025-01-19T00:00:02.202Z"&
+    startEnd="2025-01-25T16:17:02.202Z"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU5MWFkMGJiLTVkNzctNDFiZC1hMDhmLWNlOWY5OTgyYWUyOCIsImlhdCI6MTczNzkyMDg2NCwiZXhwIjoxNzM4MDA3MjY0fQ.huGktgdxA7Png707lY1prIsem0pS7zrP-pJZ7qA00hM
+Content-Type: application/json
+
+{
+  "player1_id": "23a2eb88-344b-4c9c-a98a-48eb1bc41208",
+  "title": "Giải đấu tập 1",
+  "location": "Hà nội",
+  "notes": "đến đúng thời điểm",
+  "is_doubles": false,
+  "match_type": "PRACTICE",
+  "scheduled_at": "",
+  "status": "SCHEDULED"
+}
+
+###
+# group: match
+# @name get match id
+GET {{host}}:{{port}}/match/2743267b-429a-457a-a07e-8a200bdbb874
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "player1_id": "23a2eb88-344b-4c9c-a98a-48eb1bc41208",
+  "title": "Giải đấu tập 1",
+  "location": "Hà nội",
+  "notes": "đến đúng thời điểm",
+  "is_doubles": false,
+  "match_type": "PRACTICE",
+  "scheduled_at": "",
+  "status": "SCHEDULED"
+}
+
+###
+# group: match
+# @name delete
+DELETE {{host}}:{{port}}/{{match}}/2743267b-429a-457a-a07e-8a200bdbb874
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "player1_id": "23a2eb88-344b-4c9c-a98a-48eb1bc41208",
+  "title": "Giải đấu tập 1",
+  "location": "Hà nội",
+  "notes": "đến đúng thời điểm",
+  "is_doubles": false,
+  "match_type": "PRACTICE",
+  "scheduled_at": "",
+  "status": "SCHEDULED"
+}
+
+###
+# group: match
+# @name update
+PUT {{host}}:{{port}}/{{match}}/2743267b-429a-457a-a07e-8a200bdbb874
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "player1_id": "792fca60-f58e-4f76-b734-bec7d8127e16",
+  "player2_id": "052d8049-fe68-4eb9-8b3a-2ebebc9b0712",
+  "player3_id": null,
+  "player4_id": null,
+  "title": "Giải đấu tập 1",
+  "location": "Hà nội",
+  "notes": "đến đúng thời điểm",
+  "is_doubles": false,
+  "match_type": "PRACTICE",
+  "scheduled_at": "2025-01-29T16:17:02.202Z",
+  "status": "SCHEDULED",
+  "team1_score": 10,
+  "team2_score": 0,
+  "confirmed": false
+}
+
+###
+# group: request
+# @name create
+POST {{host}}:{{port}}/{{request}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "sender_id": "9280626d-8fad-4030-b855-452c3b1b830c",
+  "recipient_id": "a4fdb8ab-4bf6-4246-a19a-f6f0bd9f8bfb",
+  "status": "PENDING",
+  "match_id": "2743267b-429a-457a-a07e-8a200bdbb874"
+}
+
+###
+# group: request
+# @name match
+GET {{host}}:{{port}}/{{request}}/request-match/2743267b-429a-457a-a07e-8a200bdbb874
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: request
+# @name sender
+GET {{host}}:{{port}}/{{request}}/request-sender/9280626d-8fad-4030-b855-452c3b1b830c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: request
+# @name request
+GET {{host}}:{{port}}/{{request}}/request-sender/792fca60-f58e-4f76-b734-bec7d8127e16
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: request
+# @name receive
+GET {{host}}:{{port}}/{{request}}/request-receiver/a4fdb8ab-4bf6-4246-a19a-f6f0bd9f8bfb
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: request
+# @name update
+PUT {{host}}:{{port}}/{{request}}/251d02da-cb55-4151-bf07-6d2be6cf6f88
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "sender_id": "9280626d-8fad-4030-b855-452c3b1b830c",
+  "recipient_id": "a4fdb8ab-4bf6-4246-a19a-f6f0bd9f8bfb",
+  "status": "DECLINED",
+  "match_id": "2743267b-429a-457a-a07e-8a200bdbb874"
+}
+
+###
+# group: request
+# @name delete
+DELETE {{host}}:{{port}}/{{request}}/251d02da-cb55-4151-bf07-6d2be6cf6f88
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournament
+# @name tournament
+GET {{host}}:{{port}}/{{tournament}}?
+    start_date="2025-01-29T16:17:02.202Z"&
+    page=1&
+    limit=100
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournament
+# @name tournament by id
+GET {{host}}:{{port}}/{{tournament}}/76114174-4df1-4c04-a7de-68b356ea4971
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournament
+# @name create
+POST {{host}}:{{port}}/{{tournament}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "title": "Giải hạng nhất2",
+  "description": "giải bô địch xóm2",
+  "image_url": "https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-1/470221840_1105552328022289_687184779529186019_n.jpg?",
+  "location": "Hà nội",
+  "start_date": "2025-01-29T16:17:02.202Z",
+  "end_date": "2025-01-30T16:17:02.202Z",
+  "max_participants": 1000,
+  "current_participants": 200,
+  "match_type": "SINGLE",
+  "status": "UPCOMING"
+}
+
+###
+# group: tournament
+# @name New Request
+PUT {{host}}:{{port}}/{{tournament}}/76114174-4df1-4c04-a7de-68b356ea4971
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "title": "Giải hạng hai",
+  "description": "giải vô địch xóm 3",
+  "image_url": "https://scontent.fhan2-5.fna.fbcdn.net/v/t39.30808-1/470221840_1105552328022289_687184779529186019_n.jpg",
+  "location": "Quảng ninh",
+  "start_date": "2025-01-29T16:17:02.202Z",
+  "end_date": "2025-01-30T16:17:02.202Z",
+  "max_participants": 1000,
+  "current_participants": 200,
+  "match_type": "DOUBLE",
+  "status": "UPCOMING"
+}
+
+###
+# group: tournament
+# @name New Request
+DELETE {{host}}:{{port}}/{{tournament}}/76114174-4df1-4c04-a7de-68b356ea4971
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournamentparticipant
+# @name createParticipant
+POST {{host}}:{{port}}/{{tournamentParticipant}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "tournament_id": "f92b1a0a-8bb1-4815-adfb-f406e4d37fd5",
+  "user_id": "bd635dfe-d21d-4c34-b283-2f2cc1f22f36"
+}
+
+###
+# group: tournamentparticipant
+# @name updateParticipant
+PUT {{host}}:{{port}}/{{tournamentParticipant}}/db29a95b-23c5-410d-b221-8f8c8d559ca9
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+Content-Type: application/json
+
+{
+  "tournament_id": "f92b1a0a-8bb1-4815-adfb-f406e4d37fd5",
+  "user_id": "bd635dfe-d21d-4c34-b283-2f2cc1f22f36"
+}
+
+###
+# group: tournamentparticipant
+# @name deleteParticipant
+DELETE {{host}}:{{port}}/{{tournamentParticipant}}/db29a95b-23c5-410d-b221-8f8c8d559ca9
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournamentparticipant
+# @name getAllParticipantBytournamentId
+GET {{host}}:{{port}}/{{tournamentParticipant}}/tournament-id/f92b1a0a-8bb1-4815-adfb-f406e4d37fd5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: tournamentparticipant
+# @name getAllParticipantByUserId
+GET {{host}}:{{port}}/{{tournamentParticipant}}/user-id/bd635dfe-d21d-4c34-b283-2f2cc1f22f36
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
+
+###
+# group: Common
+# @name ranking
+GET {{host}}:{{port}}/common/ranking
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkNjM1ZGZlLWQyMWQtNGMzNC1iMjgzLTJmMmNjMWYyMmYzNiIsImlhdCI6MTczNzgwOTY0MSwiZXhwIjoxNzM3ODk2MDQxfQ.4D18zM7PX1hf3u_yccRTkb1OLKPtZMBwCm0h7tIO3m0
