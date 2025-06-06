@@ -1,0 +1,295 @@
+/* Match detail card */
+.match-detail-card {
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+/* Information items */
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.info-item:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.info-icon {
+  font-size: 18px;
+  margin-right: 16px;
+  color: #1890ff;
+}
+
+.info-icon-large {
+  font-size: 28px;
+  color: #faad14;
+  margin-right: 16px;
+}
+
+/* Teams Section */
+.section-divider {
+  margin: 24px 0 16px;
+}
+
+.divider-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.team-card {
+  border-radius: 8px;
+  height: 100%;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.team1-card {
+  border-top: 4px solid #1890ff;
+  background: #fafafa;
+}
+
+.team2-card {
+  border-top: 4px solid #f5222d;
+  background: #fafafa;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.team1-header {
+  color: #1890ff;
+}
+
+.team2-header {
+  color: #f5222d;
+}
+
+.team-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+/* VS Section */
+.vs-container {
+  background: linear-gradient(135deg, #1890ff 0%, #f5222d 100%);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.vs-container::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+  transform: rotate(45deg);
+}
+
+.vs-text {
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+/* Players */
+.player-card {
+  padding: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  background-color: white;
+}
+
+.player-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty player slots */
+.empty-player-card {
+  padding: 24px;
+  border-radius: 8px;
+  background-color: white;
+  border: 2px dashed #d9d9d9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  transition: all 0.2s ease-in-out;
+}
+
+.empty-player-card.team1:hover {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.empty-player-card.team2:hover {
+  background-color: #fff1f0;
+  border-color: #f5222d;
+}
+
+.join-tag {
+  margin-top: 8px;
+}
+
+/* Info card for competitive matches */
+.info-card {
+  background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+  border: none;
+  border-radius: 8px;
+  border-left: 4px solid #faad14;
+}
+
+.competitive-title {
+  font-size: 16px;
+  color: #d46b08;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.competitive-info {
+  margin-bottom: 12px;
+}
+
+.competitive-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Edit form */
+.edit-form {
+  margin: 16px 0;
+  padding: 16px;
+  background-color: #fafafa;
+  border-radius: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  gap: 12px;
+}
+
+.edit-action {
+  margin: 16px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.edit-button {
+  transition: all 0.3s;
+}
+
+.edit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.2);
+}
+
+/* Modal styling */
+.modal-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+}
+
+.modal-icon {
+  margin-right: 10px;
+  color: #1890ff;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.modal-team-icon {
+  font-size: 42px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.modal-question {
+  margin-bottom: 16px;
+}
+
+.modal-detail {
+  margin-bottom: 16px;
+}
+
+.modal-match-detail {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+/* Loading state */
+.loading-card {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .vs-container {
+    margin: 16px auto;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .vs-text {
+    font-size: 18px;
+  }
+
+  .player-card, .empty-player-card {
+    min-height: 140px;
+  }
+  
+  .edit-action {
+    justify-content: center;
+  }
+}

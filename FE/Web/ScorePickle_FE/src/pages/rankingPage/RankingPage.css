@@ -1,0 +1,48 @@
+/* Custom styles for Player Rankings */
+
+.filters-container {
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.player-rankings-table .ant-table-thead > tr > th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.player-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Ensure proper spacing for radio and checkbox groups */
+.ant-radio-wrapper,
+.ant-checkbox-wrapper {
+  margin-bottom: 8px;
+}
+
+/* Adjust avatar size */
+.ant-avatar {
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+/* Style for change indicators */
+.text-success {
+  color: #52c41a;
+}
+
+.text-danger {
+  color: #ff4d4f;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .col-md-3,
+  .col-md-9 {
+    width: 100%;
+  }
+
+  .filters-container {
+    margin-bottom: 20px;
+  }
+}

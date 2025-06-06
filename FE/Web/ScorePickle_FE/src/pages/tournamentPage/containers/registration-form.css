@@ -1,0 +1,127 @@
+.match-submission-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1890ff;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+}
+
+.header h1 {
+  margin: 0;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.submit-button {
+  background-color: white;
+  color: #1890ff;
+  border: none;
+}
+
+.submit-button:hover {
+  background-color: #f0f0f0 !important;
+  color: #1890ff !important;
+}
+
+.match-card {
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.match-collapse .ant-collapse-header {
+  padding: 12px 16px !important;
+}
+
+.match-title {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.player-search-container {
+  background-color: #f5f7fa;
+  border-radius: 24px;
+  padding: 8px;
+}
+
+.selected-player {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+}
+
+.player-avatar {
+  background-color: #1890ff;
+  margin-right: 8px;
+}
+
+.player-name {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.player-rating {
+  margin: 0 8px;
+}
+
+.remove-player {
+  color: #999;
+}
+
+.score-type-toggle {
+  background-color: #f0f0f0;
+  border-radius: 24px;
+  padding: 2px;
+}
+
+.score-type-btn {
+  border-radius: 24px !important;
+  min-width: 80px;
+}
+
+.score-type-btn:first-child {
+  margin-right: 4px;
+}
+
+.game-scores {
+  margin-top: 10px;
+}
+
+.game-score-input {
+  text-align: center;
+  border-radius: 8px;
+}
+
+/* Override some Ant Design styles */
+.ant-collapse-borderless {
+  background-color: white;
+}
+
+.ant-collapse-content-box {
+  padding: 16px !important;
+}
+
+.ant-input-affix-wrapper {
+  border-radius: 24px;
+}
+
+.ant-picker {
+  border-radius: 24px;
+}

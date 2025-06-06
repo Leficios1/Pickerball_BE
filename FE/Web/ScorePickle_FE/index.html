@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <title>
+      Multi dashboard template with React and Ant Design v5 - AntD Dashboard by
+      Design Sparx
+    </title>
+    <meta
+      name="description"
+      content="Explore a powerful multi-dashboard application built with React and Ant Design (v5) for efficient data visualization and management. A large number of settings, additional services and widgets."
+    />
+    <meta
+      name="keywords"
+      content="Design Sparx, antd, antd5, admin themes, react, admin themes, antd admin, antd dashboard, storybook, vite, react"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:title"
+      content="Design Sparx – A dynamic and versatile multipurpose dashboard template utilizing React, Vite, Ant Design, and Storybook by Design Sparx"
+    />
+    <meta
+      property="og:url"
+      content="https://antd-multipurpose-dashboard.netlify.app/"
+    />
+    <meta property="og:site_name" content="Good by Keenthemes" />
+    <link
+      rel="canonical"
+      href="https://antd-multipurpose-dashboard.netlify.app/"
+    />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!--    custom font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@4.0.7/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- google maps -->
+    <!-- <script>
+      async function init() {
+        await customElements.whenDefined('gmp-map');
+
+        const map = document.querySelector('gmp-map');
+        const marker = document.querySelector('gmp-advanced-marker');
+        const placePicker = document.querySelector('gmpx-place-picker');
+        const infowindow = new google.maps.InfoWindow();
+
+        map.innerMap.setOptions({
+          mapTypeControl: false,
+        });
+
+        placePicker.addEventListener('gmpx-placechange', () => {
+          const place = placePicker.value;
+
+          if (!place.location) {
+            window.alert(
+              "No details available for input: '" + place.name + "'"
+            );
+            infowindow.close();
+            marker.position = null;
+            return;
+          }
+
+          if (place.viewport) {
+            map.innerMap.fitBounds(place.viewport);
+          } else {
+            map.center = place.location;
+            map.zoom = 17;
+          }
+
+          marker.position = place.location;
+          infowindow.setContent(
+            `<strong>${place.displayName}</strong><br>
+             <span>${place.formattedAddress}</span>
+          `
+          );
+          infowindow.open(map.innerMap, marker);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script> -->
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"
+    ></script>
+  </head>
+  <body>
+    <div id="root" style="height: 100vh"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"
+    ></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCYGHFDpBXQ0oUWvJpPcSU27AEAOoMQN-Q&libraries=places"
+      async
+      defer
+    ></script>
+
+    <!-- <gmpx-api-loader key="AIzaSyCYGHFDpBXQ0oUWvJpPcSU27AEAOoMQN-Q" solution-channel="GMP_GE_mapsandplacesautocomplete_v2">
+    </gmpx-api-loader>
+    <gmp-map center="40.749933,-73.98633" zoom="13" map-id="DEMO_MAP_ID">
+      <div slot="control-block-start-inline-start" class="place-picker-container">
+        <gmpx-place-picker placeholder="Enter an address"></gmpx-place-picker>
+      </div>
+      <gmp-advanced-marker></gmp-advanced-marker>
+    </gmp-map> -->
+  </body>
+</html>

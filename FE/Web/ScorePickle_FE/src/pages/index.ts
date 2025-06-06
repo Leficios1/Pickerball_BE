@@ -1,0 +1,14 @@
+export { HomePage } from './Home.tsx';
+export { SitemapPage } from './Sitemap.tsx';
+export * from './dashboards';
+export * from './corporate';
+export * from './userAccount';
+export * from './authentication';
+export * from './errors';
+export * from './tournament';
+export * from './user';
+export * from './tournamentPage';
+export * from './rankingPage/RankingPage.tsx';
+export * from './rulePage';
+export * from './rule';
+export * from './tournament/Admin';

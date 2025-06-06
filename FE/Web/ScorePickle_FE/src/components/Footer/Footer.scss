@@ -1,0 +1,49 @@
+@import url('./../../assets/font/font.scss');
+
+$font-content: 'Nutri-Bold';
+$font-regular: 'Nutri-Regular';
+$font-title: 'Nutri-Light';
+
+.containerF {
+  width: 100%;
+
+  .title {
+    font-family: $font-title;
+    font-weight: 300;
+    letter-spacing: 0;
+    line-height: 1;
+    font-size: 25px;
+    margin-bottom: 40px;
+    padding: 10px 0;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    font-family: $font-content;
+    font-weight: 700;
+    color: black;
+    padding: 0 0 7px 0;
+  }
+
+  .content {
+    font-family: $font-title;
+    font-size: 14px;
+  }
+}
+@media (max-width: 767px) {
+  .ant-row {
+    margin: 0 !important; /* Remove margin when the screen width is smaller than 768px */
+  }
+}
+@media (max-width: 991px) {
+  /* For medium and smaller screens */
+  .ant-row {
+    margin: 0 !important; /* Remove margin */
+  }
+}
+@media (max-width: 1199px) {
+  /* For medium and smaller screens */
+  .ant-row {
+    margin: 0 !important; /* Remove margin */
+  }
+}
